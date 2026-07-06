@@ -33,3 +33,8 @@ pin-check target:
 calibrate cmd out sessions="20":
     cargo run -p bench-runner -- --config config/accept.toml calibrate \
         --cmd "{{cmd}}" --sessions {{sessions}} --out "{{out}}"
+
+# Equivalence gates for a target: corpus pin (refuses on mismatch) ->
+# upstream tests -> golden replay. Fuzz/sanitizers stay per-attempt.
+gates target:
+    cargo run -p diff-test -- {{target}}

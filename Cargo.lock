@@ -183,6 +183,7 @@ name = "diff-test"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "clap",
  "serde",
  "sha2",
  "thiserror",

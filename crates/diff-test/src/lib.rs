@@ -8,6 +8,7 @@
 //! declares an explicit FP tolerance).
 
 pub mod pin;
+pub mod target;
 pub mod policy;
 
 use serde::{Deserialize, Serialize};
