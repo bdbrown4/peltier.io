@@ -1,0 +1,64 @@
+diff --git a/Cargo.toml b/Cargo.toml
+index 8b19522..b64e2b4 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -30,7 +30,8 @@ default = ["cli"]
+ yaml = ["dep:serde_yaml"]
+ 
+ [profile.release]
+-lto = "thin"
++lto = true
++codegen-units = 1
+ panic = "abort"
+ 
+ [[bin]]
+diff --git a/src/language/language_type.rs b/src/language/language_type.rs
+index bffdf7a..86c9f94 100644
+--- a/src/language/language_type.rs
++++ b/src/language/language_type.rs
+@@ -1,6 +1,6 @@
+ use std::{
+     borrow::Cow,
+-    fmt,
++    fmt, fs,
+     fs::File,
+     io::{self, Read},
+     path::{Path, PathBuf},
+@@ -38,17 +38,29 @@ impl LanguageType {
+     /// on success and giving back ownership of [`PathBuf`] on error.
+     pub fn parse(self, path: PathBuf, config: &Config) -> Result<Report, (io::Error, PathBuf)> {
+         let text = {
+-            let f = match File::open(&path) {
+-                Ok(f) => f,
++            // fs::read pre-sizes from metadata and skips buffer zeroing;
++            // the decoding reader only matters when a BOM is present, so
++            // BOM-less files (the overwhelming majority) take the raw path.
++            // encoding_rs_io passes BOM-less input through unchanged, so
++            // both paths produce identical bytes.
++            let raw = match fs::read(&path) {
++                Ok(raw) => raw,
+                 Err(e) => return Err((e, path)),
+             };
+-            let mut s = Vec::new();
+-            let mut reader = DecodeReaderBytesBuilder::new().build(f);
+-
+-            if let Err(e) = reader.read_to_end(&mut s) {
+-                return Err((e, path));
++            let has_bom = raw.starts_with(&[0xEF, 0xBB, 0xBF])
++                || raw.starts_with(&[0xFF, 0xFE])
++                || raw.starts_with(&[0xFE, 0xFF]);
++            if has_bom {
++                let mut s = Vec::new();
++                let mut reader =
++                    DecodeReaderBytesBuilder::new().build(io::Cursor::new(raw));
++                if let Err(e) = reader.read_to_end(&mut s) {
++                    return Err((e, path));
++                }
++                s
++            } else {
++                raw
+             }
+-            s
+         };
+ 
+         let mut stats = Report::new(path);

@@ -32,7 +32,7 @@ Full engineering spec: `SPEC.md`. Read it before starting any phase.
 
 ## Current phase
 
-**Phase 0 — manual dry run.** (Update this line as phases complete; exit criteria in SPEC.md §5.)
+**Phase 0 complete → Phase 1 — trust layer.** Phase 0 exit met 2026-07-06: verified +10.4% median win on tokei (95% CI [+8.5%, +12.0%], ledger `phase0-tokei-003`) + two case studies in `results/phase0/`. Phase 1 gaps to close: dedicated no-net bench containers, perf-based profiling, automated A/A + regression-injection calibration, diff-test orchestration, agent↔harness IPC. (Update this line as phases complete; exit criteria in SPEC.md §5.)
 
 ## Commands
 

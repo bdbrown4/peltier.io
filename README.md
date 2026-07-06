@@ -36,13 +36,20 @@ just compare "cmd-a" "cmd-b"    # interleaved A/B with bootstrap CI
 
 ## Status
 
-Phase 0 dry run in progress (see SPEC §5 for the phase plan and exit
-criteria). Two targets vendored and pinned (comrak 0.53.0, tokei
-14.0.0); A/A calibration passed on both workloads; three attempts in
-the ledger — best so far **+4.6% [95% CI +3.3%, +5.8%]** on comrak via
-allocator swap, `needs-human-review` (sanitizer flag, analysis in
-`results/phase0/case-study-comrak.md`). Exit criteria (≥10% verified
-win) not yet met.
+**Phase 0 complete** (see SPEC §5). Five attempts in the ledger across
+two pinned targets (comrak 0.53.0, tokei 14.0.0), A/A-calibrated,
+every number with CI and workload:
+
+- **tokei +10.4% median [95% CI +8.5%, +12.0%]** — read-path buffer
+  zeroing eliminated + fat LTO, byte-identical, 4,332-iteration
+  diff-fuzz clean, sanitizers clean, auto-accepted
+  (`results/phase0/case-study-tokei.md`). Meets the Phase 0 exit bar.
+- comrak +4.6% [+3.3%, +5.8%] — mimalloc swap, `needs-human-review`
+  on an LSan reachability flag (`results/phase0/case-study-comrak.md`).
+- Two null/sub-threshold results correctly rejected and logged.
+
+Next: Phase 1 trust-layer hardening (containers, perf, automated
+calibration, gate orchestration, agent IPC).
 
 Done:
 - Workspace with the four trust-layer crates; core statistics

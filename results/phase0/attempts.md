@@ -60,6 +60,40 @@ workloads passed with pinning (see results/calibration/).
 - **Patch**: [profile.release] lto = true, codegen-units = 1 in
   targets/tokei/workspace/Cargo.toml only.
 
+## Attempt 4 — tokei, class 3 (allocation churn / buffer zeroing)
+
+- **Logged**: 2026-07-06, before patching.
+- **Hotspot**: __memset_avx2 8.52% Ir + malloc-family + memcpy 3.97%.
+  Cause identified by reading `LanguageType::parse`: every file is read
+  via `encoding_rs_io::DecodeReaderBytes` + generic `read_to_end`. That
+  reader lacks a `read_buf` specialization, so std zero-fills every
+  grown buffer chunk before the read lands (~221 MB memset per run),
+  and the Vec grows without the file-size hint (realloc + memcpy).
+- **Hypothesis**: read raw bytes with `fs::read` (pre-sized from
+  metadata, `read_buf`-specialized, no zeroing); only files that start
+  with a UTF-8/UTF-16 BOM fall back to the original DecodeReaderBytes
+  path over the same bytes (identical semantics — encoding_rs_io
+  BOM-sniffs the stream head; BOM-less input is raw passthrough).
+  Expect 5-10% median speedup.
+- **Equivalence risk**: BOM files must transcode exactly as before —
+  handled by falling back to the identical machinery; differential
+  fuzz (old vs new binary on adversarial inputs incl. BOMs, invalid
+  UTF-8, empty files) gates the change.
+
+## Attempt 5 — tokei, class 1 stacked on accepted class 3
+
+- **Logged**: 2026-07-06, before patching.
+- **Rationale**: fat LTO+cgu=1 alone measured a real +1.6% [1.0026,
+  1.0262] (phase0-tokei-001, rejected: under the 2% bar standalone).
+  Stacked on the accepted read-path patch it is part of the tree that
+  would actually ship; the combined candidate is benched vs the
+  pristine baseline and re-gated as a whole.
+- **Hypothesis**: combined read-path + fat LTO clears ≥10% median vs
+  pristine (9.9% + ~1.6%, roughly additive since they touch different
+  costs: syscall/alloc path vs codegen).
+- **Patch**: results/phase0/tokei-readpath.patch + [profile.release]
+  lto=true, codegen-units=1.
+
 ## Outcomes (ledger is authoritative: results/ledger.sqlite)
 
 | run_id | class | speedup median | 95% CI | verdict |
@@ -67,6 +101,8 @@ workloads passed with pinning (see results/calibration/).
 | phase0-comrak-001 | 1 build-config | 0.9965 | [0.9826, 1.0110] | rejected-bench (null) |
 | phase0-comrak-002 | 2 allocator | **1.0459** | **[1.0333, 1.0577]** | needs-human-review |
 | phase0-tokei-001 | 1 build-config | 1.0161 | [1.0026, 1.0262] | rejected-bench (< 2% threshold) |
+| phase0-tokei-002 | 3 alloc-churn (read path) | **1.0990** | **[1.0797, 1.1271]** | **accepted** (first auto-accept) |
+| phase0-tokei-003 | 1+3 combined ship tree | **1.1036** | **[1.0852, 1.1201]** | **accepted** — Phase 0 exit bar met |
 
 - comrak-002 gates: 848 upstream tests green on patched tree; golden
   replay byte-identical; pristine ASan+LSan clean; patched ASan-proper
@@ -76,9 +112,13 @@ workloads passed with pinning (see results/calibration/).
 - tokei-001 is a *real but small* effect — CI excludes 1.0 but its
   lower bound (+0.26%) is under the 2% bar. Correctly rejected; logged
   so nobody re-grinds it.
-- Phase 0 exit criteria (≥1 verified win ≥10%) **not yet met**: best
-  verified candidate is +4.6% pending human review. Next cheapest
-  hypotheses per profile: comrak class 3 (allocation churn — arena the
-  inline parser's Vec growth, RawVec::finish_grow 2.3% + memcpy 3.1%);
-  tokei class 3 (memset 8.5% suggests per-file buffer zeroing) and
-  class 5 (perform_multi_line_analysis 31.7% single frame).
+- **Phase 0 exit criteria met**: phase0-tokei-003 is a verified
+  +10.4% median win (95% CI [+8.5%, +12.0%]) with full gates, plus two
+  written case studies. Stated precisely: the median clears 10%; the
+  CI lower bound is 8.5%.
+- Still open for later sessions: comrak mimalloc (+4.6%) awaiting
+  human review; comrak class 3 (arena the inline parser, RawVec grow
+  2.3% + memcpy 3.1% + from_utf8 5.1%); tokei class 5 — byte-skip
+  table for perform_multi_line_analysis (31.7% self Ir + memcmp 8.1%),
+  sketched but deliberately not attempted: the state-machine surface
+  needs more verification budget than this session had left.
