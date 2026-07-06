@@ -1,0 +1,15 @@
+[package]
+name = "verdict"
+description = "One-shot attempt verdict: equivalence gates + interleaved A/B bench + append-only ledger row"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+bench-runner = { path = "../bench-runner" }
+clap.workspace = true
+diff-test = { path = "../diff-test" }
+ledger = { path = "../ledger" }
+serde_json.workspace = true

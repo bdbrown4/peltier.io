@@ -18,6 +18,11 @@ pub struct AcceptConfig {
     pub confidence: f64,
     /// PRNG seed for the bootstrap (reproducible calibration).
     pub bootstrap_seed: u64,
+    /// Machine-specific command prefix for CPU pinning (e.g.
+    /// "taskset -c 2"); empty disables pinning. Applied by verdict to
+    /// both sides identically.
+    #[serde(default)]
+    pub pin_prefix: String,
 }
 
 impl Default for AcceptConfig {
@@ -29,6 +34,7 @@ impl Default for AcceptConfig {
             bootstrap_iters: 10_000,
             confidence: 0.95,
             bootstrap_seed: 0x707E_17E5,
+            pin_prefix: String::new(),
         }
     }
 }

@@ -234,3 +234,4 @@ targets/comrak/asan*/
 targets/tokei/candidate-*/
 targets/tokei/asan/
 !results/calibration/*.json
+targets/*/baseline/

@@ -80,9 +80,36 @@ pub fn bootstrap_ratio_ci(
     }
 }
 
+/// Percentile-method bootstrap CI of a single sample's median, for
+/// per-side evidence in ledger rows.
+pub fn bootstrap_median_ci(sample: &[f64], iters: usize, confidence: f64, seed: u64) -> (f64, f64, f64) {
+    assert!(sample.len() >= 2 && (0.0..1.0).contains(&confidence));
+    let mut rng = XorShift64::new(seed);
+    let mut medians = Vec::with_capacity(iters);
+    let mut resample = vec![0.0; sample.len()];
+    for _ in 0..iters {
+        for slot in resample.iter_mut() {
+            *slot = sample[rng.index(sample.len())];
+        }
+        medians.push(median(&resample));
+    }
+    medians.sort_by(|a, b| a.partial_cmp(b).expect("NaN median"));
+    let alpha = (1.0 - confidence) / 2.0;
+    let lo = medians[((iters as f64) * alpha).floor() as usize];
+    let hi = medians[(((iters as f64) * (1.0 - alpha)).ceil() as usize).min(iters - 1)];
+    (median(sample), lo, hi)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn median_ci_brackets_median() {
+        let s: Vec<f64> = (0..40).map(|i| 1.0 + 0.01 * ((i * 7) % 11) as f64).collect();
+        let (m, lo, hi) = bootstrap_median_ci(&s, 1000, 0.95, 9);
+        assert!(lo <= m && m <= hi);
+    }
 
     #[test]
     fn median_odd_and_even() {

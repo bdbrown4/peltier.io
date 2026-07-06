@@ -9,8 +9,17 @@ use std::path::{Path, PathBuf};
 pub struct TargetSpec {
     pub source: Source,
     pub build: Build,
+    pub bench: Bench,
     pub gates: Gates,
     pub corpus: Corpus,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Bench {
+    /// Bench command; `{binary}` substituted per side. Run from repo root.
+    pub command: String,
+    /// Human-readable workload statement, printed with every number.
+    pub workload: String,
 }
 
 #[derive(Debug, Deserialize)]

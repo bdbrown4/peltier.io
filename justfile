@@ -38,3 +38,12 @@ calibrate cmd out sessions="20":
 # upstream tests -> golden replay. Fuzz/sanitizers stay per-attempt.
 gates target:
     cargo run -p diff-test -- {{target}}
+
+# One-shot attempt verdict: gates on candidate -> interleaved A/B vs a
+# pristine-rebuilt baseline -> ledger row. Extra flags pass through
+# (--patch-file, --needs-human-review, --baseline-bin).
+verdict target candidate run_id class hypothesis hotspot *flags:
+    cargo run -p verdict -- {{target}} --rebuild-baseline \
+        --candidate-bin "{{candidate}}" --run-id "{{run_id}}" \
+        --playbook-class {{class}} --hypothesis "{{hypothesis}}" \
+        --hotspot "{{hotspot}}" {{flags}}
