@@ -53,6 +53,7 @@ Built so far (command-level, pre-target-integration):
 just build / test / lint    # trust-layer workspace: cargo build/test/clippy+fmt
 just aa [cmd]               # A/A self-test of bench-runner on a shell command
 just compare <a> <b>        # interleaved A/B of two shell commands, bootstrap CI
+just gates <target>         # corpus pin + upstream tests + golden replay
 just pin-check <target>     # verify corpus MANIFEST.sha256
 just calibrate <cmd> <out>  # automated A/A + regression-injection calibration
 ```

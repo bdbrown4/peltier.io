@@ -9,8 +9,8 @@ commit = "fa44e5194060305576514d59b850353643afbfc8"   # v14.0.0
 license = "MIT OR Apache-2.0"
 
 [build]
-baseline = "cargo build --release --manifest-path workspace/Cargo.toml"
-binary = "workspace/target/release/tokei"
+baseline = "cargo build --release --manifest-path targets/tokei/workspace/Cargo.toml"
+binary = "targets/tokei/workspace/target/release/tokei"
 
 [bench]
 # Single rayon thread: measurement first (SPEC conventions); the
@@ -19,5 +19,10 @@ command = "RAYON_NUM_THREADS=1 {binary} --sort code corpora/tokei/input > /dev/n
 workload = "8 replicas of pinned progit + comrak/src trees, 221 MB, 4360 files, single rayon thread"
 
 [gates]
-tests = "cargo test --release --manifest-path workspace/Cargo.toml"
+tests = "cargo test --release --manifest-path targets/tokei/workspace/Cargo.toml"
 golden = "RAYON_NUM_THREADS=1 {binary} --sort code corpora/tokei/input"
+
+[corpus]
+manifest = "corpora/tokei/MANIFEST.sha256"
+root = "corpora/tokei/input/copy1"
+golden_sha256 = "corpora/tokei/GOLDEN.sha256"

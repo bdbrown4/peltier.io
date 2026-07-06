@@ -18,8 +18,8 @@ license = "BSD-2-Clause"
 #   git clone <submodule repo> workspace/vendor/progit && git -C ... checkout <commit>
 
 [build]
-baseline = "cargo build --release --manifest-path workspace/Cargo.toml"
-binary = "workspace/target/release/comrak"
+baseline = "cargo build --release --manifest-path targets/comrak/workspace/Cargo.toml"
+binary = "targets/comrak/workspace/target/release/comrak"
 
 [bench]
 # Upstream workload (benches/bench.sh): full Pro Git book through the
@@ -28,6 +28,11 @@ command = "cat corpora/comrak/progit.md | {binary} > /dev/null"
 workload = "Pro Git book, all translations, 11.0 MB concatenated markdown, single stream"
 
 [gates]
-tests = "cargo test --release --manifest-path workspace/Cargo.toml"
+tests = "cargo test --release --manifest-path targets/comrak/workspace/Cargo.toml"
 # Golden replay: corpus through the binary, stdout must be byte-identical.
 golden = "cat corpora/comrak/progit.md | {binary}"
+
+[corpus]
+manifest = "corpora/comrak/MANIFEST.sha256"
+root = "corpora/comrak"
+golden_sha256 = "corpora/comrak/GOLDEN.sha256"
