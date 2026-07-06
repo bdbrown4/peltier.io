@@ -1,0 +1,12 @@
+# ROI pricing inputs (SPEC §3.6, §9). Defaults are public-cloud list
+# prices; replace with the customer's own numbers per engagement.
+# This file is trust-layer: read-only to the agent (SPEC §10).
+
+# On-demand vCPU rate, dollars per core-hour.
+dollars_per_core_hour = 0.04
+
+# Hours per year the fleet actually runs the workload (8760 = 24/7).
+hours_per_year = 8760.0
+
+# Printed on the report so the number survives hostile review.
+rate_source = "example: AWS m7i on-demand us-east-1, per-vCPU approximation — replace per engagement"

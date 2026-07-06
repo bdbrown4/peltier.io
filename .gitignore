@@ -216,3 +216,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Rust (trust-layer workspace)
+target/
+
+# hotpath run outputs
+results/**/*.json
+results/**/*.sqlite
+targets/*/workspace/
