@@ -1,0 +1,20 @@
+# Accept thresholds for bench-runner (SPEC §3.1).
+# This file is trust-layer: read-only to the agent (SPEC §10).
+
+# CI lower bound of the speedup ratio must clear 1 + threshold.
+threshold = 0.02
+
+# Measured runs per side (SPEC minimum: 30). Interleaved ABAB.
+runs_per_side = 30
+
+# Warm-up runs per side, discarded.
+warmup_runs = 3
+
+# Bootstrap resamples for the ratio CI.
+bootstrap_iters = 10000
+
+# Confidence level for the ratio CI.
+confidence = 0.95
+
+# Fixed PRNG seed so calibration runs are reproducible.
+bootstrap_seed = 1887343589
