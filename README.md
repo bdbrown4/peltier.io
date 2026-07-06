@@ -36,7 +36,13 @@ just compare "cmd-a" "cmd-b"    # interleaved A/B with bootstrap CI
 
 ## Status
 
-Phase 0–1 scaffold (see SPEC §5 for the phase plan and exit criteria).
+Phase 0 dry run in progress (see SPEC §5 for the phase plan and exit
+criteria). Two targets vendored and pinned (comrak 0.53.0, tokei
+14.0.0); A/A calibration passed on both workloads; three attempts in
+the ledger — best so far **+4.6% [95% CI +3.3%, +5.8%]** on comrak via
+allocator swap, `needs-human-review` (sanitizer flag, analysis in
+`results/phase0/case-study-comrak.md`). Exit criteria (≥10% verified
+win) not yet met.
 
 Done:
 - Workspace with the four trust-layer crates; core statistics

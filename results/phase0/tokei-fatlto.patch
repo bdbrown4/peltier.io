@@ -1,0 +1,14 @@
+diff --git a/Cargo.toml b/Cargo.toml
+index 8b19522..b64e2b4 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -30,7 +30,8 @@ default = ["cli"]
+ yaml = ["dep:serde_yaml"]
+ 
+ [profile.release]
+-lto = "thin"
++lto = true
++codegen-units = 1
+ panic = "abort"
+ 
+ [[bin]]

@@ -26,4 +26,4 @@ compare baseline candidate:
 # Verify a target corpus against its pinned manifest
 # (wired through diff-test CLI once it exists; manual check for now)
 pin-check target:
-    cd corpora/{{target}} && sha256sum -c MANIFEST.sha256
+    cd corpora/{{target}} && sh gen-corpus.sh

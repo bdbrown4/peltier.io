@@ -1,0 +1,4 @@
+env fingerprint: {"kernel":"6.18.5","cpu_model":"Intel(R) Xeon(R) Processor @ 2.80GHz","governor":"unknown","smt":"0","turbo":"unknown","aslr":"mode=system-default randomize_va_space=2","cpu_pinning":"none"}
+plan: 30 measured + 3 warm-up runs per side, interleaved
+speedup (baseline/candidate): median 0.9773, 95% CI [0.9376, 1.0080]
+A/A self-test passed (null verdict)

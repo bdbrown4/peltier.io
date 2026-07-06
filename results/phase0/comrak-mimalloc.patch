@@ -1,0 +1,39 @@
+diff --git a/Cargo.toml b/Cargo.toml
+index bd1dfe9..fcc70f3 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -69,7 +69,7 @@ phf_codegen = "0.13"
+ 
+ [features]
+ default = ["cli", "syntect-onig", "bon"]
+-cli = ["clap", "bon", "shell-words", "xdg", "fmt2io", "shortcodes", "phoenix_heex", "attributes"]
++cli = ["clap", "bon", "shell-words", "xdg", "fmt2io", "shortcodes", "phoenix_heex", "attributes", "mimalloc"]
+ shortcodes = ["emojis"]
+ phoenix_heex = []
+ attributes = []
+@@ -107,6 +107,7 @@ clap = { version = "4", optional = true, features = [
+     "string",
+     "wrap_help",
+ ] }
++mimalloc = { version = "0.1", optional = true }
+ 
+ [[example]]
+ name = "syntect"
+diff --git a/src/main.rs b/src/main.rs
+index 6c5b2a6..a439fb7 100644
+--- a/src/main.rs
++++ b/src/main.rs
+@@ -10,6 +10,13 @@ use std::{boxed::Box, io::BufWriter};
+ 
+ use clap::{Parser, ValueEnum};
+ 
++// The CLI churns many small AST allocations; mimalloc services them with
++// far fewer instructions than glibc malloc. Library consumers are
++// unaffected: this only applies to the comrak binary.
++#[cfg(not(target_arch = "wasm32"))]
++#[global_allocator]
++static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
++
+ use comrak::options;
+ use comrak::{Arena, Options};
+ #[cfg(feature = "syntect")]

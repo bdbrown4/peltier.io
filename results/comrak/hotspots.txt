@@ -1,0 +1,40 @@
+--------------------------------------------------------------------------------
+Profile data file 'results/comrak/callgrind.out' (creator: callgrind-3.22.0)
+--------------------------------------------------------------------------------
+I1 cache: 
+D1 cache: 
+LL cache: 
+Timerange: Basic block 0 - 196578070
+Trigger: Program termination
+Profiled target:  targets/comrak/workspace/target/release/comrak (PID 17601, part 1)
+Events recorded:  Ir
+Events shown:     Ir
+Event sort order: Ir
+Thresholds:       99
+Include dirs:     
+User annotated:   
+Auto-annotation:  on
+
+--------------------------------------------------------------------------------
+Ir                   
+--------------------------------------------------------------------------------
+883,766,827 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                   file:function
+--------------------------------------------------------------------------------
+88,282,747 ( 9.99%)  ./malloc/./malloc/malloc.c:_int_malloc [/usr/lib/x86_64-linux-gnu/libc.so.6]
+60,568,128 ( 6.85%)  ./malloc/./malloc/malloc.c:_int_free [/usr/lib/x86_64-linux-gnu/libc.so.6]
+58,911,428 ( 6.67%)  ???:comrak::parser::inlines::Subject::parse_inline [/home/user/peltier.io/targets/comrak/workspace/target/release/comrak]
+57,026,217 ( 6.45%)  ???:comrak::parser::Parser::process_line [/home/user/peltier.io/targets/comrak/workspace/target/release/comrak]
+45,107,073 ( 5.10%)  ???:core::str::converts::from_utf8 [/home/user/peltier.io/targets/comrak/workspace/target/release/comrak]
+41,962,238 ( 4.75%)  ???:<comrak::plugins::syntect::SyntectAdapter as comrak::adapters::SyntaxHighlighterAdapter>::write_highlighted [/home/user/peltier.io/targets/comrak/workspace/target/release/comrak]
+34,662,512 ( 3.92%)  ./malloc/./malloc/malloc.c:malloc [/usr/lib/x86_64-linux-gnu/libc.so.6]
+33,819,139 ( 3.83%)  ???:comrak::parser::Parser::parse [/home/user/peltier.io/targets/comrak/workspace/target/release/comrak]
+30,762,786 ( 3.48%)  ./malloc/./malloc/malloc.c:malloc_consolidate [/usr/lib/x86_64-linux-gnu/libc.so.6]
+27,843,363 ( 3.15%)  ???:syntect::parsing::parser::ParseState::parse_line [/home/user/peltier.io/targets/comrak/workspace/target/release/comrak]
+27,272,869 ( 3.09%)  ./string/../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:__memcpy_avx_unaligned_erms [/usr/lib/x86_64-linux-gnu/libc.so.6]
+26,634,752 ( 3.01%)  ???:comrak::parser::Parser::open_new_blocks [/home/user/peltier.io/targets/comrak/workspace/target/release/comrak]
+22,049,414 ( 2.49%)  ./malloc/./malloc/malloc.c:free [/usr/lib/x86_64-linux-gnu/libc.so.6]
+21,200,547 ( 2.40%)  ???:jetscii::simd::Bytes::find [/home/user/peltier.io/targets/comrak/workspace/target/release/comrak]
+20,549,182 ( 2.33%)  ???:alloc::raw_vec::RawVecInner<A>::finish_grow [/home/user/peltier.io/targets/comrak/workspace/target/release/comrak]

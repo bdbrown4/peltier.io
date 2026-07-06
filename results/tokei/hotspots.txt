@@ -1,0 +1,40 @@
+--------------------------------------------------------------------------------
+Profile data file 'results/tokei/callgrind.out' (creator: callgrind-3.22.0)
+--------------------------------------------------------------------------------
+I1 cache: 
+D1 cache: 
+LL cache: 
+Timerange: Basic block 0 - 600400493
+Trigger: Program termination
+Profiled target:  targets/tokei/workspace/target/release/tokei --sort code corpora/tokei/input (PID 17959, part 1)
+Events recorded:  Ir
+Events shown:     Ir
+Event sort order: Ir
+Thresholds:       99
+Include dirs:     
+User annotated:   
+Auto-annotation:  on
+
+--------------------------------------------------------------------------------
+Ir                     
+--------------------------------------------------------------------------------
+1,808,959,061 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                    file:function
+--------------------------------------------------------------------------------
+572,758,799 (31.66%)  ???:tokei::language::syntax::SyntaxCounter::perform_multi_line_analysis [/home/user/peltier.io/targets/tokei/workspace/target/release/tokei]
+172,785,648 ( 9.55%)  ???:tokei::language::language_type::LanguageType::parse_lines [/home/user/peltier.io/targets/tokei/workspace/target/release/tokei]
+154,178,149 ( 8.52%)  ./string/../sysdeps/x86_64/multiarch/memset-vec-unaligned-erms.S:__memset_avx2_unaligned_erms [/usr/lib/x86_64-linux-gnu/libc.so.6]
+146,199,746 ( 8.08%)  ./string/../sysdeps/x86_64/multiarch/memcmp-avx2-movbe.S:__memcmp_avx2_movbe [/usr/lib/x86_64-linux-gnu/libc.so.6]
+104,071,008 ( 5.75%)  ???:tokei::language::syntax::SyntaxCounter::try_perform_single_line_analysis [/home/user/peltier.io/targets/tokei/workspace/target/release/tokei]
+ 93,030,608 ( 5.14%)  ???:memchr::arch::x86_64::avx2::packedpair::Finder::find_impl [/home/user/peltier.io/targets/tokei/workspace/target/release/tokei]
+ 75,136,592 ( 4.15%)  ???:aho_corasick::automaton::try_find_fwd [/home/user/peltier.io/targets/tokei/workspace/target/release/tokei]
+ 71,820,456 ( 3.97%)  ./string/../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:__memcpy_avx_unaligned_erms [/usr/lib/x86_64-linux-gnu/libc.so.6]
+ 50,442,206 ( 2.79%)  ???:memchr::arch::x86_64::avx2::memchr::One::find_raw_avx2 [/home/user/peltier.io/targets/tokei/workspace/target/release/tokei]
+ 28,664,232 ( 1.58%)  ???:memchr::memmem::searcher::searcher_kind_avx2 [/home/user/peltier.io/targets/tokei/workspace/target/release/tokei]
+ 27,626,392 ( 1.53%)  ???:<aho_corasick::util::prefilter::Memmem as aho_corasick::util::prefilter::PrefilterI>::find_in [/home/user/peltier.io/targets/tokei/workspace/target/release/tokei]
+ 26,582,656 ( 1.47%)  ???:memchr::arch::x86_64::memchr::memchr_raw::find_avx2 [/home/user/peltier.io/targets/tokei/workspace/target/release/tokei]
+ 22,263,784 ( 1.23%)  ???:memchr::arch::x86_64::avx2::memchr::Three::find_raw [/home/user/peltier.io/targets/tokei/workspace/target/release/tokei]
+ 20,246,771 ( 1.12%)  ???:tokei::language::syntax::SyntaxCounter::perform_multi_line_analysis'2 [/home/user/peltier.io/targets/tokei/workspace/target/release/tokei]
+ 20,005,440 ( 1.11%)  ???:memchr::arch::x86_64::avx2::memchr::One::find_raw [/home/user/peltier.io/targets/tokei/workspace/target/release/tokei]

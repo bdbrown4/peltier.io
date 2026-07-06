@@ -1,0 +1,33 @@
+# comrak — CommonMark + GFM parser/renderer (Rust)
+# Selection vs SPEC §6: CPU-bound parser; upstream spec test suite;
+# upstream-defined benchmark workload (benches/bench.sh, Pro Git book);
+# BSD-2-Clause; active, no dedicated perf team.
+
+[source]
+repo = "https://github.com/kivikakk/comrak.git"
+commit = "45c1995fe922b6d5782b971a377721f088025fc8"   # v0.53.0
+license = "BSD-2-Clause"
+
+[source.submodules]
+# Upstream benchmark corpus (Pro Git book, all translations).
+"vendor/progit" = { repo = "https://github.com/progit/progit.git", commit = "61833a527c6ac0c44cc40793c034b81599c25efc" }
+
+[fetch]
+# targets/*/workspace is gitignored; reproduce it with:
+#   git clone <repo> workspace && git -C workspace checkout <commit>
+#   git clone <submodule repo> workspace/vendor/progit && git -C ... checkout <commit>
+
+[build]
+baseline = "cargo build --release --manifest-path workspace/Cargo.toml"
+binary = "workspace/target/release/comrak"
+
+[bench]
+# Upstream workload (benches/bench.sh): full Pro Git book through the
+# renderer, output discarded. Corpus pinned via corpora/comrak/MANIFEST.sha256.
+command = "cat corpora/comrak/progit.md | {binary} > /dev/null"
+workload = "Pro Git book, all translations, 11.0 MB concatenated markdown, single stream"
+
+[gates]
+tests = "cargo test --release --manifest-path workspace/Cargo.toml"
+# Golden replay: corpus through the binary, stdout must be byte-identical.
+golden = "cat corpora/comrak/progit.md | {binary}"
