@@ -7,6 +7,7 @@
 //! per-target equivalence policy parser (byte-identical unless a target
 //! declares an explicit FP tolerance).
 
+pub mod orchestrate;
 pub mod pin;
 pub mod target;
 pub mod policy;
