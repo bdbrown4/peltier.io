@@ -1,0 +1,3 @@
+# Golden replay pin: sha256 of `RAYON_NUM_THREADS=1 tokei --sort code
+# corpora/tokei/input` stdout at the pinned tokei commit (fa44e51, v14.0.0).
+d61cb8522ee2f3c7cc24a87a9b2755bbea7f9bf55c974d1d056dc3237f7700a1  tokei-stdout.txt

@@ -224,3 +224,12 @@ target/
 results/**/*.json
 results/**/*.sqlite
 targets/*/workspace/
+corpora/comrak/progit.md
+corpora/tokei/input/
+!results/ledger.sqlite
+results/**/callgrind.out*
+results/**/*.log
+targets/comrak/candidate-*/
+targets/comrak/asan*/
+targets/tokei/candidate-*/
+targets/tokei/asan/

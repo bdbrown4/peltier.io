@@ -1,0 +1,23 @@
+# tokei — source-code statistics tool (Rust)
+# Selection vs SPEC §6: CPU-bound line/language analysis (83% user time,
+# single-threaded mode); upstream test suite; scriptable deterministic
+# workload; MIT OR Apache-2.0; active, no dedicated perf team.
+
+[source]
+repo = "https://github.com/XAMPPRocky/tokei.git"
+commit = "fa44e5194060305576514d59b850353643afbfc8"   # v14.0.0
+license = "MIT OR Apache-2.0"
+
+[build]
+baseline = "cargo build --release --manifest-path workspace/Cargo.toml"
+binary = "workspace/target/release/tokei"
+
+[bench]
+# Single rayon thread: measurement first (SPEC conventions); the
+# multi-thread mode is a playbook class-7 concern, not the baseline.
+command = "RAYON_NUM_THREADS=1 {binary} --sort code corpora/tokei/input > /dev/null"
+workload = "8 replicas of pinned progit + comrak/src trees, 221 MB, 4360 files, single rayon thread"
+
+[gates]
+tests = "cargo test --release --manifest-path workspace/Cargo.toml"
+golden = "RAYON_NUM_THREADS=1 {binary} --sort code corpora/tokei/input"
