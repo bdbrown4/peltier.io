@@ -54,6 +54,7 @@ just build / test / lint    # trust-layer workspace: cargo build/test/clippy+fmt
 just aa [cmd]               # A/A self-test of bench-runner on a shell command
 just compare <a> <b>        # interleaved A/B of two shell commands, bootstrap CI
 just pin-check <target>     # verify corpus MANIFEST.sha256
+just calibrate <cmd> <out>  # automated A/A + regression-injection calibration
 ```
 
 ## Definition of done — one optimization attempt

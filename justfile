@@ -27,3 +27,9 @@ compare baseline candidate:
 # (wired through diff-test CLI once it exists; manual check for now)
 pin-check target:
     cd corpora/{{target}} && sh gen-corpus.sh
+
+# Automated calibration: N A/A sessions (<5% false-positive required) +
+# N injected-slowdown sessions (>=95% detection required), JSON evidence
+calibrate cmd out sessions="20":
+    cargo run -p bench-runner -- --config config/accept.toml calibrate \
+        --cmd "{{cmd}}" --sessions {{sessions}} --out "{{out}}"
