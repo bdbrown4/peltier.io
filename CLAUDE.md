@@ -57,6 +57,7 @@ just gates <target>         # corpus pin + upstream tests + golden replay
 just pin-check <target>     # verify corpus MANIFEST.sha256
 just calibrate <cmd> <out>  # automated A/A + regression-injection calibration
 just verdict <t> <bin> ...  # gates + bench vs pristine-rebuilt baseline + ledger row
+cargo run -p harnessd       # agent IPC daemon: six-tool JSON surface (SPEC §3.5)
 ```
 
 ## Definition of done — one optimization attempt

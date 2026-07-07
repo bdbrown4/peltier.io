@@ -1,0 +1,9 @@
+diff --git a/README.md b/README.md
+index 5ab2632..dadf761 100644
+--- a/README.md
++++ b/README.md
+@@ -586,3 +586,4 @@ See [the graph](https://github.com/XAMPPRocky/tokei/graphs/contributors) for a f
+ Tokei is distributed under the terms of both the MIT license and the Apache License (Version 2.0).
+ 
+ See [LICENCE-APACHE](./LICENCE-APACHE), [LICENCE-MIT](./LICENCE-MIT) for more information.
++<!-- hotpath ipc e2e marker -->

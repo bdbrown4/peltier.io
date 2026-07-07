@@ -1,59 +1,71 @@
 """Tool surface exposed to the model (SPEC §3.5).
 
-Exactly six tools, all mediated by the trust-layer harness over IPC —
+Exactly six tools, all mediated by harnessd over line-delimited JSON —
 the agent process has no direct filesystem or shell capability beyond
 what these return. Deliberately NOT exposed: shell on the host, writes
 outside targets/<name>/, any access to crates/, config/, corpora/.
 
-Phase 2 wiring: each function below becomes a Claude Agent SDK tool
-definition whose implementation calls the harness. The signatures and
-docstrings are the contract; the bodies are placeholders until the
-harness IPC exists (Phase 1 exit criteria).
+Phase 2 wiring: each function becomes a Claude Agent SDK tool
+definition. The bodies talk to the live harness; construct a client
+with `connect(repo_root)` first.
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-class HarnessUnavailable(RuntimeError):
-    """Raised until the Phase 1 trust-layer harness IPC is wired up."""
+from .harness import HarnessClient
+
+_client: HarnessClient | None = None
+
+
+def connect(repo_root: str, binary: str = "target/debug/harnessd") -> None:
+    global _client
+    _client = HarnessClient(repo_root, binary)
+
+
+def _c() -> HarnessClient:
+    if _client is None:
+        raise RuntimeError("call connect(repo_root) first")
+    return _client
 
 
 def read_profile(target: str) -> dict[str, Any]:
-    """Latest profile for a target: ranked hotspots (symbol, exclusive %,
-    source mapping) plus perf stat counters. Read-only."""
-    raise HarnessUnavailable("profiler adapter not wired (Phase 1)")
+    """Latest profile for a target: ranked hotspots. Read-only."""
+    return _c().call("read_profile", target=target)
 
 
-def read_ledger(target: str) -> list[dict[str, Any]]:
-    """All prior attempts against this target — the anti-double-attempt
-    memory. The agent must not re-grind a (hotspot, playbook_class,
-    hypothesis) combination that already has a verdict."""
-    raise HarnessUnavailable("ledger IPC not wired (Phase 1)")
+def read_ledger(target: str) -> dict[str, Any]:
+    """Prior attempts against this target — the anti-double-attempt
+    memory. Never re-grind a class that already has a verdict."""
+    return _c().call("read_ledger", target=target)
 
 
 def read_playbook(class_number: int) -> str:
-    """Playbook class markdown (1-7): preconditions, procedure,
-    verification notes, known failure modes."""
-    raise HarnessUnavailable("playbook IPC not wired (Phase 1)")
+    """Playbook class markdown (1-7)."""
+    return _c().call("read_playbook", **{"class": class_number})["markdown"]
 
 
 def read_target_source(target: str, path: str) -> str:
-    """Read-only view of the target's source tree at the pinned commit."""
-    raise HarnessUnavailable("source IPC not wired (Phase 1)")
+    """Read-only view of the target workspace at the pinned commit."""
+    return _c().call("read_target_source", target=target, path=path)["content"]
 
 
 def propose_patch(target: str, diff: str, hypothesis: str) -> str:
-    """Submit a unified diff plus the hypothesis it tests. The harness
-    applies it via `git apply` after a path-allowlist check (SPEC §10);
-    a diff touching anything outside targets/<target>/ is auto-rejected
-    before any gate runs. Returns a patch id."""
-    raise HarnessUnavailable("patch IPC not wired (Phase 1)")
+    """Submit a unified diff plus its hypothesis. The harness applies it
+    via `git apply` after a path-allowlist check (SPEC §10); anything
+    outside targets/<target>/workspace is rejected before any gate
+    runs. Returns a patch id."""
+    return _c().call("propose_patch", target=target, diff=diff, hypothesis=hypothesis)["patch_id"]
 
 
-def run_verdict(patch_id: str) -> dict[str, Any]:
-    """Run the full gate + bench sequence on a proposed patch and return
-    the ledger row (gates, bench CIs, verdict). This is the only way the
-    agent ever learns whether a change 'worked' — there is no other
-    number to optimize."""
-    raise HarnessUnavailable("verdict IPC not wired (Phase 1)")
+def run_verdict(patch_id: str, run_id: str, playbook_class: int, hotspot: str) -> dict[str, Any]:
+    """Gates + bench + ledger row for a proposed patch. This is the only
+    way the agent learns whether a change 'worked'."""
+    return _c().call(
+        "run_verdict",
+        patch_id=patch_id,
+        run_id=run_id,
+        playbook_class=str(playbook_class),
+        hotspot=hotspot,
+    )
