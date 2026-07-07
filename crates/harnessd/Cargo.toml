@@ -1,0 +1,15 @@
+[package]
+name = "harnessd"
+description = "Agent-facing IPC daemon: the six-tool surface (SPEC §3.5) over line-delimited JSON on stdio; patches applied only after path-allowlist checks"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+diff-test = { path = "../diff-test" }
+ledger = { path = "../ledger" }
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
