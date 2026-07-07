@@ -1,0 +1,87 @@
+name: ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  trust-layer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --workspace
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - run: cargo fmt --all --check
+
+  # Phase 1: target gates run mechanically, and the bench workload
+  # executes inside a NO-NETWORK container (SPEC §3.1/§10). The runner
+  # is a shared VM — fine for gates; bench numbers for verdicts come
+  # from calibrated hardware, not this job.
+  target-gates-no-net:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Fetch pinned targets
+        run: |
+          sh targets/fetch.sh comrak
+          sh targets/fetch.sh tokei
+      - name: Generate + verify pinned corpora
+        run: |
+          sh corpora/comrak/gen-corpus.sh
+          sh corpora/tokei/gen-corpus.sh
+      - name: Build tokei baseline
+        run: cargo build --release --manifest-path targets/tokei/workspace/Cargo.toml
+      - name: Gates (corpus pin -> upstream tests -> golden replay)
+        run: cargo run -p diff-test -- tokei
+      - name: Bench workload inside no-network container
+        run: |
+          docker run --rm --network=none \
+            -v "$PWD:/w" -w /w \
+            debian:bookworm-slim \
+            sh -c "targets/tokei/workspace/target/release/tokei --sort code corpora/tokei/input | sha256sum"
+
+  # Informational: measure THIS runner's noise floor with the A/A +
+  # injection harness and archive the evidence. A shared VM failing the
+  # bars is expected — the artifact is the point (trust layer judges
+  # environments empirically; verdict benches belong on bench-metal).
+  runner-calibration:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Calibrate (reduced sessions, synthetic CPU-bound workload)
+        run: |
+          mkdir -p calib
+          cargo run -p bench-runner -- calibrate \
+            --cmd "head -c 3000000 /dev/urandom | sha256sum" \
+            --sessions 8 --out calib/gh-runner-calibration.json \
+            | tee calib/summary.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: runner-calibration
+          path: calib/
+
+  # Informational: does perf work here, and with which event sources?
+  perf-probe:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe perf availability
+        run: |
+          sudo apt-get -qq update && sudo apt-get -qq install -y linux-tools-common linux-tools-generic || true
+          PERF=$(ls /usr/lib/linux-tools/*/perf 2>/dev/null | head -1 || command -v perf || true)
+          echo "perf binary: ${PERF:-none}"
+          [ -n "$PERF" ] || exit 0
+          sudo sysctl -w kernel.perf_event_paranoid=1 || true
+          echo "--- software clock sampling:"
+          $PERF record -e cpu-clock -o /tmp/p.data -- sh -c 'i=0; while [ $i -lt 2000000 ]; do i=$((i+1)); done' && $PERF report -i /tmp/p.data --stdio | head -5 || echo "cpu-clock sampling unavailable"
+          echo "--- hardware cycle counter:"
+          $PERF stat -e cycles true 2>&1 | tail -3 || true

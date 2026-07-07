@@ -9,8 +9,8 @@
 
 pub mod orchestrate;
 pub mod pin;
-pub mod target;
 pub mod policy;
+pub mod target;
 
 use serde::{Deserialize, Serialize};
 
@@ -35,11 +35,12 @@ pub enum GateLayer {
 
 /// All layers must pass; any failure is an auto-reject (SPEC §8).
 pub fn all_passed(results: &[(GateLayer, GateOutcome)]) -> bool {
-    results.iter().all(|(_, o)| {
-        matches!(o, GateOutcome::Passed | GateOutcome::Skipped { .. })
-    }) && results
+    results
         .iter()
-        .any(|(_, o)| matches!(o, GateOutcome::Passed))
+        .all(|(_, o)| matches!(o, GateOutcome::Passed | GateOutcome::Skipped { .. }))
+        && results
+            .iter()
+            .any(|(_, o)| matches!(o, GateOutcome::Passed))
 }
 
 #[cfg(test)]
@@ -52,7 +53,9 @@ mod tests {
             (GateLayer::UpstreamTests, GateOutcome::Passed),
             (
                 GateLayer::GoldenReplay,
-                GateOutcome::Failed { detail: "stdout diverged".into() },
+                GateOutcome::Failed {
+                    detail: "stdout diverged".into(),
+                },
             ),
         ];
         assert!(!all_passed(&results));
@@ -62,7 +65,9 @@ mod tests {
     fn all_skipped_is_not_a_pass() {
         let results = vec![(
             GateLayer::Sanitizers,
-            GateOutcome::Skipped { reason: "n/a".into() },
+            GateOutcome::Skipped {
+                reason: "n/a".into(),
+            },
         )];
         assert!(!all_passed(&results));
     }

@@ -43,7 +43,10 @@ pub fn run_core_gates(
             GateOutcome::Passed
         } else {
             GateOutcome::Failed {
-                detail: String::from_utf8_lossy(&t.stderr).chars().take(2000).collect(),
+                detail: String::from_utf8_lossy(&t.stderr)
+                    .chars()
+                    .take(2000)
+                    .collect(),
             }
         },
     ));
@@ -57,7 +60,10 @@ pub fn run_core_gates(
             GateOutcome::Passed
         } else {
             GateOutcome::Failed {
-                detail: format!("exit={:?} expected={expected} actual={actual}", g.status.code()),
+                detail: format!(
+                    "exit={:?} expected={expected} actual={actual}",
+                    g.status.code()
+                ),
             }
         },
     ));
