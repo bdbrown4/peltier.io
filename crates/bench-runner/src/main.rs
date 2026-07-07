@@ -5,7 +5,10 @@ use ledger::Verdict;
 use std::path::PathBuf;
 
 #[derive(Parser)]
-#[command(name = "bench-runner", about = "Interleaved A/B benchmark harness (hotpath trust layer)")]
+#[command(
+    name = "bench-runner",
+    about = "Interleaved A/B benchmark harness (hotpath trust layer)"
+)]
 struct Cli {
     /// Path to accept.toml; built-in defaults if omitted.
     #[arg(long)]
@@ -68,23 +71,32 @@ fn calibrate(
         let seed = cfg.bootstrap_seed.wrapping_add(i as u64);
         let aa = exec::run_interleaved(cmd, cmd, cfg.runs_per_side, cfg.warmup_runs, 0.0)?;
         let aa_ci = stats::bootstrap_ratio_ci(
-            &aa.baseline_s, &aa.candidate_s, cfg.bootstrap_iters, cfg.confidence, seed,
+            &aa.baseline_s,
+            &aa.candidate_s,
+            cfg.bootstrap_iters,
+            cfg.confidence,
+            seed,
         );
         if decide(aa_ci, cfg.threshold) == Verdict::Accepted {
             false_positives += 1;
         }
-        aa_sessions.push(serde_json::json!({"median": aa_ci.median, "lo": aa_ci.lo, "hi": aa_ci.hi}));
+        aa_sessions
+            .push(serde_json::json!({"median": aa_ci.median, "lo": aa_ci.lo, "hi": aa_ci.hi}));
 
-        let inj =
-            exec::run_interleaved(cmd, cmd, cfg.runs_per_side, cfg.warmup_runs, inject_s)?;
+        let inj = exec::run_interleaved(cmd, cmd, cfg.runs_per_side, cfg.warmup_runs, inject_s)?;
         let inj_ci = stats::bootstrap_ratio_ci(
-            &inj.baseline_s, &inj.candidate_s, cfg.bootstrap_iters, cfg.confidence, seed,
+            &inj.baseline_s,
+            &inj.candidate_s,
+            cfg.bootstrap_iters,
+            cfg.confidence,
+            seed,
         );
         // Detected = the harness resolves a regression: CI entirely < 1.
         if inj_ci.hi < 1.0 {
             detections += 1;
         }
-        inj_sessions.push(serde_json::json!({"median": inj_ci.median, "lo": inj_ci.lo, "hi": inj_ci.hi}));
+        inj_sessions
+            .push(serde_json::json!({"median": inj_ci.median, "lo": inj_ci.lo, "hi": inj_ci.hi}));
         eprintln!(
             "session {}/{sessions}: A/A [{:.4},{:.4}] fp={false_positives}; inj [{:.4},{:.4}] det={detections}",
             i + 1, aa_ci.lo, aa_ci.hi, inj_ci.lo, inj_ci.hi
@@ -127,9 +139,17 @@ fn main() -> Result<()> {
     };
 
     let (baseline, candidate, aa_mode) = match &cli.command {
-        Cmd::Compare { baseline, candidate } => (baseline.clone(), candidate.clone(), false),
+        Cmd::Compare {
+            baseline,
+            candidate,
+        } => (baseline.clone(), candidate.clone(), false),
         Cmd::Aa { cmd } => (cmd.clone(), cmd.clone(), true),
-        Cmd::Calibrate { cmd, sessions, slowdown, out } => {
+        Cmd::Calibrate {
+            cmd,
+            sessions,
+            slowdown,
+            out,
+        } => {
             return calibrate(&cfg, cmd, *sessions, *slowdown, out);
         }
     };
@@ -141,8 +161,13 @@ fn main() -> Result<()> {
         cfg.runs_per_side, cfg.warmup_runs
     );
 
-    let samples =
-        exec::run_interleaved(&baseline, &candidate, cfg.runs_per_side, cfg.warmup_runs, 0.0)?;
+    let samples = exec::run_interleaved(
+        &baseline,
+        &candidate,
+        cfg.runs_per_side,
+        cfg.warmup_runs,
+        0.0,
+    )?;
     let ci = stats::bootstrap_ratio_ci(
         &samples.baseline_s,
         &samples.candidate_s,

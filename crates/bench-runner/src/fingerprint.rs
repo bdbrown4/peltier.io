@@ -38,9 +38,7 @@ impl EnvFingerprint {
         Self {
             kernel: read_trimmed("/proc/sys/kernel/osrelease"),
             cpu_model,
-            governor: read_trimmed(
-                "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor",
-            ),
+            governor: read_trimmed("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"),
             smt: read_trimmed("/sys/devices/system/cpu/smt/active"),
             turbo: read_trimmed("/sys/devices/system/cpu/intel_pstate/no_turbo"),
             aslr: format!(

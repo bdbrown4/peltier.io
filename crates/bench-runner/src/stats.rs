@@ -54,7 +54,10 @@ pub fn bootstrap_ratio_ci(
     confidence: f64,
     seed: u64,
 ) -> RatioCi {
-    assert!(baseline.len() >= 2 && candidate.len() >= 2, "need >=2 runs per side");
+    assert!(
+        baseline.len() >= 2 && candidate.len() >= 2,
+        "need >=2 runs per side"
+    );
     assert!((0.0..1.0).contains(&confidence));
     let mut rng = XorShift64::new(seed);
     let mut ratios = Vec::with_capacity(iters);
@@ -82,7 +85,12 @@ pub fn bootstrap_ratio_ci(
 
 /// Percentile-method bootstrap CI of a single sample's median, for
 /// per-side evidence in ledger rows.
-pub fn bootstrap_median_ci(sample: &[f64], iters: usize, confidence: f64, seed: u64) -> (f64, f64, f64) {
+pub fn bootstrap_median_ci(
+    sample: &[f64],
+    iters: usize,
+    confidence: f64,
+    seed: u64,
+) -> (f64, f64, f64) {
     assert!(sample.len() >= 2 && (0.0..1.0).contains(&confidence));
     let mut rng = XorShift64::new(seed);
     let mut medians = Vec::with_capacity(iters);
@@ -106,7 +114,9 @@ mod tests {
 
     #[test]
     fn median_ci_brackets_median() {
-        let s: Vec<f64> = (0..40).map(|i| 1.0 + 0.01 * ((i * 7) % 11) as f64).collect();
+        let s: Vec<f64> = (0..40)
+            .map(|i| 1.0 + 0.01 * ((i * 7) % 11) as f64)
+            .collect();
         let (m, lo, hi) = bootstrap_median_ci(&s, 1000, 0.95, 9);
         assert!(lo <= m && m <= hi);
     }
@@ -120,15 +130,22 @@ mod tests {
     #[test]
     fn aa_ci_straddles_one() {
         // Same distribution both sides: the CI must contain 1.0.
-        let sample: Vec<f64> = (0..40).map(|i| 1.0 + 0.01 * ((i * 7) % 11) as f64).collect();
+        let sample: Vec<f64> = (0..40)
+            .map(|i| 1.0 + 0.01 * ((i * 7) % 11) as f64)
+            .collect();
         let ci = bootstrap_ratio_ci(&sample, &sample, 2000, 0.95, 42);
-        assert!(ci.lo <= 1.0 && ci.hi >= 1.0, "A/A CI must straddle 1.0, got {ci:?}");
+        assert!(
+            ci.lo <= 1.0 && ci.hi >= 1.0,
+            "A/A CI must straddle 1.0, got {ci:?}"
+        );
     }
 
     #[test]
     fn detects_injected_regression() {
         // Candidate 5% slower with mild noise: speedup CI entirely < 1.
-        let base: Vec<f64> = (0..40).map(|i| 1.0 + 0.002 * ((i * 3) % 7) as f64).collect();
+        let base: Vec<f64> = (0..40)
+            .map(|i| 1.0 + 0.002 * ((i * 3) % 7) as f64)
+            .collect();
         let cand: Vec<f64> = base.iter().map(|t| t * 1.05).collect();
         let ci = bootstrap_ratio_ci(&base, &cand, 2000, 0.95, 42);
         assert!(ci.hi < 1.0, "5% regression must be detected, got {ci:?}");

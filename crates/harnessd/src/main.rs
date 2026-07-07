@@ -41,7 +41,10 @@ fn field<'a>(req: &'a Value, key: &str) -> Result<&'a str> {
 /// A target name must be a plain directory name — no separators, no dots.
 fn check_target(name: &str) -> Result<()> {
     ensure!(
-        !name.is_empty() && name.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_'),
+        !name.is_empty()
+            && name
+                .chars()
+                .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_'),
         "invalid target name"
     );
     Ok(())
@@ -88,7 +91,11 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
             let dir = root.join("playbook");
             let entry = std::fs::read_dir(&dir)?
                 .filter_map(|e| e.ok())
-                .find(|e| e.file_name().to_string_lossy().starts_with(&format!("{class:02}-")))
+                .find(|e| {
+                    e.file_name()
+                        .to_string_lossy()
+                        .starts_with(&format!("{class:02}-"))
+                })
                 .ok_or_else(|| anyhow!("no playbook file for class {class}"))?;
             Ok(json!({"markdown": std::fs::read_to_string(entry.path())?}))
         }
@@ -109,10 +116,16 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
             // relative path (the git -C below roots them in the target
             // workspace; nothing outside it is reachable).
             for l in diff.lines() {
-                if let Some(p) = l.strip_prefix("--- a/").or_else(|| l.strip_prefix("+++ b/")) {
+                if let Some(p) = l
+                    .strip_prefix("--- a/")
+                    .or_else(|| l.strip_prefix("+++ b/"))
+                {
                     check_rel_path(p.trim())?;
                 }
-                ensure!(!l.starts_with("--- /") && !l.starts_with("+++ /"), "absolute diff paths forbidden");
+                ensure!(
+                    !l.starts_with("--- /") && !l.starts_with("+++ /"),
+                    "absolute diff paths forbidden"
+                );
             }
             let ws = root.join(format!("targets/{t}/workspace"));
             let mut check = Command::new("git")
@@ -132,13 +145,18 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
             std::fs::create_dir_all(&pending)?;
             std::fs::write(
                 pending.join(format!("{patch_id}.json")),
-                serde_json::to_string_pretty(&json!({"target": t, "hypothesis": hypothesis, "diff": diff}))?,
+                serde_json::to_string_pretty(
+                    &json!({"target": t, "hypothesis": hypothesis, "diff": diff}),
+                )?,
             )?;
             Ok(json!({"patch_id": patch_id}))
         }
         "run_verdict" => {
             let patch_id = field(&req, "patch_id")?;
-            ensure!(patch_id.chars().all(|c| c.is_ascii_hexdigit()) && patch_id.len() == 12, "bad patch id");
+            ensure!(
+                patch_id.chars().all(|c| c.is_ascii_hexdigit()) && patch_id.len() == 12,
+                "bad patch id"
+            );
             let run_id = field(&req, "run_id")?;
             let class = field(&req, "playbook_class")?;
             let hotspot = field(&req, "hotspot")?;
@@ -151,24 +169,40 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
             // isolated dir, then hand off to the verdict pipeline.
             let cand_dir = root.join(format!("targets/{t}/candidate-{patch_id}"));
             let build = Command::new("sh")
-                .arg("-c").arg(&spec.build.baseline)
+                .arg("-c")
+                .arg(&spec.build.baseline)
                 .current_dir(root)
                 .env("CARGO_TARGET_DIR", &cand_dir)
                 .status()?;
             ensure!(build.success(), "candidate build failed");
-            let bin = Path::new(&spec.build.binary).file_name().unwrap().to_str().unwrap();
+            let bin = Path::new(&spec.build.binary)
+                .file_name()
+                .unwrap()
+                .to_str()
+                .unwrap();
             let diff_path = root.join(format!("results/pending/{patch_id}.json.diff"));
             std::fs::write(&diff_path, pending["diff"].as_str().unwrap())?;
             let out = Command::new("cargo")
                 .args([
-                    "run", "-q", "-p", "verdict", "--", t,
+                    "run",
+                    "-q",
+                    "-p",
+                    "verdict",
+                    "--",
+                    t,
                     "--rebuild-baseline",
-                    "--candidate-bin", &format!("targets/{t}/candidate-{patch_id}/release/{bin}"),
-                    "--run-id", run_id,
-                    "--playbook-class", class,
-                    "--hypothesis", pending["hypothesis"].as_str().unwrap(),
-                    "--hotspot", hotspot,
-                    "--patch-file", diff_path.to_str().unwrap(),
+                    "--candidate-bin",
+                    &format!("targets/{t}/candidate-{patch_id}/release/{bin}"),
+                    "--run-id",
+                    run_id,
+                    "--playbook-class",
+                    class,
+                    "--hypothesis",
+                    pending["hypothesis"].as_str().unwrap(),
+                    "--hotspot",
+                    hotspot,
+                    "--patch-file",
+                    diff_path.to_str().unwrap(),
                 ])
                 .current_dir(root)
                 .output()?;

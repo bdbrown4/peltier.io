@@ -34,10 +34,18 @@ mod tests {
     #[test]
     fn accept_requires_ci_lower_bound_not_point_estimate() {
         // 10% median speedup but the CI dips below threshold: rejected.
-        let noisy = RatioCi { median: 1.10, lo: 1.005, hi: 1.21 };
+        let noisy = RatioCi {
+            median: 1.10,
+            lo: 1.005,
+            hi: 1.21,
+        };
         assert_eq!(decide(noisy, 0.02), Verdict::RejectedBench);
         // 4% speedup with a tight CI: accepted.
-        let tight = RatioCi { median: 1.04, lo: 1.025, hi: 1.055 };
+        let tight = RatioCi {
+            median: 1.04,
+            lo: 1.025,
+            hi: 1.055,
+        };
         assert_eq!(decide(tight, 0.02), Verdict::Accepted);
     }
 }

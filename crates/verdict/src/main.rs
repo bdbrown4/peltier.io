@@ -8,12 +8,17 @@
 use anyhow::Result;
 use bench_runner::{config::AcceptConfig, decide, exec, fingerprint::EnvFingerprint, stats};
 use clap::Parser;
-use diff_test::{all_passed, orchestrate::run_core_gates, target::TargetSpec, GateLayer, GateOutcome};
+use diff_test::{
+    all_passed, orchestrate::run_core_gates, target::TargetSpec, GateLayer, GateOutcome,
+};
 use ledger::{Attempt, BenchEvidence, GateResults, Ledger, Verdict};
 use std::path::PathBuf;
 
 #[derive(Parser)]
-#[command(name = "verdict", about = "gates + bench + ledger row for one optimization attempt")]
+#[command(
+    name = "verdict",
+    about = "gates + bench + ledger row for one optimization attempt"
+)]
 struct Cli {
     /// Target name under targets/.
     target: String,
@@ -78,7 +83,10 @@ fn rebuild_pristine_baseline(
         .arg("-c")
         .arg(&spec.build.baseline)
         .current_dir(root)
-        .env("CARGO_TARGET_DIR", root.join(format!("targets/{target}/baseline")))
+        .env(
+            "CARGO_TARGET_DIR",
+            root.join(format!("targets/{target}/baseline")),
+        )
         .status();
     if dirty {
         anyhow::ensure!(
@@ -95,7 +103,10 @@ fn rebuild_pristine_baseline(
         .and_then(|n| n.to_str())
         .ok_or_else(|| anyhow::anyhow!("bad build.binary path"))?;
     let baseline = format!("targets/{target}/baseline/release/{bin_name}");
-    anyhow::ensure!(root.join(&baseline).exists(), "baseline binary missing: {baseline}");
+    anyhow::ensure!(
+        root.join(&baseline).exists(),
+        "baseline binary missing: {baseline}"
+    );
     println!("baseline rebuilt from pristine checkout: {baseline}");
     Ok(baseline)
 }
@@ -147,52 +158,75 @@ fn main() -> Result<()> {
     let pin = &cfg.pin_prefix;
     let wrap = |bin: &str| {
         let cmd = spec.bench.command.replace("{binary}", bin);
-        if pin.is_empty() { format!("sh -c \"{cmd}\"") } else { format!("{pin} sh -c \"{cmd}\"") }
+        if pin.is_empty() {
+            format!("sh -c \"{cmd}\"")
+        } else {
+            format!("{pin} sh -c \"{cmd}\"")
+        }
     };
 
-    let (verdict, bench) = if !all_passed(&gates) {
-        println!("verdict: rejected-gate (bench skipped)");
-        (Verdict::RejectedGate, None)
-    } else {
-        println!(
-            "bench: {} measured + {} warm-up runs/side, interleaved, pin='{}'",
-            cfg.runs_per_side, cfg.warmup_runs, pin
-        );
-        let samples = exec::run_interleaved(
-            &wrap(&baseline_bin), &wrap(&cli.candidate_bin),
-            cfg.runs_per_side, cfg.warmup_runs, 0.0,
-        )?;
-        let ratio = stats::bootstrap_ratio_ci(
-            &samples.baseline_s, &samples.candidate_s,
-            cfg.bootstrap_iters, cfg.confidence, cfg.bootstrap_seed,
-        );
-        let (bm, blo, bhi) = stats::bootstrap_median_ci(
-            &samples.baseline_s, cfg.bootstrap_iters, cfg.confidence, cfg.bootstrap_seed,
-        );
-        let (cm, clo, chi) = stats::bootstrap_median_ci(
-            &samples.candidate_s, cfg.bootstrap_iters, cfg.confidence, cfg.bootstrap_seed,
-        );
-        println!(
+    let (verdict, bench) =
+        if !all_passed(&gates) {
+            println!("verdict: rejected-gate (bench skipped)");
+            (Verdict::RejectedGate, None)
+        } else {
+            println!(
+                "bench: {} measured + {} warm-up runs/side, interleaved, pin='{}'",
+                cfg.runs_per_side, cfg.warmup_runs, pin
+            );
+            let samples = exec::run_interleaved(
+                &wrap(&baseline_bin),
+                &wrap(&cli.candidate_bin),
+                cfg.runs_per_side,
+                cfg.warmup_runs,
+                0.0,
+            )?;
+            let ratio = stats::bootstrap_ratio_ci(
+                &samples.baseline_s,
+                &samples.candidate_s,
+                cfg.bootstrap_iters,
+                cfg.confidence,
+                cfg.bootstrap_seed,
+            );
+            let (bm, blo, bhi) = stats::bootstrap_median_ci(
+                &samples.baseline_s,
+                cfg.bootstrap_iters,
+                cfg.confidence,
+                cfg.bootstrap_seed,
+            );
+            let (cm, clo, chi) = stats::bootstrap_median_ci(
+                &samples.candidate_s,
+                cfg.bootstrap_iters,
+                cfg.confidence,
+                cfg.bootstrap_seed,
+            );
+            println!(
             "speedup (baseline/candidate): median {:.4}, {:.0}% CI [{:.4}, {:.4}] | workload: {}",
             ratio.median, cfg.confidence * 100.0, ratio.lo, ratio.hi, spec.bench.workload
         );
-        let mut v = decide(ratio, cfg.threshold);
-        if cli.needs_human_review && v == Verdict::Accepted {
-            v = Verdict::NeedsHumanReview;
-        }
-        let fp = EnvFingerprint::collect(pin, "system-default");
-        (v, Some(BenchEvidence {
-            baseline_median: bm, baseline_ci: (blo, bhi),
-            candidate_median: cm, candidate_ci: (clo, chi),
-            speedup_median: ratio.median, speedup_ci: (ratio.lo, ratio.hi),
-            env_fingerprint: serde_json::json!({
-                "fingerprint": fp,
-                "workload": spec.bench.workload,
-                "target_commit": spec.source.commit,
-                "gates_detail": "fuzz/sanitizers per-attempt manual in Phase 1",
-            }),
-        }))
-    };
+            let mut v = decide(ratio, cfg.threshold);
+            if cli.needs_human_review && v == Verdict::Accepted {
+                v = Verdict::NeedsHumanReview;
+            }
+            let fp = EnvFingerprint::collect(pin, "system-default");
+            (
+                v,
+                Some(BenchEvidence {
+                    baseline_median: bm,
+                    baseline_ci: (blo, bhi),
+                    candidate_median: cm,
+                    candidate_ci: (clo, chi),
+                    speedup_median: ratio.median,
+                    speedup_ci: (ratio.lo, ratio.hi),
+                    env_fingerprint: serde_json::json!({
+                        "fingerprint": fp,
+                        "workload": spec.bench.workload,
+                        "target_commit": spec.source.commit,
+                        "gates_detail": "fuzz/sanitizers per-attempt manual in Phase 1",
+                    }),
+                }),
+            )
+        };
 
     let patch = match &cli.patch_file {
         Some(p) => std::fs::read_to_string(p)?,
@@ -215,6 +249,10 @@ fn main() -> Result<()> {
         wall_time_s: started.elapsed().as_secs_f64(),
     };
     Ledger::open(&root.join(&cli.db))?.record(&attempt)?;
-    println!("verdict: {} (ledger row {})", attempt.verdict.as_str(), attempt.run_id);
+    println!(
+        "verdict: {} (ledger row {})",
+        attempt.verdict.as_str(),
+        attempt.run_id
+    );
     Ok(())
 }

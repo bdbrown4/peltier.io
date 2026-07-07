@@ -67,7 +67,10 @@ mod tests {
         .unwrap();
         assert_eq!(
             EquivalencePolicy::load(&dir).unwrap(),
-            EquivalencePolicy::FpTolerance { abs: 1e-9, rel: 1e-6 }
+            EquivalencePolicy::FpTolerance {
+                abs: 1e-9,
+                rel: 1e-6
+            }
         );
     }
 }
