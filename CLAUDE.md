@@ -32,7 +32,7 @@ Full engineering spec: `SPEC.md`. Read it before starting any phase.
 
 ## Current phase
 
-**Phase 0 complete → Phase 1 — trust layer.** Phase 0 exit met 2026-07-06: verified +10.4% median win on tokei (95% CI [+8.5%, +12.0%], ledger `phase0-tokei-003`) + two case studies in `results/phase0/`. Phase 1 gaps to close: dedicated no-net bench containers, perf-based profiling, automated A/A + regression-injection calibration, diff-test orchestration, agent↔harness IPC. (Update this line as phases complete; exit criteria in SPEC.md §5.)
+**Phase 1 complete → Phase 2 — agent.** Phase 1 exit met 2026-07-09 on free infrastructure (SPEC §5): A/A false-positive 0/20 on both anchors (local container, results/calibration/2026-07-06-*; GitHub runner, results/calibration/2026-07-09-gh-runner-20session.md); injected-5% detection 19/20 and 20/20; gates end-to-end on comrak + tokei, re-verified per CI run incl. no-net container execution. Built: calibrate/gates/verdict pipelines, harnessd six-tool IPC. Deferred to hardware (docs/infra.md): pinned/governor-controlled bench box, hardware-PMU profiling, separate-uid enforcement — required for Phase 3/4 case studies, not the Phase 1 gate. (Update this line as phases complete; exit criteria in SPEC.md §5.)
 
 ## Commands
 
