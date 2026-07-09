@@ -60,7 +60,7 @@ jobs:
           mkdir -p calib
           cargo run -p bench-runner -- calibrate \
             --cmd "head -c 3000000 /dev/urandom | sha256sum" \
-            --sessions 8 --out calib/gh-runner-calibration.json \
+            --sessions 20 --out calib/gh-runner-calibration.json \
             | tee calib/summary.txt
       - uses: actions/upload-artifact@v4
         if: always()
