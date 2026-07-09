@@ -251,6 +251,8 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
                                    "note": "no ledger row yet; the pipeline is still building/benching"})),
             }
         }
-        other => Err(anyhow!("unknown op: {other} (seven ops, SPEC §3.5 + async read_verdict)")),
+        other => Err(anyhow!(
+            "unknown op: {other} (seven ops, SPEC §3.5 + async read_verdict)"
+        )),
     }
 }
