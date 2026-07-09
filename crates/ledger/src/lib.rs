@@ -165,6 +165,32 @@ impl Ledger {
         Ok(rows.collect::<Result<Vec<_>, _>>()?)
     }
 
+    /// Read-only verdict summary for one run — the agent's only window
+    /// onto a completed attempt (harnessd `read_verdict`). Returns the
+    /// verdict plus the bench CIs; never enough to game, since the row
+    /// is already written and immutable.
+    pub fn verdict_summary(&self, run_id: &str) -> Result<Option<serde_json::Value>, LedgerError> {
+        let row = self.conn.query_row(
+            "SELECT verdict, bench FROM attempts WHERE run_id = ?1",
+            [run_id],
+            |r| Ok((r.get::<_, String>(0)?, r.get::<_, Option<String>>(1)?)),
+        );
+        match row {
+            Ok((verdict, bench)) => {
+                let bench: Option<serde_json::Value> =
+                    bench.map(|b| serde_json::from_str(&b)).transpose()?;
+                Ok(Some(serde_json::json!({
+                    "run_id": run_id,
+                    "verdict": verdict,
+                    "speedup_median": bench.as_ref().and_then(|b| b.get("speedup_median").cloned()),
+                    "speedup_ci": bench.as_ref().and_then(|b| b.get("speedup_ci").cloned()),
+                })))
+            }
+            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e.into()),
+        }
+    }
+
     pub fn count(&self) -> Result<u64, LedgerError> {
         Ok(self
             .conn

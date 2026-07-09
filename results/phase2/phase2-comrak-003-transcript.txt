@@ -1,0 +1,26 @@
+[agent] Still need `find_special_char` — it's somewhere in lines 700–2400. Paging through.
+[agent] The diff was refused — likely a context-matching nit. Let me retry with a full git-style header and the whole function replaced as one deletion block (fewer interior blank-line context anchors).
+[agent] Retrying with a minimal hunk (single non-blank context anchors, fewer context lines to mismatch):
+[agent] Pipeline running (gates + interleaved A/B bench take several minutes). Polling…
+[agent] **Attempt complete.** Ledger row written for `phase2-comrak-003`.
+
+## Verdict (verbatim)
+
+| Field | Value |
+|---|---|
+| run_id | `phase2-comrak-003` |
+| verdict | **`rejected-bench`** |
+| speedup_ci | `[0.9695641714548212, 1.007035795621153]` |
+| speedup_median | `0.9871171594946015` |
+
+## Summary of the attempt
+
+- **Hotspot:** `comrak::parser::inlines::Subject::parse_inline` (6.67% of Ir) — the `find_special_char` per-byte scan
+- **Class:** 6 (SIMD/autovectorization enablement — cheapest untried; classes 1, 2, 3, 5 already in the ledger; class 4's cache-miss preconditions and class 7's contention preconditions were not supported by the profile)
+- **Hypothesis:** hoisting the `^`-within-brackets exception out of the per-byte predicate would tighten the inner table-lookup scan for ~1–3% end-to-end
+- **Result:** the hypothesis is refuted by measurement. The bootstrap 95% CI `[0.970, 1.007]` straddles 1.0 with a median of 0.987 (a slight *slowdown* if anything) — far from the required CI lower bound ≥ 1.02. Gates were not the blocker; the mechanism simply didn't materialize, plausibly because LLVM already hoisted the loop-invariant `within_brackets` check, or the restart-scan structure inhibited the previous straight-line codegen.
+
+This is a clean, complete outcome: hypothesis recorded before patching, patch expressed the hypothesis faithfully (byte/integer-only, no FP/concurrency/unsafe taint, no gate-routing avoidance), and the ledger row now prevents re-attempting (parse_inline, class 6, branch-hoist) in future sessions. Per the two-iteration rule I'm stopping here rather than iterating on a rejected hypothesis without new evidence — the next session should move to the next class or hotspot (the allocator-dominated profile, ~26% in malloc/free, suggests the biggest remaining lever is allocation-volume reduction, if any class-5 hypothesis distinct from the ledger's prior ones exists).
+
+One operational note: `propose_patch` rejects diffs lacking a trailing newline with the generic "does not apply cleanly" error — worth a friendlier message in `harnessd`.
+[result] turns=41 cost_usd=6.470653

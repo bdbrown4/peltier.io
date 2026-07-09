@@ -46,9 +46,9 @@ def read_playbook(class_number: int) -> str:
     return _c().call("read_playbook", **{"class": class_number})["markdown"]
 
 
-def read_target_source(target: str, path: str) -> str:
-    """Read-only view of the target workspace at the pinned commit."""
-    return _c().call("read_target_source", target=target, path=path)["content"]
+def read_target_source(target: str, path: str, offset: int = 0, limit: int = 400) -> dict[str, Any]:
+    """Read-only line window of a target workspace file at the pinned commit."""
+    return _c().call("read_target_source", target=target, path=path, offset=offset, limit=limit)
 
 
 def propose_patch(target: str, diff: str, hypothesis: str) -> str:
@@ -60,8 +60,8 @@ def propose_patch(target: str, diff: str, hypothesis: str) -> str:
 
 
 def run_verdict(patch_id: str, run_id: str, playbook_class: int, hotspot: str) -> dict[str, Any]:
-    """Gates + bench + ledger row for a proposed patch. This is the only
-    way the agent learns whether a change 'worked'."""
+    """Launch the gate + bench pipeline for a proposed patch (runs detached).
+    Returns immediately; poll run_verdict's result via read_verdict(run_id)."""
     return _c().call(
         "run_verdict",
         patch_id=patch_id,
@@ -69,3 +69,8 @@ def run_verdict(patch_id: str, run_id: str, playbook_class: int, hotspot: str) -
         playbook_class=str(playbook_class),
         hotspot=hotspot,
     )
+
+
+def read_verdict(run_id: str) -> dict[str, Any]:
+    """Poll for a completed verdict: verdict + speedup CI, or a running status."""
+    return _c().call("read_verdict", run_id=run_id)

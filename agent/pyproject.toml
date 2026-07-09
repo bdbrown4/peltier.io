@@ -4,7 +4,8 @@ version = "0.1.0"
 description = "hotpath optimization agent: the untrusted proposer in the profile→patch→verdict loop"
 requires-python = ">=3.11"
 dependencies = [
-    "claude-agent-sdk>=0.1",
+    "claude-agent-sdk>=0.2",
+    "mcp>=1.0",
 ]
 
 [project.optional-dependencies]

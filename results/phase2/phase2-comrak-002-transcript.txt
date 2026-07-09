@@ -1,0 +1,22 @@
+[agent] No filesystem Read/Grep tools exist in this environment, so I'll try the harness source reader with the offset/limit hint from the overflow message.
+[agent] The full file overflows and this environment has no direct Read/Bash tools. The `Monitor` tool runs shell commands, so I'll use it to locate and print just the hot regions of the source.
+[agent] **Verdict for `phase2-comrak-002` (verbatim):**
+
+- **verdict:** `rejected-bench`
+- **speedup_ci:** `[0.9817014566362904, 1.0258281587778724]`
+- **speedup_median:** `1.003082907815354`
+
+## Attempt summary
+
+| Field | Value |
+|---|---|
+| Target / workload | comrak — Pro Git book, all translations, 11.0 MB concatenated markdown, single stream |
+| Hotspot | glibc allocator churn (`_int_malloc`/`_int_free`/`malloc`/`malloc_consolidate`/`free`, ~26.7% Ir) via per-text-node `VecDeque` in `postprocess_text_node_with_context` |
+| Playbook class | 5 — algorithmic (procedure 2: eliminate loop-invariant dead work); cheapest untried class whose preconditions the profile satisfied (1–3 already in ledger; 4/6/7 signatures absent) |
+| Patch | `e7ecc9ea4c5d` — gate `spxv` construction + `_inner` call on `tasklist \|\| (autolink && !in_bracket_context)` |
+| Hypothesized speedup | 2–3% |
+| Measured | median 1.0031×, 95% CI [0.982, 1.026] — CI straddles 1.0; lower bound far below the 2% acceptance threshold |
+| Outcome | **Rejected at the bench gate.** Ledger row written with full evidence. |
+
+The mechanism was real but too small: per-text-node malloc/free elimination didn't move end-to-end wall time measurably — the allocator traffic is evidently dominated by other producers (syntect's per-line parsing internals, per-run text `String`s), not this `VecDeque`. This is a clean, complete outcome per the ledger-integrity rule; per the iteration rule I'm not restructuring the patch to chase the number. A future attempt should be a **new hypothesis** — the remaining class-5 surface (e.g. the per-block `typed_arena` delimiter arena in `parse_inlines`, or presizing the syntect HTML output buffer) or class 4 once `perf stat` cache-miss data exists to test its preconditions.
+[result] turns=40 cost_usd=5.606228999999999

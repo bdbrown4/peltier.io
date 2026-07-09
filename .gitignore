@@ -235,3 +235,7 @@ targets/tokei/candidate-*/
 targets/tokei/asan/
 !results/calibration/*.json
 targets/*/baseline/
+
+# Phase 2 agent artifacts (transcripts kept; pending logs are scratch)
+results/pending/
+agent/**/__pycache__/
