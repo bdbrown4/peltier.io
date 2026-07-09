@@ -1,0 +1,25 @@
+[agent] Patch accepted (`patch_id: 1c0adbfc12ed`). Running the full gate + bench pipeline.
+[agent] Two timeouts at the 60s transport cap. Before retrying again (and risking duplicate pipeline runs), let me check whether either invocation completed server-side and wrote a ledger row.
+[agent] I'm stopping retries here: `run_verdict` re-attaches to a multi-minute pipeline but the MCP transport caps at 60s, so its return payload is unreachable this session, and repeated calls just burn harness compute. The ledger is confirmed stable (no duplicate rows), so the attempt itself is complete. Final report:
+
+---
+
+## Attempt report — `phase2-comrak-001` (comrak)
+
+**Hotspot selection.** Profile (`callgrind`, 883.8M Ir total): allocator symbols ≈ 26.7% combined (`_int_malloc` 9.99%, `_int_free` 6.85%, `malloc` 3.92%, `malloc_consolidate` 3.48%, `free` 2.49%), plus `RawVecInner::finish_grow` 2.33% and `memcpy` 3.09% — a classic Vec/String growth-churn signature. Ledger showed classes 1 and 2 already attempted → cheapest untried class satisfying preconditions was **Class 3 (allocation churn)**.
+
+Note: the top two target-owned hotspots (`Subject::parse_inline` 6.67%, `Parser::process_line` 6.45%) live in ~100KB files that `read_target_source` returns only whole, exceeding output limits, and no chunked/general file-read tool was available this session — so I targeted the highest-ranked hotspot whose source I could fully read: `SyntectAdapter::write_highlighted` (4.75%).
+
+**Hypothesis (as logged, verbatim in the ledger via `propose_patch`).** `highlight_html`'s themed branch accumulates per-line highlighted HTML into `String::new()` (capacity 0); highlighted HTML is reliably several times input size, so the buffer undergoes ~log2(output_len) doubling reallocations per code block. Reserving `code.len()*3` up front eliminates most growth reallocations. Expected 1–3% wall-clock; CI lower bound may not clear the 2% threshold — a clean rejection is acceptable. Risk flagged: RSS overshoot from the 3× reserve.
+
+**Patch.** One-line change in `src/plugins/syntect.rs` (`String::new()` → `String::with_capacity(code.len().saturating_mul(3))`), no FP/concurrency/unsafe surface. Accepted by the allowlist check as `patch_id 1c0adbfc12ed`.
+
+**Verdict: ⚠️ not retrievable this session — I cannot report it verbatim, and I won't fabricate it.** Every `run_verdict` call (3 attempts) timed out at the 60s MCP transport cap while the multi-minute pipeline ran server-side. What I can verify:
+
+- The pipeline **did complete and write exactly one ledger row**: `read_ledger` moved from `{classes: [1,2], attempts: 8}` to `{classes: [1,2,3], attempts: 9}` and stayed there across all retries — the harness deduped on `run_id`, so ledger integrity is intact.
+- The verdict text/bench CI is not exposed by any reachable tool: `read_ledger` returns only summary counts, and the harness server publishes no MCP resources.
+
+**Action needed from a human (or a harness fix):** read the verdict for run `phase2-comrak-001` directly from the ledger SQLite (`crates/ledger`) or `just report phase2-comrak-001`, and raise the harnessd `run_verdict` IPC timeout (or make it return a ticket immediately and expose a `read_verdict`/poll tool) — as written, its result can never be observed through a 60s MCP transport.
+
+Per the two-iteration rule: whatever the verdict is, it's on the record with a clean row, and this attempt is closed. No further iteration on this hypothesis from me until the verdict is readable.
+[result] turns=21 cost_usd=2.7417439999999997

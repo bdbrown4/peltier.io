@@ -32,7 +32,7 @@ Full engineering spec: `SPEC.md`. Read it before starting any phase.
 
 ## Current phase
 
-**Phase 1 complete → Phase 2 — agent.** Phase 1 exit met 2026-07-09 on free infrastructure (SPEC §5): A/A false-positive 0/20 on both anchors (local container, results/calibration/2026-07-06-*; GitHub runner, results/calibration/2026-07-09-gh-runner-20session.md); injected-5% detection 19/20 and 20/20; gates end-to-end on comrak + tokei, re-verified per CI run incl. no-net container execution. Built: calibrate/gates/verdict pipelines, harnessd six-tool IPC. Deferred to hardware (docs/infra.md): pinned/governor-controlled bench box, hardware-PMU profiling, separate-uid enforcement — required for Phase 3/4 case studies, not the Phase 1 gate. (Update this line as phases complete; exit criteria in SPEC.md §5.)
+**Phase 2 in progress — agent loop.** The unattended profile→hypothesize→patch→gated-verdict loop runs on comrak via the Claude Agent SDK (`agent/hotpath_agent/loop.py`, model claude-fable-5) over a stdio MCP server wrapping the seven harness tools. 3 audited attempts (phase2-comrak-001/002/003), all honest rejections, **0 false accepts**; the agent twice refused to fabricate an unreadable verdict (results/phase2/case-study-agent-loop.md). Shipped: async run_verdict + pollable read_verdict, windowed read_target_source. Exit-criteria gaps: an auto-accepted win (needs richer profiling to unlock more classes), and OS-level process/user isolation for the agent's tool boundary (SPEC §10; the SDK allow/deny layer is defense-in-depth only — see docs/infra.md). (Update this line as phases complete; exit criteria in SPEC.md §5.)
 
 ## Commands
 

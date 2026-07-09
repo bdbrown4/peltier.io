@@ -32,6 +32,11 @@ fn main() -> Result<()> {
     Ok(())
 }
 
+/// Single-quote a string for safe embedding in a generated shell script.
+fn shq(s: &str) -> String {
+    format!("'{}'", s.replace('\'', "'\\''"))
+}
+
 fn field<'a>(req: &'a Value, key: &str) -> Result<&'a str> {
     req.get(key)
         .and_then(Value::as_str)
@@ -105,7 +110,32 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
             check_target(t)?;
             check_rel_path(p)?;
             let full = root.join(format!("targets/{t}/workspace")).join(p);
-            Ok(json!({"content": std::fs::read_to_string(full)?}))
+            let text = std::fs::read_to_string(full)?;
+            // Optional line window so large source files (100KB+) can be read in
+            // chunks instead of overflowing one response — otherwise the agent
+            // is tempted to reach for a shell it must not have.
+            let lines: Vec<&str> = text.lines().collect();
+            let total = lines.len();
+            let offset = req.get("offset").and_then(Value::as_u64).unwrap_or(0) as usize;
+            let limit = req
+                .get("limit")
+                .and_then(Value::as_u64)
+                .map(|v| v as usize)
+                .unwrap_or(usize::MAX);
+            let end = offset.saturating_add(limit).min(total);
+            let start = offset.min(total);
+            let slice = lines[start..end]
+                .iter()
+                .enumerate()
+                .map(|(i, l)| format!("{}\t{}", start + i + 1, l))
+                .collect::<Vec<_>>()
+                .join("\n");
+            Ok(json!({
+                "content": slice,
+                "total_lines": total,
+                "returned_lines": [start + 1, end],
+                "truncated": end < total,
+            }))
         }
         "propose_patch" => {
             let t = field(&req, "target")?;
@@ -158,6 +188,12 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
                 "bad patch id"
             );
             let run_id = field(&req, "run_id")?;
+            ensure!(
+                run_id
+                    .chars()
+                    .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_'),
+                "bad run id"
+            );
             let class = field(&req, "playbook_class")?;
             let hotspot = field(&req, "hotspot")?;
             let pending: Value = serde_json::from_str(&std::fs::read_to_string(
@@ -165,16 +201,6 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
             )?)?;
             let t = pending["target"].as_str().unwrap();
             let spec = diff_test::target::TargetSpec::load(root, t)?;
-            // Build the candidate from the patched workspace into an
-            // isolated dir, then hand off to the verdict pipeline.
-            let cand_dir = root.join(format!("targets/{t}/candidate-{patch_id}"));
-            let build = Command::new("sh")
-                .arg("-c")
-                .arg(&spec.build.baseline)
-                .current_dir(root)
-                .env("CARGO_TARGET_DIR", &cand_dir)
-                .status()?;
-            ensure!(build.success(), "candidate build failed");
             let bin = Path::new(&spec.build.binary)
                 .file_name()
                 .unwrap()
@@ -182,34 +208,51 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
                 .unwrap();
             let diff_path = root.join(format!("results/pending/{patch_id}.json.diff"));
             std::fs::write(&diff_path, pending["diff"].as_str().unwrap())?;
-            let out = Command::new("cargo")
-                .args([
-                    "run",
-                    "-q",
-                    "-p",
-                    "verdict",
-                    "--",
-                    t,
-                    "--rebuild-baseline",
-                    "--candidate-bin",
-                    &format!("targets/{t}/candidate-{patch_id}/release/{bin}"),
-                    "--run-id",
-                    run_id,
-                    "--playbook-class",
-                    class,
-                    "--hypothesis",
-                    pending["hypothesis"].as_str().unwrap(),
-                    "--hotspot",
-                    hotspot,
-                    "--patch-file",
-                    diff_path.to_str().unwrap(),
-                ])
+            // The build + verdict pipeline runs for minutes — far past the MCP
+            // transport's per-call cap. Launch it detached, writing progress to
+            // a log; the agent observes the result via the read_verdict op,
+            // which reads the append-only ledger row once written.
+            let cand_dir = format!("targets/{t}/candidate-{patch_id}");
+            let cand_bin = format!("{cand_dir}/release/{bin}");
+            let log = format!("results/pending/{run_id}.log");
+            let script = format!(
+                "set -e\nCARGO_TARGET_DIR={cand} {build}\ncargo run -q -p verdict -- {tgt} \
+                 --rebuild-baseline --candidate-bin {cbin} --run-id {rid} --playbook-class {cls} \
+                 --hypothesis {hyp} --hotspot {hs} --patch-file {pf}\n",
+                cand = shq(&cand_dir),
+                build = spec.build.baseline,
+                tgt = shq(t),
+                cbin = shq(&cand_bin),
+                rid = shq(run_id),
+                cls = shq(class),
+                hyp = shq(pending["hypothesis"].as_str().unwrap()),
+                hs = shq(hotspot),
+                pf = shq(diff_path.to_str().unwrap()),
+            );
+            let logf = std::fs::File::create(root.join(&log))?;
+            let errf = logf.try_clone()?;
+            Command::new("setsid")
+                .arg("sh")
+                .arg("-c")
+                .arg(&script)
                 .current_dir(root)
-                .output()?;
-            let stdout = String::from_utf8_lossy(&out.stdout).to_string();
-            Ok(json!({"exit_ok": out.status.success(), "report": stdout,
-                       "stderr_tail": String::from_utf8_lossy(&out.stderr).chars().rev().take(500).collect::<String>().chars().rev().collect::<String>()}))
+                .stdout(std::process::Stdio::from(logf))
+                .stderr(std::process::Stdio::from(errf))
+                .spawn()?;
+            Ok(json!({"status": "started", "run_id": run_id, "log": log,
+                       "note": "pipeline runs detached; poll read_verdict with this run_id"}))
         }
-        other => Err(anyhow!("unknown op: {other} (six ops only, SPEC §3.5)")),
+        "read_verdict" => {
+            let run_id = field(&req, "run_id")?;
+            let ledger = ledger::Ledger::open(&root.join("results/ledger.sqlite"))?;
+            match ledger.verdict_summary(run_id)? {
+                Some(v) => Ok(v),
+                None => Ok(json!({"status": "running",
+                                   "note": "no ledger row yet; the pipeline is still building/benching"})),
+            }
+        }
+        other => Err(anyhow!(
+            "unknown op: {other} (seven ops, SPEC §3.5 + async read_verdict)"
+        )),
     }
 }
