@@ -1,0 +1,20 @@
+[agent] The pipeline has completed and the ledger row is written. Reporting verbatim:
+
+## Verdict: `phase2-tokei-002`
+
+```
+verdict:        rejected-gate
+speedup_median: None
+speedup_ci:     None
+```
+
+**Outcome:** REJECTED at the equivalence gates. The pipeline never reached benchmarking (no speedup CI exists — and per policy, no performance number is claimed). This is a complete, valid outcome with a clean ledger row.
+
+**Attempt summary:**
+- **Hotspot:** `LanguageType::parse_lines` 43.04% Ir + `SyntaxCounter::parse_context` 12.59% Ir (per-byte `parse_context` calls on gated bytes)
+- **Class:** 5 (algorithmic, tier-2 invariant hoisting) — re-entered with a materially new mechanism vs the accepted phase2-tokei-001 gate table; classes 2/4/7 preconditions were honestly unsatisfied by the profile (allocator symbols ~4% < 5% bar; hot loop branch-bound, not memory-bound; no lock contention), and class 6 was rejected as classification-shopping since the state-machine loop can't vectorize
+- **Patch:** `3467042e690d` — skip-scan over gated bytes when `regex_cache.family()` is `None` (or Rust at non-whitespace bytes), eliminating per-byte `parse_context` calls and trim-break checks
+- **Result:** a gate (upstream tests / golden replay / diff-fuzz / sanitizers) refuted the equivalence argument. My purity proof for the skipped-byte path evidently missed a case — most plausibly in the `ended_with_comments` / all-whitespace-`break` interaction or the Rust whitespace-stop refinement. The gate did its job; the hypothesis is falsified as expressed.
+
+Per the iteration rule I am not restructuring the patch to chase the measurement — this was the one attempt requested. The ledger now records the falsified hypothesis, so a future attempt on this hotspot must bring a genuinely different mechanism (or diagnose the divergence from the gate log at `results/pending/phase2-tokei-002.log` before re-hypothesizing, counting as iteration 1 of 2).
+[result] turns=20 cost_usd=4.863955
