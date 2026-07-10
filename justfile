@@ -47,3 +47,12 @@ verdict target candidate run_id class hypothesis hotspot *flags:
         --candidate-bin "{{candidate}}" --run-id "{{run_id}}" \
         --playbook-class {{class}} --hypothesis "{{hypothesis}}" \
         --hotspot "{{hotspot}}" {{flags}}
+
+# One unattended agent attempt behind the SPEC §10 OS boundary:
+# harnessd (trusted uid) on a Unix socket, agent loop as user hpagent.
+agent-attempt target run_id max_turns="40":
+    sh scripts/agent-isolated.sh {{target}} {{run_id}} {{max_turns}}
+
+# Verify the OS boundary from the agent user's side (negative + positive)
+isolation-check:
+    sh scripts/isolation-check.sh

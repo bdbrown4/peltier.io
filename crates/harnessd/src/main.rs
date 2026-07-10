@@ -10,11 +10,24 @@ use anyhow::{anyhow, ensure, Result};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 use std::io::{BufRead, Write};
+use std::os::unix::net::UnixListener;
 use std::path::{Component, Path};
 use std::process::Command;
+use std::sync::Mutex;
+
+/// Serializes mutating ops (git apply, pending writes) across socket
+/// connections; reads don't need it but the cost is nil at one agent.
+static HANDLE_LOCK: Mutex<()> = Mutex::new(());
 
 fn main() -> Result<()> {
     let root = std::env::current_dir()?.canonicalize()?;
+    let args: Vec<String> = std::env::args().collect();
+    if let Some(i) = args.iter().position(|a| a == "--socket") {
+        let path = args
+            .get(i + 1)
+            .ok_or_else(|| anyhow!("--socket requires a path"))?;
+        return serve_socket(&root, Path::new(path));
+    }
     let stdin = std::io::stdin();
     let mut stdout = std::io::stdout().lock();
     for line in stdin.lock().lines() {
@@ -22,14 +35,60 @@ fn main() -> Result<()> {
         if line.trim().is_empty() {
             continue;
         }
-        let resp = match handle(&root, &line) {
-            Ok(v) => json!({"ok": true, "result": v}),
-            Err(e) => json!({"ok": false, "error": e.to_string()}),
-        };
+        let resp = respond(&root, &line);
         writeln!(stdout, "{resp}")?;
         stdout.flush()?;
     }
     Ok(())
+}
+
+/// SPEC §10 socket mode: harnessd runs as the trusted uid and listens on a
+/// Unix socket; the agent process runs as an unprivileged user whose only
+/// write path into the repo is this daemon. Socket permissions (owner/group/
+/// mode) are set by the supervisor script that starts us.
+fn serve_socket(root: &Path, sock: &Path) -> Result<()> {
+    if let Some(dir) = sock.parent() {
+        std::fs::create_dir_all(dir)?;
+    }
+    let _ = std::fs::remove_file(sock);
+    let listener = UnixListener::bind(sock)?;
+    eprintln!("harnessd listening on {}", sock.display());
+    for conn in listener.incoming() {
+        let stream = match conn {
+            Ok(s) => s,
+            Err(e) => {
+                eprintln!("accept error: {e}");
+                continue;
+            }
+        };
+        let root = root.to_path_buf();
+        std::thread::spawn(move || {
+            let reader = match stream.try_clone() {
+                Ok(s) => std::io::BufReader::new(s),
+                Err(_) => return,
+            };
+            let mut writer = stream;
+            for line in reader.lines() {
+                let Ok(line) = line else { break };
+                if line.trim().is_empty() {
+                    continue;
+                }
+                let resp = respond(&root, &line);
+                if writeln!(writer, "{resp}").is_err() {
+                    break;
+                }
+            }
+        });
+    }
+    Ok(())
+}
+
+fn respond(root: &Path, line: &str) -> Value {
+    let _guard = HANDLE_LOCK.lock().unwrap_or_else(|p| p.into_inner());
+    match handle(root, line) {
+        Ok(v) => json!({"ok": true, "result": v}),
+        Err(e) => json!({"ok": false, "error": e.to_string()}),
+    }
 }
 
 /// Single-quote a string for safe embedding in a generated shell script.

@@ -36,15 +36,14 @@ HARNESS_TOOLS = [
 ]
 
 # Built-in tools we deny at the SDK layer. This is DEFENSE IN DEPTH, not the
-# trust boundary. SPEC §10's real boundary is OS-level process/user isolation:
-# harnessd runs as a separate process the agent can't bypass, target code runs
-# in a no-net container. In THIS dev container the nested agent runs as root
-# under a parent Claude Code session, so neither --dangerously-skip-permissions
-# nor a can_use_tool callback reliably gates built-ins (settings inherited from
-# the parent session shadow them). We enumerate what we can; production runs the
-# agent process without host-shell capability at all. What holds regardless:
-# propose_patch is the only harness-mediated write path (path-allowlist + git
-# apply), and the ledger is append-only (mutation-refusing triggers).
+# trust boundary. SPEC §10's real boundary is OS-level isolation, shipped in
+# scripts/agent-isolated.sh: this whole process tree runs either inside a
+# mount namespace with the repo read-only and CAP_SYS_ADMIN dropped, or as
+# the unprivileged hpagent user — verified by `just isolation-check`. Even
+# if the nested CLI reaches a shell despite this list (settings inherited
+# from a parent session can shadow SDK gating), repo writes fail at the OS.
+# What holds regardless: propose_patch is the only harness-mediated write
+# path (path-allowlist + git apply), and the ledger is append-only.
 BUILTIN_TOOLS_DENIED = [
     "Bash", "Read", "Write", "Edit", "Glob", "Grep",
     "WebSearch", "WebFetch", "Task", "TodoWrite",
