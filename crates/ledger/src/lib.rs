@@ -165,6 +165,27 @@ impl Ledger {
         Ok(rows.collect::<Result<Vec<_>, _>>()?)
     }
 
+    /// Per-attempt history for a target: class, hotspot, hypothesis,
+    /// verdict. The agent's anti-duplicate memory at hypothesis
+    /// granularity — a class may be re-entered with a materially new
+    /// hypothesis, but never the same (hotspot, class, hypothesis).
+    pub fn attempt_history(&self, target: &str) -> Result<Vec<serde_json::Value>, LedgerError> {
+        let mut stmt = self.conn.prepare(
+            "SELECT run_id, playbook_class, hotspot, hypothesis, verdict \
+             FROM attempts WHERE target = ?1 ORDER BY rowid",
+        )?;
+        let rows = stmt.query_map([target], |r| {
+            Ok(serde_json::json!({
+                "run_id": r.get::<_, String>(0)?,
+                "playbook_class": r.get::<_, u8>(1)?,
+                "hotspot": r.get::<_, String>(2)?,
+                "hypothesis": r.get::<_, String>(3)?,
+                "verdict": r.get::<_, String>(4)?,
+            }))
+        })?;
+        Ok(rows.collect::<Result<Vec<_>, _>>()?)
+    }
+
     /// Read-only verdict summary for one run — the agent's only window
     /// onto a completed attempt (harnessd `read_verdict`). Returns the
     /// verdict plus the bench CIs; never enough to game, since the row

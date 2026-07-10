@@ -84,7 +84,21 @@ fn serve_socket(root: &Path, sock: &Path) -> Result<()> {
 }
 
 fn respond(root: &Path, line: &str) -> Value {
-    let _guard = HANDLE_LOCK.lock().unwrap_or_else(|p| p.into_inner());
+    // read_verdict long-polls the ledger (read-only) and must not hold
+    // the lock that serializes mutating ops while it sleeps.
+    let is_read_verdict = serde_json::from_str::<Value>(line)
+        .ok()
+        .and_then(|v| {
+            v.get("op")
+                .and_then(Value::as_str)
+                .map(|o| o == "read_verdict")
+        })
+        .unwrap_or(false);
+    let _guard = if is_read_verdict {
+        None
+    } else {
+        Some(HANDLE_LOCK.lock().unwrap_or_else(|p| p.into_inner()))
+    };
     match handle(root, line) {
         Ok(v) => json!({"ok": true, "result": v}),
         Err(e) => json!({"ok": false, "error": e.to_string()}),
@@ -143,7 +157,14 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
             // Read-only surface over the append-only DB.
             let ledger = ledger::Ledger::open(&root.join("results/ledger.sqlite"))?;
             let classes = ledger.attempted_classes(t)?;
-            Ok(json!({"attempted_playbook_classes": classes, "total_attempts": ledger.count()?}))
+            let history = ledger.attempt_history(t)?;
+            Ok(json!({
+                "attempted_playbook_classes": classes,
+                "attempts": history,
+                "total_attempts": ledger.count()?,
+                "note": "a class may be re-entered with a materially NEW hypothesis; \
+                         never duplicate a (hotspot, class, hypothesis) that has a verdict",
+            }))
         }
         "read_playbook" => {
             let class = match req.get("class") {
@@ -303,11 +324,21 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
         }
         "read_verdict" => {
             let run_id = field(&req, "run_id")?;
-            let ledger = ledger::Ledger::open(&root.join("results/ledger.sqlite"))?;
-            match ledger.verdict_summary(run_id)? {
-                Some(v) => Ok(v),
-                None => Ok(json!({"status": "running",
-                                   "note": "no ledger row yet; the pipeline is still building/benching"})),
+            // Long-poll: the pipeline runs for minutes and the MCP transport
+            // caps a tool call at 60s. Waiting ~45s server-side per poll cuts
+            // the agent's turn burn ~15x versus instant "running" replies.
+            let deadline = std::time::Instant::now() + std::time::Duration::from_secs(45);
+            loop {
+                let ledger = ledger::Ledger::open(&root.join("results/ledger.sqlite"))?;
+                if let Some(v) = ledger.verdict_summary(run_id)? {
+                    return Ok(v);
+                }
+                drop(ledger);
+                if std::time::Instant::now() >= deadline {
+                    return Ok(json!({"status": "running",
+                                     "note": "no ledger row yet; the pipeline is still building/benching — poll again"}));
+                }
+                std::thread::sleep(std::time::Duration::from_secs(3));
             }
         }
         other => Err(anyhow!(
