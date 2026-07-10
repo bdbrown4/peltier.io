@@ -222,6 +222,13 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
             let diff = field(&req, "diff")?;
             let hypothesis = field(&req, "hypothesis")?;
             check_target(t)?;
+            // git rejects a diff without a final newline with an opaque
+            // "corrupt patch" — say it plainly (phase2-comrak-004 burned
+            // several turns rediscovering this).
+            ensure!(
+                diff.ends_with('\n'),
+                "diff must end with a trailing newline (git would report 'corrupt patch' at EOF)"
+            );
             // Allowlist: every path named by the diff must be a safe
             // relative path (the git -C below roots them in the target
             // workspace; nothing outside it is reachable).
@@ -238,18 +245,51 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
                 );
             }
             let ws = root.join(format!("targets/{t}/workspace"));
-            let mut check = Command::new("git")
-                .args(["-C", ws.to_str().unwrap(), "apply", "--check", "-"])
-                .stdin(std::process::Stdio::piped())
-                .spawn()?;
-            check.stdin.take().unwrap().write_all(diff.as_bytes())?;
-            ensure!(check.wait()?.success(), "diff does not apply cleanly");
-            let mut apply = Command::new("git")
-                .args(["-C", ws.to_str().unwrap(), "apply", "-"])
-                .stdin(std::process::Stdio::piped())
-                .spawn()?;
-            apply.stdin.take().unwrap().write_all(diff.as_bytes())?;
-            ensure!(apply.wait()?.success(), "git apply failed");
+            // Every proposal stands alone: reset the workspace to HEAD
+            // first so probe/iteration patches cannot accumulate into a
+            // tested tree the ledger's patch field doesn't describe
+            // (phase2-comrak-004 audit finding).
+            ensure!(
+                Command::new("git")
+                    .args(["-C", ws.to_str().unwrap(), "checkout", "--", "."])
+                    .status()?
+                    .success(),
+                "workspace reset failed"
+            );
+            ensure!(
+                Command::new("git")
+                    .args(["-C", ws.to_str().unwrap(), "clean", "-fdq"])
+                    .status()?
+                    .success(),
+                "workspace clean failed"
+            );
+            let run_git_apply = |check: bool| -> Result<std::process::Output> {
+                let mut args = vec!["-C", ws.to_str().unwrap(), "apply"];
+                if check {
+                    args.push("--check");
+                }
+                args.push("-");
+                let mut child = Command::new("git")
+                    .args(&args)
+                    .stdin(std::process::Stdio::piped())
+                    .stderr(std::process::Stdio::piped())
+                    .spawn()?;
+                child.stdin.take().unwrap().write_all(diff.as_bytes())?;
+                Ok(child.wait_with_output()?)
+            };
+            let checked = run_git_apply(true)?;
+            ensure!(
+                checked.status.success(),
+                "diff does not apply cleanly against the pristine workspace \
+                 (proposals are standalone; prior proposals were reset): {}",
+                String::from_utf8_lossy(&checked.stderr).trim()
+            );
+            let applied = run_git_apply(false)?;
+            ensure!(
+                applied.status.success(),
+                "git apply failed: {}",
+                String::from_utf8_lossy(&applied.stderr).trim()
+            );
             let patch_id = format!("{:x}", Sha256::digest(diff.as_bytes()))[..12].to_string();
             let pending = root.join("results/pending");
             std::fs::create_dir_all(&pending)?;
