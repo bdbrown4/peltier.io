@@ -55,11 +55,23 @@ fi
 ( cd "$ROOT" && cargo build -q -p harnessd -p verdict )
 
 mkdir -p "$SOCK_DIR"
-if [ ! -S "$SOCK" ]; then
+# A stale socket file survives a dead daemon (e.g. after a container
+# suspend), so liveness means answering a real request — not existing.
+sock_alive() {
+    [ -S "$SOCK" ] && timeout 5 python3 -c "
+import socket
+s = socket.socket(socket.AF_UNIX); s.connect('$SOCK')
+f = s.makefile('rw')
+f.write('{\"op\":\"read_playbook\",\"class\":1}\n'); f.flush()
+assert f.readline()
+" 2>/dev/null
+}
+if ! sock_alive; then
+    rm -f "$SOCK"
     ( cd "$ROOT" && setsid ./target/debug/harnessd --socket "$SOCK" \
         >>/var/log/hotpath-harnessd.log 2>&1 & )
     for _ in $(seq 1 50); do [ -S "$SOCK" ] && break; sleep 0.1; done
-    [ -S "$SOCK" ] || { echo "harnessd socket never appeared" >&2; exit 1; }
+    sock_alive || { echo "harnessd did not come up on $SOCK" >&2; exit 1; }
 fi
 
 run_loop="python3 -m hotpath_agent.loop $TARGET --run-id $RUN_ID --max-turns $MAX_TURNS --repo-root $ROOT"
