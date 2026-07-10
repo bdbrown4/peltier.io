@@ -1,3 +1,4 @@
 [agent] Now let me see the outer driver `parse_lines` in `language_type.rs`.
 [agent] The hunk line counts were off. Recomputing and resubmitting:
 [agent] Patch applied — `patch_id: 4e3da7e6bd1c`. Launching the gate+bench pipeline.
+[agent] Still running. Polling again.
