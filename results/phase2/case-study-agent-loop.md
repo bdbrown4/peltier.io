@@ -1,11 +1,14 @@
 # Phase 2 case study — the unattended agent loop
 
-**Result: the Claude Agent SDK loop ran the full profile → hypothesize →
-patch → gated-verdict cycle on comrak with no human in the loop, across
-multiple attempts, with ZERO false accepts. The agent twice refused to
-fabricate a verdict it could not read back, verifying ledger integrity
-instead — exactly the anti-reward-hacking behavior SPEC §10 is designed
-to produce.**
+**Result: the Claude Agent SDK loop runs the full profile → hypothesize →
+patch → gated-verdict cycle with no human in the loop, on two targets,
+with ZERO false accepts — and produced its first verified auto-accepted
+win: +10.7% median on tokei, 95% CI [+8.4%, +13.1%] (221 MB / 4360-file
+pinned workload, single rayon thread, pinned core), surviving a
+10,000-input differential fuzz and ASan/LSan on top of the pipeline's
+gates. The agent twice refused to fabricate a verdict it could not read
+back, verifying ledger integrity instead — exactly the
+anti-reward-hacking behavior SPEC §10 is designed to produce.**
 
 ## What runs
 
@@ -26,6 +29,51 @@ to produce.**
 | phase2-comrak-001 | 3 alloc-churn | syntect buffer `with_capacity` | rejected-bench | [0.971, 1.007] |
 | phase2-comrak-002 | 5 algorithmic | gate dead `VecDeque` build in text postprocess | rejected-bench | [0.982, 1.026] |
 | phase2-comrak-003 | 6 SIMD | hoist `^`-in-brackets check out of `find_special_char` predicate | rejected-bench | [0.970, 1.007] |
+| phase2-tokei-001 | 5 algorithmic | first-byte gate table for per-byte token matchers in `perform_multi_line_analysis` | **accepted** | **[1.084, 1.131]** |
+
+### phase2-tokei-001 — the first auto-accepted win, and its audit
+
+Running behind the OS boundary (`scripts/agent-isolated.sh`, mountns
+mode), the agent read the new cache-sim profile, saw `parse_lines` at
+55.9% of instructions / 62% of branches / 44% of branch mispredicts,
+re-entered class 5 with a hypothesis distinct from every ledger entry
+(the hypothesis-granular `read_ledger` shipped for exactly this), and
+proposed a 256-entry first-byte gate: most bytes of most lines can't
+start any quote/comment token, so five per-byte token-matcher loops
+collapse to one table load. `git apply` refused its first diff (bad
+hunk counts); it recomputed and resubmitted — the harness, not the
+agent, owns what reaches the tree.
+
+Pipeline verdict: accepted at +10.7% median, 95% CI [+8.4%, +13.1%]
+vs the pristine-rebuilt baseline (which already banks the Phase 0
+wins, so this is marginal, not cumulative, speedup). 21 turns,
+$4.61.
+
+The pipeline's auto-gates cover upstream tests + golden replay +
+bench; fuzz and sanitizers are per-attempt manual in this phase, so
+the 100% Phase 2 audit ran them by hand before counting the win:
+
+- **Differential fuzz** (`scripts/diff-fuzz-tokei.py`): 10,000 mutated
+  inputs (quote/comment/backslash-focused mutations over 400 corpus
+  seeds), pristine vs candidate, batched over 200 process pairs —
+  **0 divergences** after canonicalizing JSON output order.
+- **ASan + LSan** (nightly, patched tree): clean over the full 221 MB
+  corpus and every kept fuzz batch.
+- Mechanical re-check (`scripts/audit-attempt.py`): CI lower bound
+  1.084 ≥ 1.02 bar; patch paths inside the workspace; hypothesis
+  matches the patch; safe code only — correct auto-accept tier.
+
+**Audit finding worth keeping: raw-byte differential comparison
+overcounts.** The first fuzz runs reported 3/200 batch divergences —
+but on different batches across two identical-seed runs, and none
+reproducible. Cause: tokei's parallel directory walker
+(`ignore::WalkBuilder::build_parallel`, its own thread pool,
+unaffected by `RAYON_NUM_THREADS`) makes same-name report ordering
+timing-dependent in both binaries — benign, count-identical, present
+in the pristine baseline. The fuzzer now canonicalizes (sorts) JSON
+before comparing and stores both raw outputs on any divergence.
+Differential gates must compare semantics, not bytes, wherever the
+target itself is legitimately nondeterministic in presentation.
 
 Run 003 exercised the two shipped fixes: the agent **paged through a
 2,400-line file with `read_target_source` windows** (no shell reach this

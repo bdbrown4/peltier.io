@@ -1,0 +1,22 @@
+[agent] Now let me see the outer driver `parse_lines` in `language_type.rs`.
+[agent] The hunk line counts were off. Recomputing and resubmitting:
+[agent] Patch applied — `patch_id: 4e3da7e6bd1c`. Launching the gate+bench pipeline.
+[agent] Still running. Polling again.
+[agent] **Verdict: `accepted`** — ledger row written for `phase2-tokei-001`.
+
+## Attempt summary
+
+| | |
+|---|---|
+| **Run ID** | `phase2-tokei-001` |
+| **Target / hotspot** | tokei — `LanguageType::parse_lines` 55.89% Ir / 62% branches / 44% branch-misses + `__memcmp_avx2_movbe` 9.37% Ir |
+| **Playbook class** | 5 (algorithmic — precomputed lookup table tier) |
+| **Patch** | `4e3da7e6bd1c`: 256-entry first-byte "interesting bytes" table in `SharedMatchers` (superset of all quote/comment token start+end first bytes, plus `\`), gating the five per-byte token matchers in `perform_multi_line_analysis`; `parse_context` still consulted on gated bytes so semantics are exactly preserved |
+| **Verdict** | **accepted** |
+| **Speedup (median)** | 1.1071× (~+10.7%) |
+| **Speedup 95% CI** | **[1.0836, 1.1310]** — CI lower bound +8.4%, clear of the 2% accept threshold |
+
+Measured on the tokei benchmark workload (`tokei --sort code corpora/tokei/input`), interleaved A/B vs pristine-rebuilt baseline, all equivalence gates green (upstream tests, golden replay, diff-fuzz, sanitizers — no FP/concurrency/unsafe surface touched, so no human-review routing triggered).
+
+The hypothesis predicted 5–12% median; the measured +10.7% landed inside that band. Notably, this also satisfies the outstanding Phase 2 exit criterion of at least one auto-accepted win from the unattended loop. One attempt was requested; stopping here.
+[result] turns=21 cost_usd=4.614901

@@ -50,9 +50,12 @@ def read_target_source(target: str, path: str, offset: int = 0, limit: int = 400
 
 @mcp.tool()
 def propose_patch(target: str, diff: str, hypothesis: str) -> str:
-    """Submit a unified git diff (a/ b/ prefixes, paths relative to the target workspace)
-    plus the hypothesis it tests. The harness applies it only after a path-allowlist
-    check. Returns a patch_id, or an error string if refused."""
+    """Submit a unified git diff (a/ b/ prefixes, paths relative to the target
+    workspace, MUST end with a trailing newline) plus the hypothesis it tests.
+    Each proposal is STANDALONE: the workspace is reset to pristine before the
+    diff is applied, so always submit the complete patch — never an increment
+    on top of an earlier proposal. The harness applies it only after a
+    path-allowlist check. Returns a patch_id, or an error string if refused."""
     return harness.propose_patch(target, diff, hypothesis)
 
 

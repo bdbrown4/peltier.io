@@ -10,11 +10,24 @@ use anyhow::{anyhow, ensure, Result};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 use std::io::{BufRead, Write};
+use std::os::unix::net::UnixListener;
 use std::path::{Component, Path};
 use std::process::Command;
+use std::sync::Mutex;
+
+/// Serializes mutating ops (git apply, pending writes) across socket
+/// connections; reads don't need it but the cost is nil at one agent.
+static HANDLE_LOCK: Mutex<()> = Mutex::new(());
 
 fn main() -> Result<()> {
     let root = std::env::current_dir()?.canonicalize()?;
+    let args: Vec<String> = std::env::args().collect();
+    if let Some(i) = args.iter().position(|a| a == "--socket") {
+        let path = args
+            .get(i + 1)
+            .ok_or_else(|| anyhow!("--socket requires a path"))?;
+        return serve_socket(&root, Path::new(path));
+    }
     let stdin = std::io::stdin();
     let mut stdout = std::io::stdout().lock();
     for line in stdin.lock().lines() {
@@ -22,14 +35,74 @@ fn main() -> Result<()> {
         if line.trim().is_empty() {
             continue;
         }
-        let resp = match handle(&root, &line) {
-            Ok(v) => json!({"ok": true, "result": v}),
-            Err(e) => json!({"ok": false, "error": e.to_string()}),
-        };
+        let resp = respond(&root, &line);
         writeln!(stdout, "{resp}")?;
         stdout.flush()?;
     }
     Ok(())
+}
+
+/// SPEC §10 socket mode: harnessd runs as the trusted uid and listens on a
+/// Unix socket; the agent process runs as an unprivileged user whose only
+/// write path into the repo is this daemon. Socket permissions (owner/group/
+/// mode) are set by the supervisor script that starts us.
+fn serve_socket(root: &Path, sock: &Path) -> Result<()> {
+    if let Some(dir) = sock.parent() {
+        std::fs::create_dir_all(dir)?;
+    }
+    let _ = std::fs::remove_file(sock);
+    let listener = UnixListener::bind(sock)?;
+    eprintln!("harnessd listening on {}", sock.display());
+    for conn in listener.incoming() {
+        let stream = match conn {
+            Ok(s) => s,
+            Err(e) => {
+                eprintln!("accept error: {e}");
+                continue;
+            }
+        };
+        let root = root.to_path_buf();
+        std::thread::spawn(move || {
+            let reader = match stream.try_clone() {
+                Ok(s) => std::io::BufReader::new(s),
+                Err(_) => return,
+            };
+            let mut writer = stream;
+            for line in reader.lines() {
+                let Ok(line) = line else { break };
+                if line.trim().is_empty() {
+                    continue;
+                }
+                let resp = respond(&root, &line);
+                if writeln!(writer, "{resp}").is_err() {
+                    break;
+                }
+            }
+        });
+    }
+    Ok(())
+}
+
+fn respond(root: &Path, line: &str) -> Value {
+    // read_verdict long-polls the ledger (read-only) and must not hold
+    // the lock that serializes mutating ops while it sleeps.
+    let is_read_verdict = serde_json::from_str::<Value>(line)
+        .ok()
+        .and_then(|v| {
+            v.get("op")
+                .and_then(Value::as_str)
+                .map(|o| o == "read_verdict")
+        })
+        .unwrap_or(false);
+    let _guard = if is_read_verdict {
+        None
+    } else {
+        Some(HANDLE_LOCK.lock().unwrap_or_else(|p| p.into_inner()))
+    };
+    match handle(root, line) {
+        Ok(v) => json!({"ok": true, "result": v}),
+        Err(e) => json!({"ok": false, "error": e.to_string()}),
+    }
 }
 
 /// Single-quote a string for safe embedding in a generated shell script.
@@ -84,7 +157,14 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
             // Read-only surface over the append-only DB.
             let ledger = ledger::Ledger::open(&root.join("results/ledger.sqlite"))?;
             let classes = ledger.attempted_classes(t)?;
-            Ok(json!({"attempted_playbook_classes": classes, "total_attempts": ledger.count()?}))
+            let history = ledger.attempt_history(t)?;
+            Ok(json!({
+                "attempted_playbook_classes": classes,
+                "attempts": history,
+                "total_attempts": ledger.count()?,
+                "note": "a class may be re-entered with a materially NEW hypothesis; \
+                         never duplicate a (hotspot, class, hypothesis) that has a verdict",
+            }))
         }
         "read_playbook" => {
             let class = match req.get("class") {
@@ -142,6 +222,13 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
             let diff = field(&req, "diff")?;
             let hypothesis = field(&req, "hypothesis")?;
             check_target(t)?;
+            // git rejects a diff without a final newline with an opaque
+            // "corrupt patch" — say it plainly (phase2-comrak-004 burned
+            // several turns rediscovering this).
+            ensure!(
+                diff.ends_with('\n'),
+                "diff must end with a trailing newline (git would report 'corrupt patch' at EOF)"
+            );
             // Allowlist: every path named by the diff must be a safe
             // relative path (the git -C below roots them in the target
             // workspace; nothing outside it is reachable).
@@ -158,18 +245,51 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
                 );
             }
             let ws = root.join(format!("targets/{t}/workspace"));
-            let mut check = Command::new("git")
-                .args(["-C", ws.to_str().unwrap(), "apply", "--check", "-"])
-                .stdin(std::process::Stdio::piped())
-                .spawn()?;
-            check.stdin.take().unwrap().write_all(diff.as_bytes())?;
-            ensure!(check.wait()?.success(), "diff does not apply cleanly");
-            let mut apply = Command::new("git")
-                .args(["-C", ws.to_str().unwrap(), "apply", "-"])
-                .stdin(std::process::Stdio::piped())
-                .spawn()?;
-            apply.stdin.take().unwrap().write_all(diff.as_bytes())?;
-            ensure!(apply.wait()?.success(), "git apply failed");
+            // Every proposal stands alone: reset the workspace to HEAD
+            // first so probe/iteration patches cannot accumulate into a
+            // tested tree the ledger's patch field doesn't describe
+            // (phase2-comrak-004 audit finding).
+            ensure!(
+                Command::new("git")
+                    .args(["-C", ws.to_str().unwrap(), "checkout", "--", "."])
+                    .status()?
+                    .success(),
+                "workspace reset failed"
+            );
+            ensure!(
+                Command::new("git")
+                    .args(["-C", ws.to_str().unwrap(), "clean", "-fdq"])
+                    .status()?
+                    .success(),
+                "workspace clean failed"
+            );
+            let run_git_apply = |check: bool| -> Result<std::process::Output> {
+                let mut args = vec!["-C", ws.to_str().unwrap(), "apply"];
+                if check {
+                    args.push("--check");
+                }
+                args.push("-");
+                let mut child = Command::new("git")
+                    .args(&args)
+                    .stdin(std::process::Stdio::piped())
+                    .stderr(std::process::Stdio::piped())
+                    .spawn()?;
+                child.stdin.take().unwrap().write_all(diff.as_bytes())?;
+                Ok(child.wait_with_output()?)
+            };
+            let checked = run_git_apply(true)?;
+            ensure!(
+                checked.status.success(),
+                "diff does not apply cleanly against the pristine workspace \
+                 (proposals are standalone; prior proposals were reset): {}",
+                String::from_utf8_lossy(&checked.stderr).trim()
+            );
+            let applied = run_git_apply(false)?;
+            ensure!(
+                applied.status.success(),
+                "git apply failed: {}",
+                String::from_utf8_lossy(&applied.stderr).trim()
+            );
             let patch_id = format!("{:x}", Sha256::digest(diff.as_bytes()))[..12].to_string();
             let pending = root.join("results/pending");
             std::fs::create_dir_all(&pending)?;
@@ -244,11 +364,21 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
         }
         "read_verdict" => {
             let run_id = field(&req, "run_id")?;
-            let ledger = ledger::Ledger::open(&root.join("results/ledger.sqlite"))?;
-            match ledger.verdict_summary(run_id)? {
-                Some(v) => Ok(v),
-                None => Ok(json!({"status": "running",
-                                   "note": "no ledger row yet; the pipeline is still building/benching"})),
+            // Long-poll: the pipeline runs for minutes and the MCP transport
+            // caps a tool call at 60s. Waiting ~45s server-side per poll cuts
+            // the agent's turn burn ~15x versus instant "running" replies.
+            let deadline = std::time::Instant::now() + std::time::Duration::from_secs(45);
+            loop {
+                let ledger = ledger::Ledger::open(&root.join("results/ledger.sqlite"))?;
+                if let Some(v) = ledger.verdict_summary(run_id)? {
+                    return Ok(v);
+                }
+                drop(ledger);
+                if std::time::Instant::now() >= deadline {
+                    return Ok(json!({"status": "running",
+                                     "note": "no ledger row yet; the pipeline is still building/benching — poll again"}));
+                }
+                std::thread::sleep(std::time::Duration::from_secs(3));
             }
         }
         other => Err(anyhow!(

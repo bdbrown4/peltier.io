@@ -36,15 +36,14 @@ HARNESS_TOOLS = [
 ]
 
 # Built-in tools we deny at the SDK layer. This is DEFENSE IN DEPTH, not the
-# trust boundary. SPEC §10's real boundary is OS-level process/user isolation:
-# harnessd runs as a separate process the agent can't bypass, target code runs
-# in a no-net container. In THIS dev container the nested agent runs as root
-# under a parent Claude Code session, so neither --dangerously-skip-permissions
-# nor a can_use_tool callback reliably gates built-ins (settings inherited from
-# the parent session shadow them). We enumerate what we can; production runs the
-# agent process without host-shell capability at all. What holds regardless:
-# propose_patch is the only harness-mediated write path (path-allowlist + git
-# apply), and the ledger is append-only (mutation-refusing triggers).
+# trust boundary. SPEC §10's real boundary is OS-level isolation, shipped in
+# scripts/agent-isolated.sh: this whole process tree runs either inside a
+# mount namespace with the repo read-only and CAP_SYS_ADMIN dropped, or as
+# the unprivileged hpagent user — verified by `just isolation-check`. Even
+# if the nested CLI reaches a shell despite this list (settings inherited
+# from a parent session can shadow SDK gating), repo writes fail at the OS.
+# What holds regardless: propose_patch is the only harness-mediated write
+# path (path-allowlist + git apply), and the ledger is append-only.
 BUILTIN_TOOLS_DENIED = [
     "Bash", "Read", "Write", "Edit", "Glob", "Grep",
     "WebSearch", "WebFetch", "Task", "TodoWrite",
@@ -76,13 +75,20 @@ async def run_attempt(target: str, run_id: str, max_turns: int, repo_root: str) 
     task = (
         f"Perform ONE optimization attempt on target '{target}'. You have NO shell, file, or "
         f"web tools — only the seven mcp__harness__ tools. Do not attempt any other tool.\n"
-        f"1. read_ledger to see attempted classes; read_profile for hotspots.\n"
-        f"2. Pick the cheapest UNTRIED playbook class whose preconditions the profile "
-        f"satisfies; read_playbook for it.\n"
+        f"1. read_ledger for the attempt history (class, hotspot, hypothesis, verdict per "
+        f"prior attempt); read_profile for hotspots (includes cache-miss and branch-miss "
+        f"columns from cache simulation).\n"
+        f"2. Pick the cheapest playbook class whose preconditions the profile satisfies AND "
+        f"whose (hotspot, class, hypothesis) would be materially NEW — an attempted class "
+        f"may be re-entered with a different hotspot or a genuinely different mechanism, "
+        f"but never re-submit a hypothesis equivalent to one already in the ledger; "
+        f"read_playbook for it.\n"
         f"3. Read the relevant source with read_target_source — for large files pass "
         f"offset/limit and page through in windows (do NOT attempt any shell). State your "
         f"hypothesis, then propose_patch (unified diff, a/ b/ prefixes, paths relative to the "
-        f"target workspace root).\n"
+        f"target workspace root, trailing newline required). Each proposal is STANDALONE — "
+        f"the workspace resets to pristine before every apply, so always submit the complete "
+        f"patch, never an increment on a prior proposal.\n"
         f"4. run_verdict with run_id '{run_id}', the class number, and the hotspot string. "
         f"It launches a multi-minute pipeline and returns immediately.\n"
         f"5. Poll read_verdict('{run_id}') until it returns a verdict (not a 'running' status). "

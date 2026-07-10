@@ -11,7 +11,38 @@ repo's CI cannot provide. Status by requirement:
 | Environment noise measured | ✅ (measured, likely fails bars) | `runner-calibration` CI job, artifact per run |
 | Profiling | ⚠️ software `cpu-clock` only (VM PMU usually absent) | `perf-probe` CI job reports what works |
 | Pinned cores, governor, SMT/turbo control | ❌ shared VM | **bench-metal box (below)** |
-| Separate-uid read-only trust layer | ❌ | bench-metal box setup |
+| Separate-uid read-only trust layer | ✅ shipped | `scripts/agent-isolated.sh` + `just isolation-check` (below) |
+
+## OS-level agent isolation (SPEC §10) — shipped
+
+`scripts/agent-isolated.sh` launches one unattended attempt with the
+agent process tree behind an OS boundary; `just isolation-check`
+verifies the boundary from the agent's side (19 negative/positive
+checks, both modes). harnessd runs OUTSIDE the boundary as the trusted
+uid, serving its seven ops on a Unix socket (`harnessd --socket`) — the
+agent's only write path into the repo.
+
+Two modes (`HOTPATH_ISOLATION`):
+
+- **`mountns` (default in this container).** The agent tree runs uid 0
+  inside a private mount namespace with the repo bind-mounted
+  read-only, `CAP_SYS_ADMIN`/`CAP_SYS_PTRACE` dropped from the bounding
+  set. Verified refused: repo writes (EROFS), forged ledger INSERT,
+  trust-binary replacement, `mount -o remount,rw`, and userns re-entry
+  to undo the mount. Chosen because the nested CLI's auth is bound to
+  the parent session's uid — no credentials are copied anywhere.
+- **`user` (bench-metal shape).** The agent runs as unprivileged
+  `hpagent`; the repo is root-owned with no world-writable paths (the
+  launcher refuses to start otherwise). Verified refused: all of the
+  above plus running the `verdict` binary directly. Requires the agent
+  user to bring its own API credentials; a parent session's root-owned
+  auth is deliberately not copied across the boundary.
+
+Residual (both modes, this container): the agent tree can still read
+the repo (by design — it needs source), reach the network through the
+container's egress proxy, and signal same-uid processes in `mountns`
+mode. The bench-metal `user` mode plus no-net target containers remains
+the production shape.
 
 ## The bench-metal box (human setup, ~15 min + account)
 
