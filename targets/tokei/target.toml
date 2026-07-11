@@ -9,8 +9,10 @@ commit = "fa44e5194060305576514d59b850353643afbfc8"   # v14.0.0
 license = "MIT OR Apache-2.0"
 
 [build]
-baseline = "cargo build --release --manifest-path targets/tokei/workspace/Cargo.toml"
-binary = "targets/tokei/workspace/target/release/tokei"
+baseline = "CARGO_TARGET_DIR={out} cargo build --release --manifest-path targets/tokei/workspace/Cargo.toml"
+binary = "{out}/release/tokei"
+sanitizer = "CARGO_TARGET_DIR={out} RUSTFLAGS='-Zsanitizer=address' cargo +nightly build --target x86_64-unknown-linux-gnu --manifest-path targets/tokei/workspace/Cargo.toml"
+sanitizer_binary = "{out}/x86_64-unknown-linux-gnu/debug/tokei"
 
 [bench]
 # Single rayon thread: measurement first (SPEC conventions); the

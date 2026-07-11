@@ -18,8 +18,10 @@ license = "BSD-2-Clause"
 #   git clone <submodule repo> workspace/vendor/progit && git -C ... checkout <commit>
 
 [build]
-baseline = "cargo build --release --manifest-path targets/comrak/workspace/Cargo.toml"
-binary = "targets/comrak/workspace/target/release/comrak"
+baseline = "CARGO_TARGET_DIR={out} cargo build --release --manifest-path targets/comrak/workspace/Cargo.toml"
+binary = "{out}/release/comrak"
+sanitizer = "CARGO_TARGET_DIR={out} RUSTFLAGS='-Zsanitizer=address' cargo +nightly build --target x86_64-unknown-linux-gnu --manifest-path targets/comrak/workspace/Cargo.toml"
+sanitizer_binary = "{out}/x86_64-unknown-linux-gnu/debug/comrak"
 
 [bench]
 # Upstream workload (benches/bench.sh): full Pro Git book through the

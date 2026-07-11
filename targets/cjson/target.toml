@@ -1,0 +1,44 @@
+# cJSON — ultralightweight JSON parser/printer (C)
+# Selection vs SPEC §6: CPU-bound parse+serialize; hermetic Unity/CTest
+# suite vendored in-tree; deterministic scripted workload; MIT license;
+# active but deliberately "simple", no dedicated perf team — the richer
+# legacy-C hunting ground Phase 3 calls for.
+
+[source]
+repo = "https://github.com/DaveGamble/cJSON.git"
+commit = "c859b25da02955fef659d658b8f324b5cde87be3"   # v1.7.19
+license = "MIT"
+
+[fetch]
+# targets/*/workspace is gitignored; reproduce it with:
+#   git clone https://github.com/DaveGamble/cJSON.git workspace
+#   git -C workspace checkout v1.7.19
+# The bench/golden driver targets/cjson/harness.c and the Unity suite in
+# workspace/tests/ (unity vendored in-tree) are hermetic — no submodules.
+
+[build]
+# Compile the trust-layer harness against the (patched) workspace cJSON.c.
+# {out} is the isolation dir; the agent may patch only workspace/*, never
+# harness.c, so the measurement rig is fixed across baseline/candidate.
+baseline = "mkdir -p {out} && clang -O2 -DNDEBUG -I targets/cjson/workspace -o {out}/cjson-bench targets/cjson/harness.c targets/cjson/workspace/cJSON.c"
+binary = "{out}/cjson-bench"
+# ASan + UBSan (C/C++ analogue of the Rust nightly ASan path); run on
+# every would-be accept (SPEC §8), halting on any leak/UB.
+sanitizer = "mkdir -p {out} && clang -O1 -g -fsanitize=address,undefined -fno-sanitize-recover=all -I targets/cjson/workspace -o {out}/cjson-asan targets/cjson/harness.c targets/cjson/workspace/cJSON.c"
+sanitizer_binary = "{out}/cjson-asan"
+
+[bench]
+command = "{binary} corpora/cjson/input/big.json 2 > /dev/null"
+workload = "5.6 MB synthetic JSON (20k records: nested objects/arrays, escaped/unicode strings, ints, dense floats), parsed+serialized 2x, single thread"
+
+[gates]
+# Upstream Unity suite via CTest — parse_number/string/array/object,
+# print_*, misc_tests, compare/minify. Tests the PATCHED cJSON.c.
+tests = "cmake -S targets/cjson/workspace -B targets/cjson/testbuild -DENABLE_CJSON_TEST=On -DCMAKE_BUILD_TYPE=Debug >/dev/null 2>&1 && cmake --build targets/cjson/testbuild -j >/dev/null 2>&1 && ctest --test-dir targets/cjson/testbuild --output-on-failure"
+# Golden: full re-serialization + checksum of the corpus, byte-hashed.
+golden = "{binary} corpora/cjson/input/big.json 1"
+
+[corpus]
+manifest = "corpora/cjson/MANIFEST.sha256"
+root = "corpora/cjson/input"
+golden_sha256 = "corpora/cjson/GOLDEN.sha256"
