@@ -353,10 +353,13 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
             let cand_dir = format!("targets/{t}/candidate-{patch_id}");
             let cand_bin = format!("{cand_dir}/release/{bin}");
             let log = format!("results/pending/{run_id}.log");
+            // On any failure (candidate build, gates crash) the trap line
+            // marks the log so read_verdict can report "failed" instead of
+            // leaving the agent polling a verdict that will never exist.
             let script = format!(
-                "set -e\nCARGO_TARGET_DIR={cand} {build}\ncargo run -q -p verdict -- {tgt} \
+                "{{ set -e\nCARGO_TARGET_DIR={cand} {build}\ncargo run -q -p verdict -- {tgt} \
                  --rebuild-baseline --candidate-bin {cbin} --run-id {rid} --playbook-class {cls} \
-                 --hypothesis {hyp} --hotspot {hs} --patch-file {pf}\n",
+                 --hypothesis {hyp} --hotspot {hs} --patch-file {pf}\n}} || echo HOTPATH-PIPELINE-FAILED\n",
                 cand = shq(&cand_dir),
                 build = spec.build.baseline,
                 tgt = shq(t),
@@ -392,6 +395,34 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
                     return Ok(v);
                 }
                 drop(ledger);
+                // A pipeline that died before the verdict binary ran never
+                // writes a row; its trap line marks the log instead.
+                if run_id
+                    .chars()
+                    .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+                {
+                    let log = root.join(format!("results/pending/{run_id}.log"));
+                    if let Ok(text) = std::fs::read_to_string(&log) {
+                        if text.contains("HOTPATH-PIPELINE-FAILED") {
+                            let tail: String = text
+                                .lines()
+                                .rev()
+                                .take(12)
+                                .collect::<Vec<_>>()
+                                .into_iter()
+                                .rev()
+                                .collect::<Vec<_>>()
+                                .join("\n");
+                            return Ok(json!({
+                                "status": "failed",
+                                "note": "the pipeline died before producing a verdict (usually a \
+                                         candidate build failure); no ledger row was or will be \
+                                         written for this run_id. Failure log tail follows.",
+                                "log_tail": tail,
+                            }));
+                        }
+                    }
+                }
                 if std::time::Instant::now() >= deadline {
                     return Ok(json!({"status": "running",
                                      "note": "no ledger row yet; the pipeline is still building/benching — poll again"}));
