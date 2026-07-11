@@ -75,7 +75,9 @@ def main() -> int:
     for line in patch.splitlines():
         if line.startswith(("--- ", "+++ ")):
             p = line[4:].strip()
-            if p.startswith("/") or "../" in p:
+            # /dev/null is git's marker for new/deleted files — the one
+            # absolute path the harness allowlist also accepts.
+            if (p.startswith("/") and p != "/dev/null") or "../" in p:
                 problems.append(f"patch path escapes workspace: {p}")
 
     print("\npatch:")

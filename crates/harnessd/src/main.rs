@@ -189,8 +189,22 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
             let p = field(&req, "path")?;
             check_target(t)?;
             check_rel_path(p)?;
-            let full = root.join(format!("targets/{t}/workspace")).join(p);
-            let text = std::fs::read_to_string(full)?;
+            // Serve the PRISTINE (HEAD) content, not the working tree:
+            // propose_patch applies each proposal against a reset
+            // workspace, so reads must show the same base the diff needs
+            // — otherwise reads after a proposal show the patched tree
+            // and the next diff's context lines drift (phase2-comrak-005
+            // burned turns rediscovering this).
+            let ws = root.join(format!("targets/{t}/workspace"));
+            let shown = Command::new("git")
+                .args(["-C", ws.to_str().unwrap(), "show", &format!("HEAD:{p}")])
+                .output()?;
+            ensure!(
+                shown.status.success(),
+                "cannot read {p} at HEAD: {}",
+                String::from_utf8_lossy(&shown.stderr).trim()
+            );
+            let text = String::from_utf8_lossy(&shown.stdout).into_owned();
             // Optional line window so large source files (100KB+) can be read in
             // chunks instead of overflowing one response — otherwise the agent
             // is tempted to reach for a shell it must not have.
@@ -231,7 +245,9 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
             );
             // Allowlist: every path named by the diff must be a safe
             // relative path (the git -C below roots them in the target
-            // workspace; nothing outside it is reachable).
+            // workspace; nothing outside it is reachable). `/dev/null`
+            // is the one absolute path git legitimately emits, for
+            // new/deleted files.
             for l in diff.lines() {
                 if let Some(p) = l
                     .strip_prefix("--- a/")
@@ -240,8 +256,10 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
                     check_rel_path(p.trim())?;
                 }
                 ensure!(
-                    !l.starts_with("--- /") && !l.starts_with("+++ /"),
-                    "absolute diff paths forbidden"
+                    (!l.starts_with("--- /") && !l.starts_with("+++ /"))
+                        || l == "--- /dev/null"
+                        || l == "+++ /dev/null",
+                    "absolute diff paths forbidden (only /dev/null is allowed, for new/deleted files)"
                 );
             }
             let ws = root.join(format!("targets/{t}/workspace"));
@@ -335,10 +353,13 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
             let cand_dir = format!("targets/{t}/candidate-{patch_id}");
             let cand_bin = format!("{cand_dir}/release/{bin}");
             let log = format!("results/pending/{run_id}.log");
+            // On any failure (candidate build, gates crash) the trap line
+            // marks the log so read_verdict can report "failed" instead of
+            // leaving the agent polling a verdict that will never exist.
             let script = format!(
-                "set -e\nCARGO_TARGET_DIR={cand} {build}\ncargo run -q -p verdict -- {tgt} \
+                "{{ set -e\nCARGO_TARGET_DIR={cand} {build}\ncargo run -q -p verdict -- {tgt} \
                  --rebuild-baseline --candidate-bin {cbin} --run-id {rid} --playbook-class {cls} \
-                 --hypothesis {hyp} --hotspot {hs} --patch-file {pf}\n",
+                 --hypothesis {hyp} --hotspot {hs} --patch-file {pf}\n}} || echo HOTPATH-PIPELINE-FAILED\n",
                 cand = shq(&cand_dir),
                 build = spec.build.baseline,
                 tgt = shq(t),
@@ -374,6 +395,34 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
                     return Ok(v);
                 }
                 drop(ledger);
+                // A pipeline that died before the verdict binary ran never
+                // writes a row; its trap line marks the log instead.
+                if run_id
+                    .chars()
+                    .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+                {
+                    let log = root.join(format!("results/pending/{run_id}.log"));
+                    if let Ok(text) = std::fs::read_to_string(&log) {
+                        if text.contains("HOTPATH-PIPELINE-FAILED") {
+                            let tail: String = text
+                                .lines()
+                                .rev()
+                                .take(12)
+                                .collect::<Vec<_>>()
+                                .into_iter()
+                                .rev()
+                                .collect::<Vec<_>>()
+                                .join("\n");
+                            return Ok(json!({
+                                "status": "failed",
+                                "note": "the pipeline died before producing a verdict (usually a \
+                                         candidate build failure); no ledger row was or will be \
+                                         written for this run_id. Failure log tail follows.",
+                                "log_tail": tail,
+                            }));
+                        }
+                    }
+                }
                 if std::time::Instant::now() >= deadline {
                     return Ok(json!({"status": "running",
                                      "note": "no ledger row yet; the pipeline is still building/benching — poll again"}));

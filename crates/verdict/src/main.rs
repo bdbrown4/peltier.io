@@ -111,6 +111,59 @@ fn rebuild_pristine_baseline(
     Ok(baseline)
 }
 
+/// SPEC §8: an accept is final only if ASan+LSan are clean on the patched
+/// tree over the pinned workload. Stop-the-line fix after phase2-comrak-010:
+/// the pipeline auto-accepted an LSan-flagged teardown patch (sanitizers
+/// were per-attempt manual) and the human audit had to overturn it — the
+/// accept path now runs the check itself and caps flagged wins at
+/// needs-human-review. Rejections skip it: they ship nothing.
+fn sanitizer_check(root: &std::path::Path, target: &str, spec: &TargetSpec) -> Result<bool> {
+    let ws = root.join(format!("targets/{target}/workspace"));
+    let asan_dir = root.join(format!("targets/{target}/asan"));
+    println!("sanitizers: ASan+LSan build (nightly) of the patched tree…");
+    let status = std::process::Command::new("cargo")
+        .args([
+            "+nightly",
+            "build",
+            "-q",
+            "--target",
+            "x86_64-unknown-linux-gnu",
+        ])
+        .env("RUSTFLAGS", "-Zsanitizer=address")
+        .env("CARGO_TARGET_DIR", &asan_dir)
+        .current_dir(&ws)
+        .status()?;
+    anyhow::ensure!(status.success(), "sanitizer build failed");
+    let bin_name = std::path::Path::new(&spec.build.binary)
+        .file_name()
+        .and_then(|n| n.to_str())
+        .ok_or_else(|| anyhow::anyhow!("bad build.binary path"))?;
+    let asan_bin = asan_dir.join(format!("x86_64-unknown-linux-gnu/debug/{bin_name}"));
+    let cmd = spec
+        .bench
+        .command
+        .replace("{binary}", asan_bin.to_str().unwrap());
+    let out = std::process::Command::new("sh")
+        .arg("-c")
+        .arg(&cmd)
+        .env("ASAN_OPTIONS", "detect_leaks=1")
+        .current_dir(root)
+        .output()?;
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    let clean = out.status.success() && !stderr.contains("ERROR:");
+    if clean {
+        println!("sanitizers: clean");
+    } else {
+        let lines: Vec<&str> = stderr.lines().filter(|l| !l.is_empty()).collect();
+        let start = lines.len().saturating_sub(8);
+        println!("sanitizers: FLAGGED (rc={:?})", out.status.code());
+        for l in &lines[start..] {
+            println!("  {l}");
+        }
+    }
+    Ok(clean)
+}
+
 fn now_utc() -> String {
     let out = std::process::Command::new("date")
         .args(["-u", "+%Y-%m-%dT%H:%M:%SZ"])
@@ -146,7 +199,7 @@ fn main() -> Result<()> {
             GateOutcome::Skipped { reason } => println!("{layer:?}: skipped — {reason}"),
         }
     }
-    let gate_results = GateResults {
+    let mut gate_results = GateResults {
         upstream_tests: matches!(gates[0].1, GateOutcome::Passed),
         golden_replay: matches!(gates[1].1, GateOutcome::Passed),
         fuzz_iters: 0,
@@ -165,79 +218,100 @@ fn main() -> Result<()> {
         }
     };
 
-    let (verdict, bench) =
-        if !all_passed(&gates) {
-            println!("verdict: rejected-gate (bench skipped)");
-            (Verdict::RejectedGate, None)
-        } else {
-            println!(
-                "bench: {} measured + {} warm-up runs/side, interleaved, pin='{}'",
-                cfg.runs_per_side, cfg.warmup_runs, pin
-            );
-            let samples = exec::run_interleaved(
-                &wrap(&baseline_bin),
-                &wrap(&cli.candidate_bin),
-                cfg.runs_per_side,
-                cfg.warmup_runs,
-                0.0,
-            )?;
-            let ratio = stats::bootstrap_ratio_ci(
-                &samples.baseline_s,
-                &samples.candidate_s,
-                cfg.bootstrap_iters,
-                cfg.confidence,
-                cfg.bootstrap_seed,
-            );
-            let (bm, blo, bhi) = stats::bootstrap_median_ci(
-                &samples.baseline_s,
-                cfg.bootstrap_iters,
-                cfg.confidence,
-                cfg.bootstrap_seed,
-            );
-            let (cm, clo, chi) = stats::bootstrap_median_ci(
-                &samples.candidate_s,
-                cfg.bootstrap_iters,
-                cfg.confidence,
-                cfg.bootstrap_seed,
-            );
-            println!(
-            "speedup (baseline/candidate): median {:.4}, {:.0}% CI [{:.4}, {:.4}] | workload: {}",
-            ratio.median, cfg.confidence * 100.0, ratio.lo, ratio.hi, spec.bench.workload
+    let (verdict, bench) = if !all_passed(&gates) {
+        println!("verdict: rejected-gate (bench skipped)");
+        (Verdict::RejectedGate, None)
+    } else {
+        println!(
+            "bench: {} measured + {} warm-up runs/side, interleaved, pin='{}'",
+            cfg.runs_per_side, cfg.warmup_runs, pin
         );
-            let mut v = decide(ratio, cfg.threshold);
-            if cli.needs_human_review && v == Verdict::Accepted {
+        let samples = exec::run_interleaved(
+            &wrap(&baseline_bin),
+            &wrap(&cli.candidate_bin),
+            cfg.runs_per_side,
+            cfg.warmup_runs,
+            0.0,
+        )?;
+        let ratio = stats::bootstrap_ratio_ci(
+            &samples.baseline_s,
+            &samples.candidate_s,
+            cfg.bootstrap_iters,
+            cfg.confidence,
+            cfg.bootstrap_seed,
+        );
+        let (bm, blo, bhi) = stats::bootstrap_median_ci(
+            &samples.baseline_s,
+            cfg.bootstrap_iters,
+            cfg.confidence,
+            cfg.bootstrap_seed,
+        );
+        let (cm, clo, chi) = stats::bootstrap_median_ci(
+            &samples.candidate_s,
+            cfg.bootstrap_iters,
+            cfg.confidence,
+            cfg.bootstrap_seed,
+        );
+        println!(
+            "speedup (baseline/candidate): median {:.4}, {:.0}% CI [{:.4}, {:.4}] | workload: {}",
+            ratio.median,
+            cfg.confidence * 100.0,
+            ratio.lo,
+            ratio.hi,
+            spec.bench.workload
+        );
+        let mut v = decide(ratio, cfg.threshold);
+        if cli.needs_human_review && v == Verdict::Accepted {
+            v = Verdict::NeedsHumanReview;
+        }
+        if v == Verdict::Accepted {
+            let clean = sanitizer_check(&root, &cli.target, &spec)?;
+            gate_results.sanitizers_clean = clean;
+            if !clean {
+                println!("verdict: sanitizer flag caps the accept at needs-human-review (SPEC §8)");
                 v = Verdict::NeedsHumanReview;
             }
-            let fp = EnvFingerprint::collect(pin, "system-default");
-            (
-                v,
-                Some(BenchEvidence {
-                    baseline_median: bm,
-                    baseline_ci: (blo, bhi),
-                    candidate_median: cm,
-                    candidate_ci: (clo, chi),
-                    speedup_median: ratio.median,
-                    speedup_ci: (ratio.lo, ratio.hi),
-                    env_fingerprint: serde_json::json!({
-                        "fingerprint": fp,
-                        "workload": spec.bench.workload,
-                        "target_commit": spec.source.commit,
-                        "gates_detail": "fuzz/sanitizers per-attempt manual in Phase 1",
-                    }),
+        }
+        let fp = EnvFingerprint::collect(pin, "system-default");
+        (
+            v,
+            Some(BenchEvidence {
+                baseline_median: bm,
+                baseline_ci: (blo, bhi),
+                candidate_median: cm,
+                candidate_ci: (clo, chi),
+                speedup_median: ratio.median,
+                speedup_ci: (ratio.lo, ratio.hi),
+                env_fingerprint: serde_json::json!({
+                    "fingerprint": fp,
+                    "workload": spec.bench.workload,
+                    "target_commit": spec.source.commit,
+                    "gates_detail": "diff-fuzz per-attempt manual; ASan+LSan enforced on the accept path",
                 }),
-            )
-        };
+            }),
+        )
+    };
 
     let patch = match &cli.patch_file {
         Some(p) => std::fs::read_to_string(p)?,
         None => "(no source patch)".into(),
     };
+    // Derive the phase from the run_id namespace (phaseN-*) so the column
+    // matches the run_id prefix; the historical hardcoded `1` left every
+    // verdict-written row tagged phase 1 regardless of namespace (found in
+    // the phase2-final-audit sweep). Falls back to 1 for un-prefixed ids.
+    let phase = cli
+        .run_id
+        .strip_prefix("phase")
+        .and_then(|r| r.split('-').next())
+        .and_then(|n| n.parse::<u8>().ok())
+        .unwrap_or(1);
     let attempt = Attempt {
         run_id: cli.run_id.clone(),
         timestamp: now_utc(),
         target: cli.target.clone(),
         target_commit: spec.source.commit.clone(),
-        phase: 1,
+        phase,
         hotspot: cli.hotspot,
         playbook_class: cli.playbook_class,
         hypothesis: cli.hypothesis,
