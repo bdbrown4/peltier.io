@@ -239,3 +239,11 @@ targets/*/baseline/
 # Phase 2 agent artifacts (transcripts kept; pending logs are scratch)
 results/pending/
 agent/**/__pycache__/
+
+# cjson corpus is regenerable via gen-corpus.sh (deterministic)
+corpora/cjson/input/
+targets/cjson/testbuild/
+results/*/callgrind-cache.out
+targets/cjson/candidate-*/
+targets/cjson/cand-*/
+targets/cjson/asan*/

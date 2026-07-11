@@ -33,10 +33,31 @@ pub struct Source {
 
 #[derive(Debug, Deserialize)]
 pub struct Build {
-    /// Baseline build command, run from repo root.
+    /// Build command, run from repo root. `{out}` is substituted with an
+    /// isolation directory the harness provides (per-baseline, per-
+    /// candidate, per-sanitizer) — the command MUST place all artifacts
+    /// under it. A cargo target sets `CARGO_TARGET_DIR={out}`; a make
+    /// target builds and copies the binary to `{out}`. Language-agnostic:
+    /// nothing here assumes cargo.
     pub baseline: String,
-    /// Built binary path, relative to repo root.
+    /// Built binary path with `{out}` substituted — where `baseline`
+    /// leaves the binary given an isolation dir.
     pub binary: String,
+    /// ASan+LSan (or ASan+UBSan for C/C++) build command; `{out}`
+    /// substituted. Run on every would-be accept (SPEC §8). If absent,
+    /// an accept cannot be sanitizer-verified and is capped at
+    /// needs-human-review.
+    #[serde(default)]
+    pub sanitizer: Option<String>,
+    /// Sanitizer binary path with `{out}` substituted.
+    #[serde(default)]
+    pub sanitizer_binary: Option<String>,
+}
+
+/// Substitute the `{out}` isolation-dir placeholder in a build command or
+/// binary-path template.
+pub fn subst_out(template: &str, out_dir: &str) -> String {
+    template.replace("{out}", out_dir)
 }
 
 #[derive(Debug, Deserialize)]

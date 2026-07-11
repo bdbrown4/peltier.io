@@ -25,18 +25,24 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
+      - name: Toolchains for C/C++ targets
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq clang cmake
       - name: Fetch pinned targets
         run: |
           sh targets/fetch.sh comrak
           sh targets/fetch.sh tokei
+          sh targets/fetch.sh cjson
       - name: Generate + verify pinned corpora
         run: |
           sh corpora/comrak/gen-corpus.sh
           sh corpora/tokei/gen-corpus.sh
+          sh corpora/cjson/gen-corpus.sh
       - name: Build tokei baseline
         run: cargo build --release --manifest-path targets/tokei/workspace/Cargo.toml
-      - name: Gates (corpus pin -> upstream tests -> golden replay)
+      - name: Gates — tokei (Rust; corpus pin -> upstream tests -> golden replay)
         run: cargo run -p diff-test -- tokei
+      - name: Gates — cjson (C; clang build -> Unity/CTest -> golden replay)
+        run: cargo run -p diff-test -- cjson
       - name: Bench workload inside no-network container
         run: |
           docker run --rm --network=none \

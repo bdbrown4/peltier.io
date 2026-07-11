@@ -79,14 +79,14 @@ fn rebuild_pristine_baseline(
             "git stash failed"
         );
     }
+    let out_dir = root
+        .join(format!("targets/{target}/baseline"))
+        .to_string_lossy()
+        .into_owned();
     let build = std::process::Command::new("sh")
         .arg("-c")
-        .arg(&spec.build.baseline)
+        .arg(diff_test::target::subst_out(&spec.build.baseline, &out_dir))
         .current_dir(root)
-        .env(
-            "CARGO_TARGET_DIR",
-            root.join(format!("targets/{target}/baseline")),
-        )
         .status();
     if dirty {
         anyhow::ensure!(
@@ -98,13 +98,9 @@ fn rebuild_pristine_baseline(
         );
     }
     anyhow::ensure!(build?.success(), "baseline build failed");
-    let bin_name = std::path::Path::new(&spec.build.binary)
-        .file_name()
-        .and_then(|n| n.to_str())
-        .ok_or_else(|| anyhow::anyhow!("bad build.binary path"))?;
-    let baseline = format!("targets/{target}/baseline/release/{bin_name}");
+    let baseline = diff_test::target::subst_out(&spec.build.binary, &out_dir);
     anyhow::ensure!(
-        root.join(&baseline).exists(),
+        std::path::Path::new(&baseline).exists(),
         "baseline binary missing: {baseline}"
     );
     println!("baseline rebuilt from pristine checkout: {baseline}");
@@ -117,40 +113,51 @@ fn rebuild_pristine_baseline(
 /// were per-attempt manual) and the human audit had to overturn it — the
 /// accept path now runs the check itself and caps flagged wins at
 /// needs-human-review. Rejections skip it: they ship nothing.
-fn sanitizer_check(root: &std::path::Path, target: &str, spec: &TargetSpec) -> Result<bool> {
-    let ws = root.join(format!("targets/{target}/workspace"));
-    let asan_dir = root.join(format!("targets/{target}/asan"));
-    println!("sanitizers: ASan+LSan build (nightly) of the patched tree…");
-    let status = std::process::Command::new("cargo")
-        .args([
-            "+nightly",
-            "build",
-            "-q",
-            "--target",
-            "x86_64-unknown-linux-gnu",
-        ])
-        .env("RUSTFLAGS", "-Zsanitizer=address")
-        .env("CARGO_TARGET_DIR", &asan_dir)
-        .current_dir(&ws)
+/// Returns Some(clean) if the sanitizer gate ran, or None if the target
+/// declares no sanitizer build (an accept then cannot be verified and is
+/// capped at needs-human-review by the caller).
+fn sanitizer_check(
+    root: &std::path::Path,
+    target: &str,
+    spec: &TargetSpec,
+) -> Result<Option<bool>> {
+    let (Some(build_tpl), Some(bin_tpl)) = (&spec.build.sanitizer, &spec.build.sanitizer_binary)
+    else {
+        println!("sanitizers: target declares no sanitizer build — cannot verify an accept");
+        return Ok(None);
+    };
+    let out_dir = root
+        .join(format!("targets/{target}/asan"))
+        .to_string_lossy()
+        .into_owned();
+    println!("sanitizers: ASan build of the patched tree…");
+    let status = std::process::Command::new("sh")
+        .arg("-c")
+        .arg(diff_test::target::subst_out(build_tpl, &out_dir))
+        .current_dir(root)
         .status()?;
-    anyhow::ensure!(status.success(), "sanitizer build failed");
-    let bin_name = std::path::Path::new(&spec.build.binary)
-        .file_name()
-        .and_then(|n| n.to_str())
-        .ok_or_else(|| anyhow::anyhow!("bad build.binary path"))?;
-    let asan_bin = asan_dir.join(format!("x86_64-unknown-linux-gnu/debug/{bin_name}"));
-    let cmd = spec
-        .bench
-        .command
-        .replace("{binary}", asan_bin.to_str().unwrap());
+    if !status.success() {
+        // Infrastructure failure (missing runtime, toolchain), not a code
+        // defect: don't crash the verdict and lose a measured bench —
+        // treat "cannot build the sanitizer binary" like "no sanitizer
+        // declared" so the accept caps at needs-human-review (None), with
+        // the failure logged for the operator to fix and re-run.
+        println!("sanitizers: BUILD FAILED — cannot verify; capping accept at needs-human-review");
+        return Ok(None);
+    }
+    let asan_bin = diff_test::target::subst_out(bin_tpl, &out_dir);
+    let cmd = spec.bench.command.replace("{binary}", &asan_bin);
     let out = std::process::Command::new("sh")
         .arg("-c")
         .arg(&cmd)
+        // detect_leaks is a no-op for the C/C++ UBSan combo but harmless.
         .env("ASAN_OPTIONS", "detect_leaks=1")
+        .env("UBSAN_OPTIONS", "halt_on_error=1:print_stacktrace=1")
         .current_dir(root)
         .output()?;
     let stderr = String::from_utf8_lossy(&out.stderr);
-    let clean = out.status.success() && !stderr.contains("ERROR:");
+    let clean =
+        out.status.success() && !stderr.contains("ERROR:") && !stderr.contains("runtime error:");
     if clean {
         println!("sanitizers: clean");
     } else {
@@ -161,7 +168,7 @@ fn sanitizer_check(root: &std::path::Path, target: &str, spec: &TargetSpec) -> R
             println!("  {l}");
         }
     }
-    Ok(clean)
+    Ok(Some(clean))
 }
 
 fn now_utc() -> String {
@@ -265,11 +272,18 @@ fn main() -> Result<()> {
             v = Verdict::NeedsHumanReview;
         }
         if v == Verdict::Accepted {
-            let clean = sanitizer_check(&root, &cli.target, &spec)?;
-            gate_results.sanitizers_clean = clean;
-            if !clean {
-                println!("verdict: sanitizer flag caps the accept at needs-human-review (SPEC §8)");
-                v = Verdict::NeedsHumanReview;
+            match sanitizer_check(&root, &cli.target, &spec)? {
+                Some(true) => gate_results.sanitizers_clean = true,
+                Some(false) => {
+                    println!(
+                        "verdict: sanitizer flag caps the accept at needs-human-review (SPEC §8)"
+                    );
+                    v = Verdict::NeedsHumanReview;
+                }
+                None => {
+                    println!("verdict: no sanitizer build declared; capping accept at needs-human-review (SPEC §8)");
+                    v = Verdict::NeedsHumanReview;
+                }
             }
         }
         let fp = EnvFingerprint::collect(pin, "system-default");

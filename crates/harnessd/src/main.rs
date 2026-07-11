@@ -339,29 +339,30 @@ fn handle(root: &Path, line: &str) -> Result<Value> {
             )?)?;
             let t = pending["target"].as_str().unwrap();
             let spec = diff_test::target::TargetSpec::load(root, t)?;
-            let bin = Path::new(&spec.build.binary)
-                .file_name()
-                .unwrap()
-                .to_str()
-                .unwrap();
             let diff_path = root.join(format!("results/pending/{patch_id}.json.diff"));
             std::fs::write(&diff_path, pending["diff"].as_str().unwrap())?;
             // The build + verdict pipeline runs for minutes — far past the MCP
             // transport's per-call cap. Launch it detached, writing progress to
             // a log; the agent observes the result via the read_verdict op,
             // which reads the append-only ledger row once written.
-            let cand_dir = format!("targets/{t}/candidate-{patch_id}");
-            let cand_bin = format!("{cand_dir}/release/{bin}");
+            // {out} isolates the candidate build (cargo: CARGO_TARGET_DIR;
+            // make: build+copy into it) — language-agnostic, mirrors the
+            // baseline rebuild in verdict.
+            let cand_dir = root
+                .join(format!("targets/{t}/candidate-{patch_id}"))
+                .to_string_lossy()
+                .into_owned();
+            let cand_build = diff_test::target::subst_out(&spec.build.baseline, &cand_dir);
+            let cand_bin = diff_test::target::subst_out(&spec.build.binary, &cand_dir);
             let log = format!("results/pending/{run_id}.log");
             // On any failure (candidate build, gates crash) the trap line
             // marks the log so read_verdict can report "failed" instead of
             // leaving the agent polling a verdict that will never exist.
             let script = format!(
-                "{{ set -e\nCARGO_TARGET_DIR={cand} {build}\ncargo run -q -p verdict -- {tgt} \
+                "{{ set -e\n{build}\ncargo run -q -p verdict -- {tgt} \
                  --rebuild-baseline --candidate-bin {cbin} --run-id {rid} --playbook-class {cls} \
                  --hypothesis {hyp} --hotspot {hs} --patch-file {pf}\n}} || echo HOTPATH-PIPELINE-FAILED\n",
-                cand = shq(&cand_dir),
-                build = spec.build.baseline,
+                build = cand_build,
                 tgt = shq(t),
                 cbin = shq(&cand_bin),
                 rid = shq(run_id),

@@ -56,3 +56,12 @@ agent-attempt target run_id max_turns="40":
 # Verify the OS boundary from the agent user's side (negative + positive)
 isolation-check:
     sh scripts/isolation-check.sh
+
+# Install the coz causal profiler (apt, else source build)
+install-coz:
+    sh scripts/install-coz.sh
+
+# Causal profile of a C/C++ target: where a speedup would raise throughput
+coz target iters="200":
+    sh scripts/coz-profile.sh {{target}} {{iters}}
+    python3 scripts/coz-summary.py results/{{target}}/coz/profile.coz
