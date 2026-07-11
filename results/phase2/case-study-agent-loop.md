@@ -89,6 +89,31 @@ through `propose_patch` (path-allowlist + `git apply`) and the full
 gate+bench pipeline. Both were correctly rejected — real mechanisms,
 too small to clear the 2% CI-lower-bound bar. **No false accepts.**
 
+## The stop-the-line event: phase2-comrak-010
+
+The pipeline auto-accepted a comrak class-3 patch (+10.7% median,
+CI [+7.9%, +12.2%]) that skips AST-arena teardown via `ManuallyDrop`
+before `process::exit` — and the 100% human audit **overturned it**.
+LeakSanitizer flags a 384-byte arena chunk as unreachable at exit: the
+patch's `black_box(&arena)` keeps the arena live only until its scope
+closes, but `process::exit` runs after. The agent's own hypothesis had
+named this exact risk ("if the sanitizer still flags the leak,
+rejected-gates is the honest outcome") — the pipeline just had no
+sanitizer gate to trip: ASan/LSan were per-attempt manual, so the row
+says `accepted` with `sanitizers_clean: false`.
+
+Called per SPEC §10: a **pipeline false accept**, caught by audit before
+anything shipped (shipped false accepts remain **0**; the win was not
+banked). Fix shipped the same hour: `verdict` now runs an ASan+LSan
+build of the patched tree over the pinned workload on every would-be
+accept and caps flagged wins at `needs-human-review` — the tier rule
+SPEC §8 always specified, now enforced by the machine instead of the
+auditor. The immutable ledger row stands as written; this section is
+the corrective record.
+
+10k-input differential fuzz on the same patch: 0 divergences — the
+output equivalence was real; only the teardown-leak tier was wrong.
+
 ## Two findings the loop surfaced about itself
 
 1. **`run_verdict` outlived the MCP transport (attempt 001).** The
