@@ -9,6 +9,7 @@ pub mod config;
 pub mod exec;
 pub mod fingerprint;
 pub mod schedule;
+pub mod service;
 pub mod stats;
 
 use ledger::Verdict;

@@ -47,6 +47,297 @@ enum Cmd {
         #[arg(long)]
         out: PathBuf,
     },
+    /// Service mode (SPEC §3.1 mode c): interleaved A/B of two HTTP
+    /// server binaries under a coordinated-omission-correct open-loop
+    /// load. Reports p50 and p99 latency speedup (baseline/candidate)
+    /// with bootstrap CIs. `--aa` runs the same binary both sides.
+    Service {
+        #[arg(long)]
+        baseline_bin: String,
+        #[arg(long)]
+        candidate_bin: String,
+        #[arg(long)]
+        doc: String,
+        #[arg(long, default_value_t = 1)]
+        iters: u64,
+        /// Open-loop arrival rate (requests/sec).
+        #[arg(long, default_value_t = 200.0)]
+        rate: f64,
+        /// Timed requests per session.
+        #[arg(long, default_value_t = 1000)]
+        count: usize,
+        /// Interleaved sessions per side.
+        #[arg(long, default_value_t = 12)]
+        sessions: usize,
+        #[arg(long, default_value_t = 200)]
+        warmup: usize,
+        #[arg(long, default_value_t = 32)]
+        workers: usize,
+        /// Prefix pinning the server to a core (e.g. "taskset -c 2").
+        #[arg(long, default_value = "")]
+        pin: String,
+        /// Same binary both sides — must yield a null verdict on p99.
+        #[arg(long, default_value_t = false)]
+        aa: bool,
+        /// Optional JSON output path (latency percentiles + CIs).
+        #[arg(long)]
+        out: Option<PathBuf>,
+    },
+    /// Service-mode calibration: A/A false-positive rate + injected
+    /// latency-regression detection rate on p50 (SPEC §3.1).
+    ServiceCalibrate {
+        #[arg(long)]
+        server_bin: String,
+        #[arg(long)]
+        doc: String,
+        #[arg(long, default_value_t = 1)]
+        iters: u64,
+        #[arg(long, default_value_t = 150.0)]
+        rate: f64,
+        #[arg(long, default_value_t = 500)]
+        count: usize,
+        /// Interleaved rounds per compare.
+        #[arg(long, default_value_t = 6)]
+        rounds: usize,
+        /// Calibration compares (A/A + injection each).
+        #[arg(long, default_value_t = 10)]
+        sessions: usize,
+        #[arg(long, default_value_t = 100)]
+        warmup: usize,
+        #[arg(long, default_value_t = 32)]
+        workers: usize,
+        #[arg(long, default_value = "")]
+        pin: String,
+        #[arg(long, default_value_t = 0.05)]
+        slowdown: f64,
+        #[arg(long)]
+        out: PathBuf,
+    },
+}
+
+#[allow(clippy::too_many_arguments)]
+fn service_bench(
+    cfg: &AcceptConfig,
+    baseline_bin: &str,
+    candidate_bin: &str,
+    doc: &str,
+    iters: u64,
+    rate: f64,
+    count: usize,
+    sessions: usize,
+    warmup: usize,
+    workers: usize,
+    pin: &str,
+    aa: bool,
+    out: &Option<PathBuf>,
+) -> Result<()> {
+    use bench_runner::service::{run_compare, ServiceCfg};
+
+    let mk = |bin: &str| ServiceCfg {
+        server_bin: bin.to_string(),
+        doc: doc.to_string(),
+        iters,
+        rate,
+        count,
+        warmup,
+        workers,
+        pin_prefix: pin.to_string(),
+        inject_us: None,
+    };
+    let base_cfg = mk(baseline_bin);
+    let cand_cfg = mk(candidate_bin);
+
+    eprintln!(
+        "service: {sessions} interleaved sessions/side, {count} req @ {rate} rps, \
+         CO-correct open loop, server pin='{pin}'"
+    );
+
+    let r = run_compare(
+        &base_cfg,
+        &cand_cfg,
+        sessions,
+        cfg.bootstrap_iters,
+        cfg.confidence,
+        cfg.bootstrap_seed,
+        |k, bp50, bp99, cp50, cp99| {
+            eprintln!(
+                "  round {}/{sessions}: base p50={:.3}ms p99={:.3}ms | cand p50={:.3}ms p99={:.3}ms",
+                k + 1,
+                bp50 * 1e3,
+                bp99 * 1e3,
+                cp50 * 1e3,
+                cp99 * 1e3
+            );
+        },
+    )?;
+    let (ci50, ci99, drop_rate) = (r.ci50, r.ci99, r.drop_rate);
+    let (b_p50, c_p50, b_p99, c_p99) = (&r.base_p50, &r.cand_p50, &r.base_p99, &r.cand_p99);
+
+    // Drop rate must be negligible or the load was above capacity and the
+    // percentiles are unstable — refuse to report a number we don't trust.
+    let total_req = sessions * count * 2;
+    let total_dropped = (drop_rate * total_req as f64).round() as usize;
+    anyhow::ensure!(
+        drop_rate < 0.005,
+        "drop rate {:.2}% exceeds 0.5% — load is above server capacity; lower --rate",
+        drop_rate * 100.0
+    );
+
+    println!(
+        "p50 latency speedup (baseline/candidate): median {:.4}, {:.0}% CI [{:.4}, {:.4}]",
+        ci50.median,
+        cfg.confidence * 100.0,
+        ci50.lo,
+        ci50.hi
+    );
+    println!(
+        "p99 latency speedup (baseline/candidate): median {:.4}, {:.0}% CI [{:.4}, {:.4}]",
+        ci99.median,
+        cfg.confidence * 100.0,
+        ci99.lo,
+        ci99.hi
+    );
+    println!(
+        "drop rate: {:.3}% ({total_dropped}/{total_req})",
+        drop_rate * 100.0
+    );
+
+    if let Some(path) = out {
+        let ev = serde_json::json!({
+            "mode": "service-latency",
+            "workload": format!("{doc}, {iters} parse+print/req, {rate} rps open-loop, CO-correct"),
+            "sessions": sessions, "count_per_session": count, "rate_rps": rate,
+            "p50_speedup_median": ci50.median, "p50_speedup_ci": [ci50.lo, ci50.hi],
+            "p99_speedup_median": ci99.median, "p99_speedup_ci": [ci99.lo, ci99.hi],
+            "baseline_p50_ms_median": stats::median(b_p50) * 1e3,
+            "candidate_p50_ms_median": stats::median(c_p50) * 1e3,
+            "baseline_p99_ms_median": stats::median(b_p99) * 1e3,
+            "candidate_p99_ms_median": stats::median(c_p99) * 1e3,
+            "drop_rate": drop_rate,
+        });
+        std::fs::write(path, serde_json::to_string_pretty(&ev)?)?;
+    }
+
+    if aa {
+        // Null verdict required on BOTH percentiles.
+        for (label, ci) in [("p50", ci50), ("p99", ci99)] {
+            if decide(ci, cfg.threshold) == Verdict::Accepted {
+                anyhow::bail!(
+                    "service A/A FAILED on {label}: speedup claimed from identical servers"
+                );
+            }
+        }
+        println!("service A/A self-test passed (null verdict on p50 and p99)");
+    } else {
+        println!("p50 verdict: {}", decide(ci50, cfg.threshold).as_str());
+        println!("p99 verdict: {}", decide(ci99, cfg.threshold).as_str());
+    }
+    Ok(())
+}
+
+/// Service-mode calibration (SPEC §3.1): N A/A compares (false-positive
+/// rate on p50 must be <5%) + N injection compares (a per-request
+/// busy-wait ≈ `slowdown` of measured service time in the candidate; the
+/// harness must resolve the regression — p50 CI entirely < 1 — ≥95%).
+#[allow(clippy::too_many_arguments)]
+fn service_calibrate(
+    cfg: &AcceptConfig,
+    server_bin: &str,
+    doc: &str,
+    iters: u64,
+    rate: f64,
+    count: usize,
+    rounds: usize,
+    n: usize,
+    warmup: usize,
+    workers: usize,
+    pin: &str,
+    slowdown: f64,
+    out: &PathBuf,
+) -> Result<()> {
+    use bench_runner::service::{run_compare, run_session, ServiceCfg};
+
+    let mk = |inject: Option<u64>| ServiceCfg {
+        server_bin: server_bin.to_string(),
+        doc: doc.to_string(),
+        iters,
+        rate,
+        count,
+        warmup,
+        workers,
+        pin_prefix: pin.to_string(),
+        inject_us: inject,
+    };
+
+    // Size the injected busy-wait from a probe of the service's p50.
+    let probe = run_session(&mk(None), bench_runner::service::free_port()?)?;
+    let p50 = bench_runner::service::percentile(&probe.latencies, 0.50);
+    let inject_us = (p50 * slowdown * 1e6).round() as u64;
+    eprintln!(
+        "service-calibrate: probe p50={:.3}ms, injecting {inject_us}µs (~{:.0}%) for detection",
+        p50 * 1e3,
+        slowdown * 100.0
+    );
+
+    let (mut fp, mut det) = (0usize, 0usize);
+    let (mut aa_rows, mut inj_rows) = (Vec::new(), Vec::new());
+    for i in 0..n {
+        let seed = cfg.bootstrap_seed.wrapping_add(i as u64);
+        let aa = run_compare(
+            &mk(None),
+            &mk(None),
+            rounds,
+            cfg.bootstrap_iters,
+            cfg.confidence,
+            seed,
+            |_, _, _, _, _| {},
+        )?;
+        if decide(aa.ci50, cfg.threshold) == Verdict::Accepted {
+            fp += 1;
+        }
+        let inj = run_compare(
+            &mk(None),
+            &mk(Some(inject_us)),
+            rounds,
+            cfg.bootstrap_iters,
+            cfg.confidence,
+            seed,
+            |_, _, _, _, _| {},
+        )?;
+        if inj.ci50.hi < 1.0 {
+            det += 1;
+        }
+        aa_rows.push(serde_json::json!({"lo": aa.ci50.lo, "hi": aa.ci50.hi}));
+        inj_rows.push(serde_json::json!({"lo": inj.ci50.lo, "hi": inj.ci50.hi}));
+        eprintln!(
+            "session {}/{n}: A/A p50 [{:.4},{:.4}] fp={fp}; inj p50 [{:.4},{:.4}] det={det}",
+            i + 1,
+            aa.ci50.lo,
+            aa.ci50.hi,
+            inj.ci50.lo,
+            inj.ci50.hi
+        );
+    }
+    let fp_rate = fp as f64 / n as f64;
+    let det_rate = det as f64 / n as f64;
+    let pass = fp_rate < 0.05 && det_rate >= 0.95;
+    let ev = serde_json::json!({
+        "mode": "service-latency-calibration",
+        "server_bin": server_bin, "workload": doc, "rate_rps": rate,
+        "count_per_session": count, "rounds_per_compare": rounds, "sessions": n,
+        "injected_slowdown": slowdown, "injected_us": inject_us,
+        "aa_false_positive_rate": fp_rate, "aa_sessions": aa_rows,
+        "injection_detection_rate": det_rate, "injection_sessions": inj_rows,
+        "acceptance": {"fp_lt": 0.05, "detection_ge": 0.95, "pass": pass},
+    });
+    std::fs::write(out, serde_json::to_string_pretty(&ev)?)?;
+    println!(
+        "service calibration: A/A false-positive {fp_rate:.3} (<0.05), \
+         injection detection {det_rate:.3} (>=0.95) -> {}",
+        if pass { "PASS" } else { "FAIL" }
+    );
+    anyhow::ensure!(pass, "service calibration acceptance criteria not met");
+    Ok(())
 }
 
 fn calibrate(
@@ -151,6 +442,56 @@ fn main() -> Result<()> {
             out,
         } => {
             return calibrate(&cfg, cmd, *sessions, *slowdown, out);
+        }
+        Cmd::Service {
+            baseline_bin,
+            candidate_bin,
+            doc,
+            iters,
+            rate,
+            count,
+            sessions,
+            warmup,
+            workers,
+            pin,
+            aa,
+            out,
+        } => {
+            #[allow(clippy::used_underscore_items)]
+            return service_bench(
+                &cfg,
+                baseline_bin,
+                candidate_bin,
+                doc,
+                *iters,
+                *rate,
+                *count,
+                *sessions,
+                *warmup,
+                *workers,
+                pin,
+                *aa,
+                out,
+            );
+        }
+        Cmd::ServiceCalibrate {
+            server_bin,
+            doc,
+            iters,
+            rate,
+            count,
+            rounds,
+            sessions,
+            warmup,
+            workers,
+            pin,
+            slowdown,
+            out,
+        } => {
+            return service_calibrate(
+                &cfg, server_bin, doc, *iters, *rate, *count, *rounds, *sessions, *warmup,
+                *workers, pin, *slowdown, out,
+            );
         }
     };
 
