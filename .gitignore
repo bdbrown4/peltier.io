@@ -244,3 +244,6 @@ agent/**/__pycache__/
 corpora/cjson/input/
 targets/cjson/testbuild/
 results/*/callgrind-cache.out
+targets/cjson/candidate-*/
+targets/cjson/cand-*/
+targets/cjson/asan*/

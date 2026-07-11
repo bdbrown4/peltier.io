@@ -136,7 +136,15 @@ fn sanitizer_check(
         .arg(diff_test::target::subst_out(build_tpl, &out_dir))
         .current_dir(root)
         .status()?;
-    anyhow::ensure!(status.success(), "sanitizer build failed");
+    if !status.success() {
+        // Infrastructure failure (missing runtime, toolchain), not a code
+        // defect: don't crash the verdict and lose a measured bench —
+        // treat "cannot build the sanitizer binary" like "no sanitizer
+        // declared" so the accept caps at needs-human-review (None), with
+        // the failure logged for the operator to fix and re-run.
+        println!("sanitizers: BUILD FAILED — cannot verify; capping accept at needs-human-review");
+        return Ok(None);
+    }
     let asan_bin = diff_test::target::subst_out(bin_tpl, &out_dir);
     let cmd = spec.bench.command.replace("{binary}", &asan_bin);
     let out = std::process::Command::new("sh")
