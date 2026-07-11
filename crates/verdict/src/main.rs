@@ -296,12 +296,22 @@ fn main() -> Result<()> {
         Some(p) => std::fs::read_to_string(p)?,
         None => "(no source patch)".into(),
     };
+    // Derive the phase from the run_id namespace (phaseN-*) so the column
+    // matches the run_id prefix; the historical hardcoded `1` left every
+    // verdict-written row tagged phase 1 regardless of namespace (found in
+    // the phase2-final-audit sweep). Falls back to 1 for un-prefixed ids.
+    let phase = cli
+        .run_id
+        .strip_prefix("phase")
+        .and_then(|r| r.split('-').next())
+        .and_then(|n| n.parse::<u8>().ok())
+        .unwrap_or(1);
     let attempt = Attempt {
         run_id: cli.run_id.clone(),
         timestamp: now_utc(),
         target: cli.target.clone(),
         target_commit: spec.source.commit.clone(),
-        phase: 1,
+        phase,
         hotspot: cli.hotspot,
         playbook_class: cli.playbook_class,
         hypothesis: cli.hypothesis,
