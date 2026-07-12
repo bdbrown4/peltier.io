@@ -39,6 +39,14 @@ every workload, fragmentation pattern, and concurrency scenario the
 target will meet in production. The pipeline measured a real win and
 then **refused to auto-ship it**, tagging it for a human ruling instead.
 
+**Human ruling (`results/rulings/phase0-comrak-002.md`): ACCEPTED,
+scoped to the comrak CLI single-stream markdown-render workload** — a
+real win for the measured use, deliberately *not* a blanket "always use
+mimalloc" mandate. The tier forced the judgment; the judgment is bounded
+and written down. The ledger row stays `needs-human-review` (append-only
+records what the pipeline decided); the ruling is the human layer on
+top.
+
 ## What the pair demonstrates
 
 The cheap classes are not lesser — class 1 produced this project's
