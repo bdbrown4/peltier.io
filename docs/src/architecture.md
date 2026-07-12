@@ -1,6 +1,6 @@
 # Architecture
 
-hotpath is split into a **trust layer** (Rust, the agent cannot write it)
+Peltier is split into a **trust layer** (Rust, the agent cannot write it)
 and an **untrusted proposer** (the agent). The split is structural, not
 advisory: the guarantees hold even if the proposer is adversarial.
 

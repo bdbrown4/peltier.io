@@ -46,7 +46,7 @@ shared runners — passed both bars before its numbers were trusted.
 Phase 4 measures latency under load, where the classic trap is
 **coordinated omission**: a closed-loop client that waits for a slow
 response simply sends fewer requests during the stall, so the stall never
-appears in the latency histogram. hotpath's load generator is **open-loop**
+appears in the latency histogram. Peltier's load generator is **open-loop**
 — requests are scheduled at a fixed rate and each latency is measured from
 its *intended* send time. When the server falls behind, the requests queued
 behind it each carry the full delay a real client would have seen. Nothing
