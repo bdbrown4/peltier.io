@@ -9,6 +9,7 @@
 | **2** | Unattended agent loop | 20 audited attempts, 3 verified wins, **0 shipped false accepts**, OS-isolated |
 | **3** | Playbook + proof, C/C++ | cross-language cJSON win (+8.85%), 4 case studies, 6 playbook classes |
 | **4** | Services & scale | cJSON service +6.2% p50 under CO-correct replay, mechanical ROI report |
+| **5** | Research forks (SPEC §13) | FP-tolerance kernel lane (matmul 3.23×, needs-human-review) + learned class-selection prior from the ledger |
 
 The `profile → hypothesize → patch → gated-verdict → ROI` loop runs
 unattended, OS-isolated, across **Rust and C**, **batch and service**, from
@@ -16,22 +17,27 @@ a pinned corpus to a dollar figure — with zero shipped false accepts across
 all phases, and the two pipeline over-accepts both caught by audit and
 turned into permanent gates.
 
-## Frontier — the research forks (SPEC §13)
+## Phase 5 — the research forks (SPEC §13)
 
-Deliberately out of the core roadmap, these are where the largest gaps
-live:
+Deliberately out of the core roadmap, these are the two hardest cases the
+spec named — both now built and exercised, both routed to human review.
+Full write-up: [Research forks](./research-forks.md).
 
-- **GPU kernel lane.** Triton/CUDA targets where 2–10× gaps are common;
-  correctness via reference-kernel differential testing; reward = measured
-  kernel time. The trust machinery (differential equivalence, interleaved
-  timing, append-only ledger) transfers directly; the profiler and bench
-  become kernel-time-aware, and it needs GPU hardware to run.
-- **Learned optimization policies.** The ledger is a growing dataset of
-  `(profile signature, class, hypothesis) → verdict`. That is training data
-  for a policy that *ranks* which class to try first on a new hotspot,
-  turning the fixed cheapest-first ordering into a learned prior. Prior art:
-  MLGO, AlphaDev, Meta's LLM Compiler; ProGraML-style IR graphs as the
-  program representation.
+- **Kernel lane — done as a CPU demonstration.** A matmul optimization that
+  reorders floating-point accumulation (transpose-B + eight-accumulator ILP)
+  runs 3.23× faster and is *impossible* to gate byte-identically. It slots
+  into the harness by swapping the equivalence policy for a declared
+  FP-tolerance (`abs + rel·|ref|`) — which still catches a genuine wrong
+  result — and routes to `needs-human-review` because using the tolerance
+  tier at all is a §8 signal. This is the GPU lane in miniature:
+  reference-kernel differential testing, interleaved timing, ledger row.
+  Only the timer and the hardware change; **the actual GPU run needs GPU
+  hardware**, absent here.
+- **Learned optimization policies — done.** `crates/policy` reads the ledger
+  and ranks optimization classes by the Wilson lower bound of their
+  shippable-win rate, turning the fixed cheapest-first ordering into a
+  learned prior (advisory only — the gates still decide). Prior art: MLGO,
+  AlphaDev, Meta's LLM Compiler.
 
 ## The real target
 

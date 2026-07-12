@@ -1,0 +1,17 @@
+learned class-selection ranking — evidence: 34 ledger rows, scope: all targets
+(Wilson 95% lower bound of the shippable-win rate; ties break untried-before-failed, then cheapest-first)
+
+rank  class         attempts  wins  held  win-rate  wilson-lb  note
+------------------------------------------------------------------------------
+   1  5 algorithmic       16     3     1       19%      0.066  proven winner
+   2  3 alloc-churn        4     1     0       25%      0.046  proven winner
+   3  1 build-config        9     1     0       11%      0.020  proven winner
+   4  7 concurrency        0     0     0        0%      0.000  untried — cheapest-first prior only
+   5  2 allocator          2     0     1        0%      0.000  held for human review (measured win, tier-gated)
+   6  4 data-layout        1     0     0        0%      0.000  evidence against — tried, no shippable win
+   7  6 simd               2     0     0        0%      0.000  evidence against — tried, no shippable win
+
+recommendation: try class 5 (algorithmic) first — best evidence (Wilson lb 0.066); then the next-ranked class whose profile preconditions match.
+
+Advisory only — the equivalence + significance gates decide every verdict. This ranking sharpens as the ledger grows.
+note: a 'win' counts only machine-sanitizer-verified accepts. Pre-sanitizer-gate accepts and the overturned comrak-010 are conservatively excluded — the policy trusts the ledger's machine record, not the external audit narrative.

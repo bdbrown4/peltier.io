@@ -19,6 +19,7 @@
 - [The caught false-accept (comrak)](./case-studies/comrak-false-accept.md)
 - [cJSON — the cross-language proof (C)](./case-studies/cjson.md)
 - [Services & scale: latency under load](./case-studies/service.md)
+- [Research forks: kernel lane & learned policy](./research-forks.md)
 
 # Reference
 
