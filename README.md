@@ -3,7 +3,7 @@
 > Spot cooling for hot paths. A profile-guided optimization agent that
 > only ships wins it can prove.
 
-Peltier profiles real binaries and services, isolates hot paths, proposes
+peltier.io profiles real binaries and services, isolates hot paths, proposes
 optimizations, and accepts a change **only** when two independent bars are
 cleared: **behavioral equivalence** (upstream tests + byte-identical golden
 replay + differential fuzzing + sanitizers) and **statistical significance**
