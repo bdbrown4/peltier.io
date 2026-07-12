@@ -1,7 +1,7 @@
 [book]
-title = "hotpath"
+title = "peltier.io"
 description = "A profile-guided optimization agent that only ships wins it can prove."
-authors = ["hotpath"]
+authors = ["peltier.io"]
 language = "en"
 src = "src"
 

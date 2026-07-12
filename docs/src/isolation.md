@@ -1,6 +1,6 @@
 # Isolation & anti-reward-hacking
 
-The guarantees only matter if the proposer cannot cheat. hotpath's defense
+The guarantees only matter if the proposer cannot cheat. Peltier's defense
 is **structural**: the agent is denied the capabilities it would need to
 manufacture a false win, at the OS level, not by prompt.
 

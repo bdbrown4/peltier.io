@@ -1,21 +1,21 @@
-# hotpath
+# peltier.io
 
 > Spot cooling for hot paths. A profile-guided optimization agent that
 > only ships wins it can prove.
 
-hotpath profiles real binaries and services, isolates hot paths, proposes
+Peltier profiles real binaries and services, isolates hot paths, proposes
 optimizations, and accepts a change **only** when two independent bars are
 cleared: **behavioral equivalence** (upstream tests + byte-identical golden
 replay + differential fuzzing + sanitizers) and **statistical significance**
 (the speedup's bootstrap 95% CI lower bound clears a threshold on
 calibrated hardware). A change without both is discarded and logged.
 
-Consultants sell surveys; compilers sell flags. hotpath sells **verified
+Consultants sell surveys; compilers sell flags. Peltier sells **verified
 deltas with the methodology attached** — a stopwatch on pinned hardware, a
 proof of equivalence, and an ROI figure whose confidence interval survives
 hostile review.
 
-📖 **Full documentation: the [hotpath book](https://bdbrown4.github.io/peltier.io/)**
+📖 **Full documentation: the [peltier.io book](https://bdbrown4.github.io/peltier.io/)**
 · Design spec: [SPEC.md](SPEC.md) · Charter: [CLAUDE.md](CLAUDE.md)
 
 ## Verified results

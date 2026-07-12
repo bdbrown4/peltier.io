@@ -1,6 +1,6 @@
 # Summary
 
-[hotpath](./introduction.md)
+[peltier.io](./introduction.md)
 
 - [The thesis: trust is the product](./thesis.md)
 - [Architecture](./architecture.md)

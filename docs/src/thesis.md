@@ -5,7 +5,7 @@ almost always some mix of a noisy benchmark, a workload that flatters the
 change, and a behavioral difference nobody checked. The number is real to
 the person who measured it and worthless to everyone downstream.
 
-hotpath is built on the opposite premise: **a performance claim is a
+Peltier is built on the opposite premise: **a performance claim is a
 liability until it is proven, and the proof ships with the number.**
 
 ## Three non-negotiables

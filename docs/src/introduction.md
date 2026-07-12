@@ -1,9 +1,9 @@
-# hotpath
+# peltier.io
 
 > Spot cooling for hot paths. A profile-guided optimization agent that
 > only ships wins it can prove.
 
-hotpath profiles real binaries and services, isolates hot paths, proposes
+Peltier profiles real binaries and services, isolates hot paths, proposes
 optimizations, and accepts a change **only** when two independent bars are
 cleared:
 
@@ -36,7 +36,7 @@ new gate.
 
 ## The differentiator
 
-Consultants sell surveys; compilers sell flags. hotpath sells **verified
+Consultants sell surveys; compilers sell flags. Peltier sells **verified
 deltas with the methodology attached** — a stopwatch on pinned hardware,
 a proof of equivalence, and an ROI figure whose confidence interval you
 can quote to a hostile reviewer. That is the entire product, and this site
