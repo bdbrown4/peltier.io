@@ -69,14 +69,27 @@ fn main() -> Result<()> {
         "**Target:** {target} · **Playbook class:** {class} · **Verdict:** `{verdict}`\n\n\
          **Workload:** {workload}\n\n",
     ));
-    // A report for anything the pipeline did not accept must say so before
-    // any dollar figure — the ROI below is a measured effect, not a
-    // shippable saving.
-    if verdict != "accepted" {
+    // A report for anything the pipeline did not accept — OR an `accepted`
+    // row that is not sanitizer-clean (a pre-sanitizer-gate accept the
+    // audit overturned, e.g. phase2-comrak-010) — must say so before any
+    // dollar figure. The ROI below is a measured effect, not a shippable
+    // saving. This closes the hole where the immutable ledger's historical
+    // accept could mint a clean ROI for a patch that was never shipped.
+    let sanitizers_clean = row["sanitizers_clean"].as_bool().unwrap_or(false);
+    let shippable = verdict == "accepted" && sanitizers_clean;
+    if !shippable {
+        let reason = if verdict != "accepted" {
+            format!("its verdict is `{verdict}`, not `accepted`")
+        } else {
+            "it is `accepted` but NOT sanitizer-clean — this is a pre-sanitizer-gate accept that \
+             the audit overturned (the immutable ledger preserves the original verdict; \
+             `sanitizers_clean:false` is the disqualifying signal)"
+                .to_string()
+        };
         md.push_str(&format!(
-            "> ⚠️ **Not shipped.** This attempt's verdict is `{verdict}`, not `accepted`. Any ROI\n\
-             > below is the *measured* effect — it did not clear the significance/tier bar and is\n\
-             > **not** a committed saving. Shown for completeness; the ledger records it as-is.\n\n",
+            "> ⚠️ **Not shipped.** This attempt is not a committed saving because {reason}. Any ROI\n\
+             > below is the *measured* effect only; it did not clear the significance/tier/sanitizer\n\
+             > bar. Shown for completeness; the ledger records it as-is.\n\n",
         ));
     }
 

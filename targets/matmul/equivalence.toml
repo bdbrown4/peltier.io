@@ -1,0 +1,14 @@
+# Kernel-lane equivalence policy (SPEC §13, §3.2). The blocked matmul
+# reorders floating-point accumulation, so byte-identical golden replay is
+# the WRONG gate — it would reject a correct optimization for differing in
+# the last ULPs. Instead, numeric outputs must agree within tolerance;
+# anything non-numeric still matches exactly, and a genuine wrong result
+# (beyond the tolerance) is still caught.
+#
+# rel = 1e-3 is generous for f32 accumulation over 512 terms in a different
+# order (observed max relative error ~1e-4); a real bug moves it far past
+# this. Using this tier at all is itself a needs-human-review signal per
+# SPEC §8 — a human confirms the tolerance is defensible for the workload.
+mode = "fp-tolerance"
+abs = 1e-4
+rel = 1e-3

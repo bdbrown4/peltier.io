@@ -1,72 +1,88 @@
-# peltier.io
+# hotpath
 
-Spot cooling for hot paths. A profile-guided optimization agent that only ships wins it can prove.
+> Spot cooling for hot paths. A profile-guided optimization agent that
+> only ships wins it can prove.
 
-hotpath finds the 10–90% left on the floor between "the compiler" and
-"hire a perf consultant," with two properties no consultant offers:
-**verified equivalence** (a change provably preserves behavior or is
-discarded) and **self-verifying ROI** (the value claim is a stopwatch on
-trusted infrastructure, not a survey).
+hotpath profiles real binaries and services, isolates hot paths, proposes
+optimizations, and accepts a change **only** when two independent bars are
+cleared: **behavioral equivalence** (upstream tests + byte-identical golden
+replay + differential fuzzing + sanitizers) and **statistical significance**
+(the speedup's bootstrap 95% CI lower bound clears a threshold on
+calibrated hardware). A change without both is discarded and logged.
 
-Full design: **[SPEC.md](SPEC.md)**.
+Consultants sell surveys; compilers sell flags. hotpath sells **verified
+deltas with the methodology attached** — a stopwatch on pinned hardware, a
+proof of equivalence, and an ROI figure whose confidence interval survives
+hostile review.
+
+📖 **Full documentation: the [hotpath book](https://bdbrown4.github.io/peltier.io/)**
+· Design spec: [SPEC.md](SPEC.md) · Charter: [CLAUDE.md](CLAUDE.md)
+
+## Verified results
+
+Every number carries its 95% CI and its workload, and every one survived the
+gates above. Across **five phases and 33 ledger rows, zero shipped false
+accepts** — including two pipeline over-accepts the audit caught before
+anything shipped, each becoming a permanent new gate.
+
+| Target | Win | Verified |
+|---|---|---|
+| tokei (Rust) — LTO (class 1) | +10.4% | CI [+8.5%, +12.0%] |
+| tokei — three class-5 algorithmic wins | +10.7% / +3.7% / +9.9% | each CI-significant |
+| cJSON (C) — number-handling rewrite (class 5) | +8.85% | CI [+7.5%, +10.0%] |
+| cJSON HTTP service — p50 latency under replay | +6.2% | CI [+5.8%, +7.2%] |
+| comrak (Rust) — mimalloc (class 2) | +4.6% | CI [+3.3%, +5.8%], [human-ruled](results/rulings/phase0-comrak-002.md) |
 
 ## Layout
 
 ```
-crates/            Trust layer (agent has NO write access — SPEC §10)
-  bench-runner/    Interleaved A/B timing, bootstrap CIs, A/A calibration
-  diff-test/       Equivalence gates, corpus hash-pinning, per-target policy
-  ledger/          Append-only SQLite attempt ledger (enforced by triggers)
-  report/          ROI math: speedup CI → cores → dollars, caveats included
+crates/            Trust layer — agent has NO write access (SPEC §10)
+  bench-runner/    Interleaved A/B, bootstrap CIs, A/A calibration, service mode
+  diff-test/       Equivalence gates, corpus hash-pinning, per-target spec
+  ledger/          Append-only SQLite attempt ledger (mutation-refusing triggers)
+  report/          ROI: speedup CI → cores → dollars, methodology inline
+  verdict/         The pipeline in one command: gates → bench → ledger row
+  harnessd/        The one door the agent talks through (7 JSON ops)
 agent/             Untrusted proposer (Claude Agent SDK, Python)
 playbook/          Optimization classes 1–7, tried strictly cheapest-first
 config/            accept.toml (thresholds), pricing.toml (ROI inputs)
-targets/           Per-target checkouts — the only agent-writable path
+targets/           Vendored OSS targets — the only agent-writable path
 corpora/           Hash-pinned golden-replay inputs (read-only to agent)
-results/           Calibration evidence, per-engagement outputs
+results/           Calibration evidence, case studies, generated ROI reports
+docs/              The mdBook site (deployed to GitHub Pages)
 ```
 
 ## Quick start
 
 ```sh
-cargo test --workspace          # trust-layer unit tests
-just aa                         # A/A self-test: must yield a null verdict
-just compare "cmd-a" "cmd-b"    # interleaved A/B with bootstrap CI
+just build / test / lint       # trust-layer workspace
+just aa                        # A/A self-test — must yield a null verdict
+just gates <target>            # corpus pin + upstream tests + golden replay
+just verdict <t> <bin> ...     # gates + bench vs pristine baseline + ledger row
+just report <run-id>           # ROI report from a ledger row
+just isolation-check           # 19 OS-boundary checks (both modes)
 ```
 
-## Status
+Full command reference and reproduction steps:
+[Reproduce it yourself](https://bdbrown4.github.io/peltier.io/reproduce.html).
 
-**Phase 0 complete** (see SPEC §5). Five attempts in the ledger across
-two pinned targets (comrak 0.53.0, tokei 14.0.0), A/A-calibrated,
-every number with CI and workload:
+## How it stays honest
 
-- **tokei +10.4% median [95% CI +8.5%, +12.0%]** — read-path buffer
-  zeroing eliminated + fat LTO, byte-identical, 4,332-iteration
-  diff-fuzz clean, sanitizers clean, auto-accepted
-  (`results/phase0/case-study-tokei.md`). Meets the Phase 0 exit bar.
-- comrak +4.6% [+3.3%, +5.8%] — mimalloc swap, `needs-human-review`
-  on an LSan reachability flag (`results/phase0/case-study-comrak.md`).
-- Two null/sub-threshold results correctly rejected and logged.
+- The agent speaks to the trust layer through **seven read-only-plus-one-
+  write JSON operations**; it has no shell, cannot write outside a target
+  workspace, and cannot touch the ledger or thresholds.
+- The **baseline is rebuilt from a pristine checkout** every session — a
+  patch never becomes its own comparison.
+- The **ledger is append-only** (SQLite triggers refuse UPDATE/DELETE);
+  accepted rows are written only by the `verdict` binary after the gates.
+- The agent process runs under **OS-level isolation** (read-only mount
+  namespace or an unprivileged uid) — the boundary is filesystem
+  permissions, not a prompt.
 
-Next: Phase 1 trust-layer hardening (containers, perf, automated
-calibration, gate orchestration, agent IPC).
-
-Done:
-- Workspace with the four trust-layer crates; core statistics
-  (interleaved scheduling, bootstrap ratio CIs, CI-lower-bound accept
-  rule), append-only ledger schema with mutation-refusing triggers,
-  corpus hash-pin verifier, equivalence-policy parser, ROI formulas —
-  all unit-tested.
-- bench-runner CLI: whole-program `compare` and `aa` modes with env
-  fingerprinting.
-- Playbook classes 1–7; agent tool contract and prompting spine.
-
-Next (Phase 1 exit criteria):
-- `perf stat` counters + max RSS + RAPL capture per run.
-- Automated A/A calibration sessions and regression-injection self-test
-  recorded to `results/calibration/` (<5% FP, ≥95% detection).
-- diff-test orchestration end-to-end on two real targets; harness IPC
-  for the agent tool surface.
+See [the case studies](https://bdbrown4.github.io/peltier.io/case-studies/overview.html)
+— especially [the caught false-accept](https://bdbrown4.github.io/peltier.io/case-studies/comrak-false-accept.html),
+where the pipeline over-accepted a leaking patch and the audit overturned
+it before it shipped.
 
 ## License
 

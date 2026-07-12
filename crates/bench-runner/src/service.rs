@@ -189,6 +189,15 @@ fn one_request(port: u16) -> std::io::Result<()> {
 
 /// One open-loop load session against a freshly spawned server.
 pub fn run_session(cfg: &ServiceCfg, port: u16) -> Result<SessionResult> {
+    ensure!(
+        cfg.rate.is_finite() && cfg.rate > 0.0,
+        "arrival rate must be finite and positive (got {})",
+        cfg.rate
+    );
+    ensure!(
+        cfg.count > 0 && cfg.workers > 0,
+        "count and workers must be > 0"
+    );
     let mut child = spawn_server(cfg, port)?;
     // Warm up closed-loop (untimed) so the first timed request doesn't eat
     // page faults / cold caches.

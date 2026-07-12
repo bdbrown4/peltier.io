@@ -1,0 +1,20 @@
+[book]
+title = "hotpath"
+description = "A profile-guided optimization agent that only ships wins it can prove."
+authors = ["hotpath"]
+language = "en"
+src = "src"
+
+[output.html]
+default-theme = "ayu"
+preferred-dark-theme = "ayu"
+git-repository-url = "https://github.com/bdbrown4/peltier.io"
+edit-url-template = "https://github.com/bdbrown4/peltier.io/edit/main/docs/{path}"
+additional-css = ["theme/custom.css"]
+
+[output.html.fold]
+enable = true
+level = 1
+
+[output.html.playground]
+runnable = false

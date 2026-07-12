@@ -84,3 +84,7 @@ service-calibrate server doc out *flags:
 # dollars and/or latency percentiles, CIs + methodology printed inline.
 report run_id *flags:
     cargo run -p report -- --run-id "{{run_id}}" {{flags}}
+
+# Learned playbook-class ranking from the ledger (SPEC §13 research fork)
+policy *flags:
+    cargo run -p policy -- {{flags}}
