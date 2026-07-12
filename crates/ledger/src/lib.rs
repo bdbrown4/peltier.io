@@ -217,12 +217,30 @@ impl Ledger {
                     .and_then(|b| b.get("env_fingerprint"))
                     .and_then(|f| f.get("workload"))
                     .cloned();
+                // Pull the sanitizer gate out so the report can refuse to
+                // mint a clean ROI for an `accepted` row that predates the
+                // machine-enforced sanitizer gate and was overturned by
+                // audit (phase2-comrak-010). The gates JSON is stored
+                // separately; read it here.
+                let sanitizers_clean = self
+                    .conn
+                    .query_row(
+                        "SELECT gates FROM attempts WHERE run_id = ?1",
+                        [run_id],
+                        |r| r.get::<_, Option<String>>(0),
+                    )
+                    .ok()
+                    .flatten()
+                    .and_then(|g| serde_json::from_str::<serde_json::Value>(&g).ok())
+                    .and_then(|g| g.get("sanitizers_clean").and_then(|v| v.as_bool()))
+                    .unwrap_or(false);
                 Ok(Some(serde_json::json!({
                     "run_id": run_id,
                     "target": target,
                     "playbook_class": class,
                     "hypothesis": hypothesis,
                     "verdict": verdict,
+                    "sanitizers_clean": sanitizers_clean,
                     "timestamp": ts,
                     "speedup_median": bench.as_ref().and_then(|b| b.get("speedup_median").cloned()),
                     "speedup_ci": bench.as_ref().and_then(|b| b.get("speedup_ci").cloned()),
