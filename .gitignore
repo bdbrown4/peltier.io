@@ -247,3 +247,5 @@ results/*/callgrind-cache.out
 targets/cjson/candidate-*/
 targets/cjson/cand-*/
 targets/cjson/asan*/
+targets/cjson/svc-baseline/
+targets/cjson/svc-candidate/

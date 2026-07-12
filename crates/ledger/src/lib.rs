@@ -190,6 +190,50 @@ impl Ledger {
     /// onto a completed attempt (harnessd `read_verdict`). Returns the
     /// verdict plus the bench CIs; never enough to game, since the row
     /// is already written and immutable.
+    /// Full row data the ROI report generator needs (SPEC §9). Includes
+    /// the workload string pulled out of the bench evidence.
+    pub fn report_row(&self, run_id: &str) -> Result<Option<serde_json::Value>, LedgerError> {
+        let row = self.conn.query_row(
+            "SELECT target, playbook_class, hypothesis, verdict, bench, timestamp \
+             FROM attempts WHERE run_id = ?1",
+            [run_id],
+            |r| {
+                Ok((
+                    r.get::<_, String>(0)?,
+                    r.get::<_, u8>(1)?,
+                    r.get::<_, String>(2)?,
+                    r.get::<_, String>(3)?,
+                    r.get::<_, Option<String>>(4)?,
+                    r.get::<_, String>(5)?,
+                ))
+            },
+        );
+        match row {
+            Ok((target, class, hypothesis, verdict, bench, ts)) => {
+                let bench: Option<serde_json::Value> =
+                    bench.map(|b| serde_json::from_str(&b)).transpose()?;
+                let workload = bench
+                    .as_ref()
+                    .and_then(|b| b.get("env_fingerprint"))
+                    .and_then(|f| f.get("workload"))
+                    .cloned();
+                Ok(Some(serde_json::json!({
+                    "run_id": run_id,
+                    "target": target,
+                    "playbook_class": class,
+                    "hypothesis": hypothesis,
+                    "verdict": verdict,
+                    "timestamp": ts,
+                    "speedup_median": bench.as_ref().and_then(|b| b.get("speedup_median").cloned()),
+                    "speedup_ci": bench.as_ref().and_then(|b| b.get("speedup_ci").cloned()),
+                    "workload": workload,
+                })))
+            }
+            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e.into()),
+        }
+    }
+
     pub fn verdict_summary(&self, run_id: &str) -> Result<Option<serde_json::Value>, LedgerError> {
         let row = self.conn.query_row(
             "SELECT verdict, bench FROM attempts WHERE run_id = ?1",

@@ -65,3 +65,22 @@ install-coz:
 coz target iters="200":
     sh scripts/coz-profile.sh {{target}} {{iters}}
     python3 scripts/coz-summary.py results/{{target}}/coz/profile.coz
+
+# Service mode (Phase 4): interleaved A/B latency bench of two server
+# binaries under coordinated-omission-correct open-loop load. p50/p99 CIs.
+service baseline candidate doc *flags:
+    cargo run -p bench-runner -- --config config/accept.toml service \
+        --baseline-bin "{{baseline}}" --candidate-bin "{{candidate}}" \
+        --doc "{{doc}}" --pin "taskset -c 2" {{flags}}
+
+# Service-mode calibration: A/A false-positive + injected latency-regression
+# detection (SPEC §3.1); writes JSON evidence.
+service-calibrate server doc out *flags:
+    cargo run -p bench-runner -- --config config/accept.toml service-calibrate \
+        --server-bin "{{server}}" --doc "{{doc}}" --pin "taskset -c 2" \
+        --out "{{out}}" {{flags}}
+
+# Mechanical ROI report from a ledger row (SPEC §9): throughput→cores→
+# dollars and/or latency percentiles, CIs + methodology printed inline.
+report run_id *flags:
+    cargo run -p report -- --run-id "{{run_id}}" {{flags}}
