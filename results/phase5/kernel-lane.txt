@@ -1,0 +1,32 @@
+# Kernel-lane demonstration — matmul (n=512, f32)
+
+## 1. Equivalence: byte-identical is the wrong gate
+byte-identical: FAIL — 244901 of 262144 result values differ (accumulation reordered)
+
+diff-test FP-tolerance policy (targets/matmul/equivalence.toml):
+  policy: FpTolerance { abs: 0.0001, rel: 0.001 }
+  EQUIVALENT under policy
+
+in-process reference differential test:
+  kernel differential test (opt vs reference):
+    max_abs_err = 3.815e-05
+    max_rel_err = 2.173e-02 (dominated by near-zero elements; see abs floor)
+    tolerance   = abs 1.000e-04 + rel 1.000e-03 * |ref|
+    byte_identical   = NO (accumulation reordered by design)
+    within_tolerance = YES
+    verdict = EQUIVALENT
+
+control — a genuine wrong result IS caught by the tolerance:
+  tolerance correctly REJECTS a +0.5 perturbation of one element
+
+## 2. Speedup: interleaved A/B, bootstrap 95% CI
+  speedup (baseline/candidate): median 3.2301, 95% CI [3.1600, 3.2594]
+  verdict: accepted
+
+## What it demonstrates
+A real matmul speedup (transpose for cache locality + eight-accumulator
+ILP) that reorders the reduction. Byte-identical rejects it; the
+FP-tolerance gate accepts it (abs 1e-4 + rel 1e-3) while still catching
+a wrong result; the bench measures it with the same CI machinery as
+every other target. The GPU extension (Triton/CUDA vs a reference
+kernel) is the same shape — only the timer and the hardware change.
