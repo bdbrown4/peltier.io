@@ -5,6 +5,11 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
+# The crate ships two binaries — the `diff-test` gate driver and the
+# `fp-compare` kernel-lane helper (src/bin/fp-compare.rs). Name the primary
+# one so `cargo run -p diff-test` stays unambiguous (CI runs it as the
+# per-target gate: `cargo run -p diff-test -- <target>`).
+default-run = "diff-test"
 
 [dependencies]
 anyhow.workspace = true
