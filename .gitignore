@@ -249,3 +249,4 @@ targets/cjson/cand-*/
 targets/cjson/asan*/
 targets/cjson/svc-baseline/
 targets/cjson/svc-candidate/
+docs/book/

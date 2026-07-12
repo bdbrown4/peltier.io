@@ -1,0 +1,20 @@
+/* hotpath docs — small refinements over the default mdBook theme. */
+
+.content h1 {
+    border-bottom: 2px solid var(--links);
+    padding-bottom: 0.2em;
+}
+
+/* Verified-number tables read as evidence: tighten and emphasize. */
+.content table td:first-child {
+    font-weight: 500;
+}
+
+blockquote {
+    border-inline-start: 4px solid var(--links);
+}
+
+/* Inline verdict-ish code (accepted / rejected-bench / needs-human-review) */
+.content code {
+    font-variant-ligatures: none;
+}
