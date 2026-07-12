@@ -1,0 +1,12 @@
+[package]
+name = "policy"
+description = "Learned class-selection policy (SPEC §13): rank playbook classes by the Wilson lower bound of their observed win-rate in the ledger, degrading to cheapest-first when data is thin"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+ledger = { path = "../ledger" }

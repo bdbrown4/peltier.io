@@ -190,6 +190,28 @@ impl Ledger {
     /// onto a completed attempt (harnessd `read_verdict`). Returns the
     /// verdict plus the bench CIs; never enough to game, since the row
     /// is already written and immutable.
+    /// Every attempt's (playbook_class, target, verdict, sanitizers_clean)
+    /// — the training signal for the learned class-selection policy
+    /// (SPEC §13). A "shippable win" is `accepted` AND sanitizers-clean,
+    /// matching the report generator's definition.
+    pub fn all_outcomes(&self) -> Result<Vec<(u8, String, String, bool)>, LedgerError> {
+        let mut stmt = self
+            .conn
+            .prepare("SELECT playbook_class, target, verdict, gates FROM attempts")?;
+        let rows = stmt.query_map([], |r| {
+            let class: u8 = r.get(0)?;
+            let target: String = r.get(1)?;
+            let verdict: String = r.get(2)?;
+            let gates: Option<String> = r.get(3)?;
+            let sanitizers_clean = gates
+                .and_then(|g| serde_json::from_str::<serde_json::Value>(&g).ok())
+                .and_then(|g| g.get("sanitizers_clean").and_then(|v| v.as_bool()))
+                .unwrap_or(false);
+            Ok((class, target, verdict, sanitizers_clean))
+        })?;
+        Ok(rows.collect::<Result<Vec<_>, _>>()?)
+    }
+
     /// Full row data the ROI report generator needs (SPEC §9). Includes
     /// the workload string pulled out of the bench evidence.
     pub fn report_row(&self, run_id: &str) -> Result<Option<serde_json::Value>, LedgerError> {
