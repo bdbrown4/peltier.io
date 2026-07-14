@@ -62,3 +62,12 @@ increments, all on the same 40%-of-runtime function — and one honest
 rejection in between (`phase2-tokei-009`, a real +5.7% median whose
 noisy CI lower bound of +0.2% could not clear the bar, so it does not
 count).
+
+---
+
+> **Note (2026-07-13).** The 10,000-input differential fuzz cited above
+> ran **out-of-band** (`scripts/diff-fuzz-tokei.py`, per-attempt), not
+> inside the verdict pipeline — so these ledger rows record
+> `fuzz_iters=0` in their machine record. The fuzz gate is now
+> pipeline-integrated; rows written after this date record the
+> iteration count actually executed.

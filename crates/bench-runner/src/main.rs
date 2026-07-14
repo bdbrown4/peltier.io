@@ -1,5 +1,7 @@
 use anyhow::Result;
-use bench_runner::{config::AcceptConfig, decide, exec, fingerprint::EnvFingerprint, stats};
+use bench_runner::{
+    config::AcceptConfig, counters, decide, exec, fingerprint::EnvFingerprint, stats,
+};
 use clap::{Parser, Subcommand};
 use ledger::Verdict;
 use std::path::PathBuf;
@@ -25,6 +27,11 @@ enum Cmd {
         baseline: String,
         #[arg(long)]
         candidate: String,
+        /// Wrap each timed run in `perf stat` and print per-side counter
+        /// medians (Unix only; opt-in diagnostics, never part of the
+        /// accept decision).
+        #[arg(long, default_value_t = false)]
+        perf_stat: bool,
     },
     /// A/A self-test: same command both sides; must yield a null verdict.
     Aa {
@@ -429,12 +436,13 @@ fn main() -> Result<()> {
         None => AcceptConfig::default(),
     };
 
-    let (baseline, candidate, aa_mode) = match &cli.command {
+    let (baseline, candidate, aa_mode, perf_stat) = match &cli.command {
         Cmd::Compare {
             baseline,
             candidate,
-        } => (baseline.clone(), candidate.clone(), false),
-        Cmd::Aa { cmd } => (cmd.clone(), cmd.clone(), true),
+            perf_stat,
+        } => (baseline.clone(), candidate.clone(), false, *perf_stat),
+        Cmd::Aa { cmd } => (cmd.clone(), cmd.clone(), true, false),
         Cmd::Calibrate {
             cmd,
             sessions,
@@ -502,13 +510,24 @@ fn main() -> Result<()> {
         cfg.runs_per_side, cfg.warmup_runs
     );
 
-    let samples = exec::run_interleaved(
-        &baseline,
-        &candidate,
-        cfg.runs_per_side,
-        cfg.warmup_runs,
-        0.0,
-    )?;
+    let (samples, perf_report) = if perf_stat {
+        let (samples, report) = counters::run_interleaved_perf(
+            &baseline,
+            &candidate,
+            cfg.runs_per_side,
+            cfg.warmup_runs,
+        )?;
+        (samples, Some(report))
+    } else {
+        let samples = exec::run_interleaved(
+            &baseline,
+            &candidate,
+            cfg.runs_per_side,
+            cfg.warmup_runs,
+            0.0,
+        )?;
+        (samples, None)
+    };
     let ci = stats::bootstrap_ratio_ci(
         &samples.baseline_s,
         &samples.candidate_s,
@@ -524,6 +543,9 @@ fn main() -> Result<()> {
         ci.lo,
         ci.hi
     );
+    if let Some(report) = &perf_report {
+        report.print(&baseline, &candidate);
+    }
 
     if aa_mode {
         // Null verdict required: an "accept" here is a calibration failure.

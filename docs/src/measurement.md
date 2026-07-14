@@ -27,6 +27,22 @@ reproduces). A change is accepted only if the **CI lower bound** clears the
 threshold in `config/accept.toml` (default 2%) — not the median. The number
 you commit to is the one that survives the interval.
 
+## Beyond wall time: max RSS and PMU counters
+
+Wall time is the **only** metric a verdict is ever decided on. Two
+supporting measurements exist alongside it:
+
+- **Max RSS** is captured for every timed run on Unix (`wait4`'s
+  `ru_maxrss`) and recorded in the run's environment fingerprint as
+  baseline/candidate medians — so a speedup that quietly pays for itself
+  in memory is visible next to the number it bought.
+- **PMU counters** (cycles, instructions, cache misses, branch misses)
+  are opt-in diagnostics: `bench-runner compare --perf-stat` wraps each
+  timed run in `perf stat` and prints per-side medians with the workload
+  caveat attached. PMU access is unavailable in most VMs, and the
+  counters never participate in the accept decision — they explain a
+  wall-time delta, they do not replace it.
+
 ## The hardware has to earn trust first
 
 Before any measurement session, the harness runs two self-tests, recorded

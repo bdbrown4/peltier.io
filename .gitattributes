@@ -1,0 +1,4 @@
+# Hash manifests and shell scripts must stay LF even on Windows checkouts —
+# sha256sum -c and POSIX sh both break on CRLF working-tree copies.
+*.sha256 text eol=lf
+*.sh text eol=lf

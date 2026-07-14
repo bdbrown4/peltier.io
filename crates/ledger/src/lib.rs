@@ -36,7 +36,10 @@ impl Verdict {
     }
 }
 
-/// Gate outcomes for one attempt (SPEC §3.2).
+/// Gate outcomes for one attempt (SPEC §3.2). The trailing fields are
+/// defaulted so historical rows (written before they existed) keep
+/// deserializing; they live only in the `gates` JSON column — no schema
+/// change, append-only doctrine untouched.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GateResults {
     pub upstream_tests: bool,
@@ -44,6 +47,15 @@ pub struct GateResults {
     pub fuzz_iters: u64,
     pub fuzz_divergence: bool,
     pub sanitizers_clean: bool,
+    /// None = no TSan lane configured/run for this attempt.
+    #[serde(default)]
+    pub tsan_clean: Option<bool>,
+    /// Lexical NHR-classifier hits (crates/verdict src/risk.rs).
+    #[serde(default)]
+    pub risk_signals: Vec<String>,
+    /// "byte-identical" | "fp-tolerance"; None for historical rows.
+    #[serde(default)]
+    pub equivalence_mode: Option<String>,
 }
 
 /// Benchmark evidence for one attempt. All times in seconds; CIs are
@@ -332,6 +344,42 @@ mod tests {
         ledger.record(&sample_attempt("r1")).unwrap();
         assert_eq!(ledger.count().unwrap(), 1);
         assert_eq!(ledger.attempted_classes("example").unwrap(), vec![2]);
+    }
+
+    #[test]
+    fn historical_gates_json_still_deserializes() {
+        // Exact shape of the 34 pre-existing rows' gates column: no
+        // tsan_clean / risk_signals / equivalence_mode keys.
+        let old = r#"{"upstream_tests":true,"golden_replay":true,"fuzz_iters":4332,
+                      "fuzz_divergence":false,"sanitizers_clean":true}"#;
+        let g: GateResults = serde_json::from_str(old).unwrap();
+        assert!(g.upstream_tests && g.golden_replay && g.sanitizers_clean);
+        assert_eq!(g.fuzz_iters, 4332);
+        assert_eq!(g.tsan_clean, None);
+        assert!(g.risk_signals.is_empty());
+        assert_eq!(g.equivalence_mode, None);
+    }
+
+    #[test]
+    fn extended_gates_round_trip() {
+        let g = GateResults {
+            upstream_tests: true,
+            golden_replay: true,
+            fuzz_iters: 10_000,
+            fuzz_divergence: false,
+            sanitizers_clean: true,
+            tsan_clean: Some(false),
+            risk_signals: vec!["concurrency".into()],
+            equivalence_mode: Some("fp-tolerance".into()),
+        };
+        let json = serde_json::to_string(&g).unwrap();
+        let back: GateResults = serde_json::from_str(&json).unwrap();
+        assert_eq!(back.tsan_clean, Some(false));
+        assert_eq!(back.risk_signals, vec!["concurrency".to_string()]);
+        assert_eq!(back.equivalence_mode.as_deref(), Some("fp-tolerance"));
+        // The keys the defensive Value readers depend on must survive.
+        let v: serde_json::Value = serde_json::from_str(&json).unwrap();
+        assert_eq!(v.get("sanitizers_clean"), Some(&serde_json::json!(true)));
     }
 
     #[test]

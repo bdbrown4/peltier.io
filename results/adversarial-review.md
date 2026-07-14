@@ -57,3 +57,19 @@ consistent, with the compound tokei figure stated as an approximation
   the case study and is now enforced by the report generator too.
 - `phase0-comrak-002` (mimalloc) is `needs-human-review`, awaiting a ruling
   (see `results/rulings/`).
+
+## Erratum (2026-07-13)
+
+Finding 1's separation claim above — "only the historical overturned row
+is `accepted + false`, so the rule cleanly separates them" — was too
+strong. **Five** accepted rows carry `sanitizers_clean: false`:
+`phase1-verdict-smoke-002`, `phase1-ipc-smoke-001`, `phase2-tokei-001`,
+`phase2-tokei-003`, and `phase2-comrak-010`. All five pre-date the
+machine-enforced sanitizer lane — the Phase 1 rows are harness smoke
+tests, and the two Phase 2 tokei wins were sanitizer-audited by hand
+during the 100% Phase 2 audit (see the Phase 2 case study) — but the
+ledger's machine record cannot distinguish "manually audited clean" from
+"never run", so the report generator's not-shippable rule flags all five,
+not just the overturned row. That is the correct conservative behavior;
+only the description of *why* the rule separates cleanly was wrong. The
+original text stands unedited above; this note is the correction.

@@ -24,8 +24,12 @@ Rules, in priority order:
    Never restructure a patch to influence measurement rather than to
    express the hypothesis.
 
-5. Equivalence is not yours to relax. Floating-point flag changes,
-   concurrency-primitive changes, and new unsafe code are routed to
-   human review automatically; do not attempt to phrase a patch to
-   avoid that routing.
+5. Equivalence is not yours to relax. The trust layer (crates/verdict)
+   runs a conservative lexical risk classifier over every patch's
+   changed lines: concurrency, unsafe, and floating-point signals force
+   any would-be accept to needs-human-review, and fp-tolerance
+   equivalence mode always routes to human review. The classifier is
+   lexical and deliberately over-triggering, not a semantic analysis;
+   a human --needs-human-review flag also exists. Do not attempt to
+   phrase a patch to slip past that routing.
 """

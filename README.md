@@ -21,7 +21,7 @@ hostile review.
 ## Verified results
 
 Every number carries its 95% CI and its workload, and every one survived the
-gates above. Across **five phases and 33 ledger rows, zero shipped false
+gates above. Across **five phases and 34 ledger rows, zero shipped false
 accepts** — including two pipeline over-accepts the audit caught before
 anything shipped, each becoming a permanent new gate.
 
@@ -58,10 +58,15 @@ docs/              The mdBook site (deployed to GitHub Pages)
 just build / test / lint       # trust-layer workspace
 just aa                        # A/A self-test — must yield a null verdict
 just gates <target>            # corpus pin + upstream tests + golden replay
-just verdict <t> <bin> ...     # gates + bench vs pristine baseline + ledger row
+                               #   (fuzz needs a baseline — it runs in `just verdict`)
+just verdict <t> <bin> ...     # gates + fuzz + sanitizers + bench vs pristine baseline
 just report <run-id>           # ROI report from a ledger row
 just isolation-check           # 19 OS-boundary checks (both modes)
 ```
+
+The pipeline is **Linux/POSIX-only** at runtime (Unix sockets, `setsid`,
+sh-based gates). Windows builds the workspace and runs the portable unit
+tests, but cannot run the pipeline.
 
 Full command reference and reproduction steps:
 [Reproduce it yourself](https://bdbrown4.github.io/peltier.io/reproduce.html).

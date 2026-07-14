@@ -29,7 +29,7 @@ and every one survived the gates above. These are not projections.
 | cJSON HTTP service — p50 latency under replayed load | +6.2%, CI [+5.8%, +7.2%] |
 | comrak (Rust) — mimalloc allocator swap (class 2) | +4.6%, CI [+3.3%, +5.8%], human-ruled |
 
-Across **five phases and 33 ledger rows**, with **zero shipped false
+Across **five phases and 34 ledger rows**, with **zero shipped false
 accepts** — including two occasions where the pipeline itself over-accepted
 and the audit caught it before anything shipped, each becoming a permanent
 new gate.

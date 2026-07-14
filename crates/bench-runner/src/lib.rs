@@ -3,9 +3,11 @@
 //! The product is this crate: interleaved A/B measurement, bootstrap CIs
 //! over the ratio of medians, threshold-gated accept decisions, and A/A
 //! self-calibration. Pure statistics live here and are unit-tested;
-//! process execution and `perf stat` integration live in `exec`.
+//! process execution lives in `exec`; opt-in `perf stat` diagnostics
+//! live in `counters`.
 
 pub mod config;
+pub mod counters;
 pub mod exec;
 pub mod fingerprint;
 pub mod schedule;

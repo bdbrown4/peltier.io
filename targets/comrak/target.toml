@@ -33,6 +33,12 @@ workload = "Pro Git book, all translations, 11.0 MB concatenated markdown, singl
 tests = "cargo test --release --manifest-path targets/comrak/workspace/Cargo.toml"
 # Golden replay: corpus through the binary, stdout must be byte-identical.
 golden = "cat corpora/comrak/progit.md | {binary}"
+# Differential fuzz, pipeline-integrated: diff-test substitutes {iters},
+# {baseline} (the pristine binary the accept path rebuilds) and {candidate},
+# then parses the script's final FUZZ-RESULT line. The harness owns where the
+# pristine build lands, so the script takes the baseline from argv and never
+# hardcodes a path; paths may be repo-root-relative or absolute.
+fuzz = "python3 scripts/diff-fuzz-comrak.py targets/comrak/fuzz-work {iters} {baseline} {candidate}"
 
 [corpus]
 manifest = "corpora/comrak/MANIFEST.sha256"

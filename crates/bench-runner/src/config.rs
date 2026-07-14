@@ -23,6 +23,13 @@ pub struct AcceptConfig {
     /// both sides identically.
     #[serde(default)]
     pub pin_prefix: String,
+    /// Differential-fuzz iterations requested per gate run (SPEC §3.2).
+    #[serde(default = "default_fuzz_iters")]
+    pub fuzz_iters: u64,
+}
+
+fn default_fuzz_iters() -> u64 {
+    10_000
 }
 
 impl Default for AcceptConfig {
@@ -35,6 +42,7 @@ impl Default for AcceptConfig {
             confidence: 0.95,
             bootstrap_seed: 0x707E_17E5,
             pin_prefix: String::new(),
+            fuzz_iters: default_fuzz_iters(),
         }
     }
 }
@@ -50,5 +58,33 @@ impl AcceptConfig {
             "confidence must be in (0, 1)"
         );
         Ok(cfg)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const MINIMAL: &str = "threshold = 0.02\nruns_per_side = 30\nwarmup_runs = 3\n\
+                           bootstrap_iters = 10000\nconfidence = 0.95\nbootstrap_seed = 7\n";
+
+    #[test]
+    fn fuzz_iters_defaults_when_absent() {
+        let cfg: AcceptConfig = toml::from_str(MINIMAL).unwrap();
+        assert_eq!(cfg.fuzz_iters, 10_000);
+        assert_eq!(AcceptConfig::default().fuzz_iters, 10_000);
+    }
+
+    #[test]
+    fn fuzz_iters_overridable() {
+        let raw = format!("{MINIMAL}fuzz_iters = 500\n");
+        let cfg: AcceptConfig = toml::from_str(&raw).unwrap();
+        assert_eq!(cfg.fuzz_iters, 500);
+    }
+
+    #[test]
+    fn unknown_fields_still_rejected() {
+        let raw = format!("{MINIMAL}fuz_iters = 500\n");
+        assert!(toml::from_str::<AcceptConfig>(&raw).is_err());
     }
 }
