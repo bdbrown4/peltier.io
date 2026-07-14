@@ -234,7 +234,9 @@ targets/comrak/asan*/
 targets/tokei/candidate-*/
 targets/tokei/asan/
 !results/calibration/*.json
+!results/phase4/*.json
 targets/*/baseline/
+targets/*/fuzz-work/
 
 # Phase 2 agent artifacts (transcripts kept; pending logs are scratch)
 results/pending/
@@ -250,3 +252,4 @@ targets/cjson/asan*/
 targets/cjson/svc-baseline/
 targets/cjson/svc-candidate/
 docs/book/
+

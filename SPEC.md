@@ -43,6 +43,8 @@ Requirements:
 - **A/A self-test mode**: run the same binary as both sides; must produce a null verdict. Scheduled automatically before any measurement session.
 - Regression-injection self-test: a synthetic 5% slowdown must be detected ≥95% of the time.
 - Metrics captured per run: wall time, cycles, instructions, cache misses, branch misses (via `perf stat`), max RSS, and RAPL energy where available.
+
+  > **Amended 2026-07-13.** As built: **wall time is the only metric a verdict is decided on.** Max RSS is captured per timed run on Unix (`wait4` / `ru_maxrss`) and recorded as baseline/candidate medians in the env fingerprint — it is **context, never an accept metric**. PMU counters (cycles, instructions, cache misses, branch misses) are opt-in diagnostics via `bench-runner compare --perf-stat` — printed with the workload caveat, never part of the accept decision, and unavailable in most VMs. RAPL energy capture was never implemented. The **"no-network container"** named in the environment-control bullet above is *not* what ships — see the §10 amendment for the isolation actually built (a network namespace on the agent path only).
 - Modes: (a) whole-program via hyperfine-style CLI timing; (b) microbench via criterion harness hooks; (c) service mode (Phase 4): wrk2 / vegeta load replay with **coordinated-omission-aware** latency recording (HdrHistogram).
 
 Acceptance: passes A/A calibration at <5% false-positive rate and injected-regression detection at ≥95%, documented in `results/calibration/`.
@@ -57,6 +59,12 @@ Layered, all must pass:
 
 Corpus and test files live outside agent-writable paths and are hash-pinned; `diff-test` refuses to run if hashes mismatch.
 
+> **Amended 2026-07-13 — layer 3 (differential fuzz) as actually built.** Fuzz is a **baseline-vs-candidate** gate: it needs both binaries, so it runs *only* on the accept path (`verdict`, the one flow that rebuilds a pristine baseline). The standalone `diff-test` / `just gates` flow has no baseline and records the gate as **Skipped, with that reason** — it is never faked by comparing the candidate against itself. `diff-test` executes the target's declared `[gates].fuzz` command and grades it strictly from a `FUZZ-RESULT iters=<n> divergences=<m>` line; a run that never prints the line is a **Failed** gate, not a pass by silence. The ledger records the iteration count actually executed. **Hard rule:** a machine `accepted` verdict is impossible unless this gate *Passed* — skipped or failed caps the verdict at `needs-human-review`. `cjson`, `comrak`, and `tokei` declare `[gates].fuzz`; `matmul` does not. The per-changed-function scoping and the 60s/10k minimum remain aspirational: the shipped fuzzers are per-target whole-binary differential drivers (`scripts/diff-fuzz-*.py`) with a configurable iteration budget.
+
+> **Amended 2026-07-13 — layer 4 (sanitizers) as actually built.** ASan+UBSan is machine-enforced on the accept path: `verdict` builds the target's `[build].sanitizer` binary, runs the pinned workload under it, and caps a flagged run — or a target that declares **no** sanitizer build — at `needs-human-review`. The **TSan lane is opt-in per target** (`[build].tsan` + `[build].tsan_binary`) rather than diff-triggered, and **no target declares it today**, so the lane is wired but **inert and no TSan coverage currently exists**; a threaded patch requires adding that opt-in first. **MIRI was never implemented.**
+
+> **Amended 2026-07-13 — test-suite pinning: mechanized, not yet active.** As built, upstream test suites are vendored inside `targets/<t>/workspace/` — an agent-writable path — so "unmodified" is enforced by pinning, not placement: `corpora/<t>/TESTSUITE.sha256` (generated only by a deliberate human run of `scripts/pin-testsuite.sh`) is verified by `diff-test` before the suite runs; a hash mismatch is a hard refusal, same posture as the corpus pin. Targets without a pin file run with an explicit "suite unpinned" warning, and `targets/fetch.sh` verifies the pin after every fetch. **Status: no target ships a pin — there are zero `TESTSUITE.sha256` files in the repo — so this gate is currently inert and constrains nothing.** It becomes real only when pins are generated per target after a fetch. (The *corpus* pin, `MANIFEST.sha256`, ships for every target and **is** enforced today.)
+
 ### 3.3 `ledger`
 
 Append-only SQLite. One row per attempt:
@@ -70,7 +78,7 @@ Phase 0–2: `perf record` + flamegraphs (inferno) + `perf stat`; hotspot rankin
 
 ### 3.5 `agent/`
 
-Claude Agent SDK (Python). Tools exposed to the model: `read_profile`, `read_ledger`, `read_playbook`, `propose_patch(diff, hypothesis)`, `run_verdict`, `read_target_source` (read-only). Deliberately **not** exposed: shell on the host, writes outside `targets/<name>/`, any access to `crates/`, `config/`, `corpora/`.
+Claude Agent SDK (Python). Tools exposed to the model — seven: `read_profile`, `read_ledger`, `read_playbook`, `read_target_source` (read-only), `propose_patch(diff, hypothesis)`, `run_verdict`, `read_verdict`. Deliberately **not** exposed: shell on the host, writes outside `targets/<name>/`, any access to `crates/`, `config/`, `corpora/`. *(Amended 2026-07-13: `run_verdict` launches the pipeline detached and returns immediately; the pollable `read_verdict` — added in Phase 2 when the pipeline outlived the MCP transport timeout — reads the result, making seven operations total.)*
 
 Prompting spine: (1) state hypothesis before patching; (2) prefer the cheapest untried playbook class; (3) max two iterations per rejected hypothesis; (4) a rejection with a clean ledger row is a successful outcome.
 
@@ -79,7 +87,7 @@ Prompting spine: (1) state hypothesis before patching; (2) prefer the cheapest u
 Consumes ledger rows, emits per-engagement ROI report:
 - Throughput jobs: cores saved = fleet_cores × (1 − 1/speedup); $ = cores × $/core-hr × hours/yr (rates in `config/pricing.toml`).
 - Services: p50/p95/p99 deltas under replayed traffic, with the business-value mapping left as a customer-supplied parameter and one worked example.
-- Optional: joules saved (RAPL) for the sustainability line.
+- Optional: joules saved (RAPL) for the sustainability line. *(Amended 2026-07-13: never implemented — RAPL energy is not captured anywhere in the harness, so no report emits a joules figure. See the §3.1 amendment.)*
 - Every figure carries CI + workload description + environment fingerprint. Caveats are printed on the report, not in an appendix.
 
 ## 4. Optimization playbook v0 (strict order)
@@ -106,6 +114,8 @@ Each class ships as `playbook/NN-name.md`: preconditions (profile signature that
 
 Language order: Rust first (criterion/proptest/MIRI make Phases 1–2 cheaper), C/C++ second (the richer legacy hunting ground), services third.
 
+> **Amended 2026-07-13.** The Phase 2 criterion as written — "zero false accepts across ≥20 audited attempts" — was violated once *in-pipeline*: `phase2-comrak-010` was falsely accepted by the pipeline (no machine sanitizer gate existed yet), caught by the 100% human audit, overturned, and never shipped. The criterion was met in the form **zero *shipped* false accepts**; the overturn drove the machine-enforced sanitizer gate and stands documented in the Phase 2 case study.
+
 ## 6. Target selection criteria (Phase 0–3)
 
 CPU-bound (>70% user time on profile); meaningful test suite; existing benchmark or easily scripted workload; permissive license; active but not hyper-optimized (skip anything with a dedicated perf team); builds cleanly in container. Good hunting: codecs, parsers, serializers, image processing, compression, static-site generators, linters.
@@ -123,6 +133,8 @@ CPU-bound (>70% user time on profile); meaningful test suite; existing benchmark
 - **needs-human-review** (never auto-accepted): FP reassociation/contraction or `-ffast-math`-class flags; any diff touching atomics, locks, memory ordering, or thread counts; unsafe blocks / raw pointer arithmetic introduced; anything the sanitizers flag even as warnings.
 - **Auto-rejected**: any gate failure, any divergence under differential fuzz, patch outside allowlist.
 
+> **Amended 2026-07-13.** The needs-human-review tier is machine-routed, not honor-system: `verdict` runs a **conservative lexical risk classifier** over the patch's changed lines (substring token lists for concurrency, unsafe, and floating-point signals) and forces any would-be accept carrying a signal to `needs-human-review`; using **fp-tolerance equivalence mode** at all also auto-routes to review; the manual `--needs-human-review` flag remains. The classifier is lexical and deliberately over-triggering — it cheaply catches the presence of risk markers, it does not prove their absence.
+
 ## 9. ROI methodology (the pitch artifact)
 
 The report answers one question: *what did the stopwatch say, and what does that cost or buy?* Throughput → cores → dollars via public cloud pricing; latency → percentile deltas under recorded production-shaped load, priced by the customer's own latency-value number; batch windows → wall-clock hours returned to the schedule. All three come with CIs and a workload statement. The methodology section ships *inside* every report so the number survives hostile review — that is the differentiation.
@@ -135,6 +147,14 @@ The agent's incentive is "make the number go up"; the design must make cheating 
 - Baselines rebuilt from pristine checkouts; corpora hash-pinned; `diff-test` refuses on mismatch.
 - Target code executes only in no-network containers (bench containers additionally seccomp-restricted).
 - Periodic human audit of accepted wins (100% in Phase 2, sampled thereafter); any false accept is a stop-the-line event.
+
+> **Amended 2026-07-13 — isolation as actually built.** The bullet above ("target code executes only in no-network containers, seccomp-restricted") is **not** what ships. What ships:
+>
+> - **The `harnessd`-launched verdict pipeline** — the agent path — execs through `scripts/no-net.sh`, a **network-namespace** wrapper (`unshare --net --map-current-user`). `HOTPATH_VERDICT_WRAPPER` overrides the wrapper.
+> - **It fails closed.** Where namespaces are unavailable the wrapper **exits 97 without running the pipeline**, rather than degrading silently. The only bypass is the explicit `HOTPATH_ALLOW_UNISOLATED=1` override — which runs the pipeline **with full network access**, warns loudly on stderr, and is recorded verbatim in the ledger's isolation note (`"no-net.sh (HOTPATH_ALLOW_UNISOLATED=1 — network NOT isolated)"`), so a run can never *claim* an isolation it did not have.
+> - **In CI**, the bench workload runs under `docker run --network=none`.
+>
+> **Two gaps, stated plainly.** (1) **Only the harnessd (agent) path is wrapped.** A human invoking `just verdict` directly runs **unwrapped** on the host; such rows record `isolation: "unwrapped-host"`. (2) **Full-container isolation of the whole pipeline remains open** — the wrapper isolates the *network*, not the filesystem or the syscall surface; the seccomp-restricted bench container of this section is not built. The agent-side OS boundary (mount-namespace / unprivileged-uid isolation, `just isolation-check`) is a separate mechanism and *is* shipped.
 
 ## 11. Risk register
 
@@ -149,9 +169,13 @@ The agent's incentive is "make the number go up"; the design must make cheating 
 | License/IP hygiene | Permissive-license targets only for public case studies |
 | Wins too small to matter | Cheap-wins-first ordering keeps cost-per-attempt low; ledger prevents re-grinding dead ends |
 
+> **Amended 2026-07-13 — which mitigations above are actually live.** The "Concurrency bugs introduced" and "UB introduced" rows overstate the machine coverage. Live today: **UBSan** (bundled with ASan on the accept path, machine-enforced) and the **human-review tier**, which is machine-routed by the lexical risk classifier of the §8 amendment — so a concurrency-token or `unsafe`-token patch *is* forced to `needs-human-review`, conservatively and lexically. **Not live: the TSan gate** (opt-in via `[build].tsan`; no target declares it) and **MIRI** (never implemented). The concurrency and UB rows therefore rest on the review tier and UBSan, not on TSan/MIRI.
+
 ## 12. Tech stack
 
 Rust workspace (`bench-runner`, `diff-test`, `ledger`, `report`) · `just` · hyperfine-style timing + criterion hooks · perf, inferno flamegraphs, coz · proptest, cargo-fuzz, libFuzzer · ASan/UBSan/TSan, MIRI · podman/docker (no-net) · wrk2 + HdrHistogram, vegeta · SQLite · Python 3.11+ with Claude Agent SDK (`agent/`) — confirm current SDK package name and auth at https://docs.claude.com/en/docs/claude-code/overview.
+
+> **Amended 2026-07-13 — the stack as actually used.** This list is the *planned* stack, not an inventory. In use: the Rust workspace (plus `verdict`, `harnessd`, `policy`), `just`, in-house interleaved timing and an in-house open-loop load generator (**not** hyperfine/criterion/wrk2/vegeta), valgrind-callgrind and coz for profiling (`perf` is often unavailable in the container), Python differential fuzzers (`scripts/diff-fuzz-*.py` — **not** proptest/cargo-fuzz/libFuzzer), ASan+UBSan, SQLite, and the Agent SDK. **Not used: MIRI (never implemented), TSan (wired but no target opts in), and podman/docker for the local verdict path** — local isolation is a network namespace (`scripts/no-net.sh`); Docker `--network=none` is used in CI.
 
 ## 13. Later / research fork (explicitly out of scope now)
 

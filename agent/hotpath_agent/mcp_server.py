@@ -1,4 +1,4 @@
-"""Standalone MCP stdio server exposing the six harness tools (SPEC §3.5).
+"""Standalone MCP stdio server exposing the seven harness tools (SPEC §3.5).
 
 Spawned as a subprocess by the agent loop; speaks MCP over stdio. Wraps
 the harnessd IPC client — the trust-layer allowlist and gates remain the

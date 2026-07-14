@@ -147,6 +147,7 @@ fn spawn_server(cfg: &ServiceCfg, port: u16) -> Result<Child> {
     Ok(child)
 }
 
+#[cfg(unix)]
 fn set_linger_zero(s: &TcpStream) {
     // SO_LINGER with a 0 timeout → RST on close instead of FIN, so the
     // tens of thousands of short client connections a load session opens
@@ -168,6 +169,12 @@ fn set_linger_zero(s: &TcpStream) {
             std::mem::size_of::<libc::linger>() as libc::socklen_t,
         );
     }
+}
+
+#[cfg(not(unix))]
+fn set_linger_zero(_s: &TcpStream) {
+    // Service mode is POSIX-only at runtime (`sh`, taskset); this stub
+    // only keeps the crate compiling on non-Unix hosts.
 }
 
 fn one_request(port: u16) -> std::io::Result<()> {

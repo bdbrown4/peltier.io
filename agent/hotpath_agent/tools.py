@@ -1,6 +1,6 @@
 """Tool surface exposed to the model (SPEC §3.5).
 
-Exactly six tools, all mediated by harnessd over line-delimited JSON —
+Exactly seven tools, all mediated by harnessd over line-delimited JSON —
 the agent process has no direct filesystem or shell capability beyond
 what these return. Deliberately NOT exposed: shell on the host, writes
 outside targets/<name>/, any access to crates/, config/, corpora/.

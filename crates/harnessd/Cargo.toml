@@ -1,6 +1,6 @@
 [package]
 name = "harnessd"
-description = "Agent-facing IPC daemon: the six-tool surface (SPEC §3.5) over line-delimited JSON on stdio; patches applied only after path-allowlist checks"
+description = "Agent-facing IPC daemon: the seven-op JSON surface (SPEC §3.5) over line-delimited JSON on stdio; patches applied only after path-allowlist checks"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

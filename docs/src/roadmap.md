@@ -44,5 +44,23 @@ Full write-up: [Research forks](./research-forks.md).
 The end goal is not vendored OSS case studies — it is a **real production
 system**. The same gates that matter for a JSON parser matter far more for
 a live CMS: an equivalence failure there is a customer-facing bug, and the
-no-network sandbox and append-only audit trail are exactly what make it
-safe to point an optimization agent at code that a business depends on.
+network-isolated verdict path and append-only audit trail are what would
+make it safe to point an optimization agent at code that a business depends
+on.
+
+## Known gaps (what would have to close first)
+
+Honesty about the remaining edges, since the product is trust:
+
+- **Full-container isolation.** The verdict pipeline is network-isolated on
+  the agent path (`scripts/no-net.sh`); the seccomp-restricted bench
+  container of SPEC §10 is **not built**, and a human running `just verdict`
+  directly is unwrapped.
+- **Test-suite pins.** The verify-or-refuse machinery exists, but **no
+  target ships a `TESTSUITE.sha256` yet** — so "the agent cannot edit the
+  upstream tests" is currently a mechanism awaiting its pins.
+- **TSan.** The lane runs on the accept path only when a target declares
+  `[build].tsan`; **none does today**, so there is no TSan coverage. Class-7
+  (concurrency) work depends on that opt-in landing.
+- **Kernel lane wiring.** `matmul` demonstrates FP-tolerance equivalence
+  script-driven; it is not yet a `target.toml` pipeline target.

@@ -52,6 +52,19 @@ tolerance is defensible for the workload, exactly as with the mimalloc
 allocator swap. The machine measures and gates; the human ratifies the
 tolerance.
 
+> **Scope, stated honestly.** The FP-tolerance *mechanism* is in the gate
+> pipeline — `diff-test` honors an `equivalence.toml` policy (it needs a
+> committed `[corpus].golden_reference`, and fails closed without one), and
+> `verdict` auto-routes any fp-tolerance run to `needs-human-review`. But
+> **`matmul` is not wired into that pipeline**: it has an `equivalence.toml`
+> and **no `target.toml`**, which is the file `diff-test`/`verdict` load a
+> target from. So the kernel lane is demonstrated **script-driven**
+> (`scripts/kernel-lane-demo.sh`, using the `fp-compare` binary and
+> `bench-runner compare` directly), and the `phase5-matmul-opt` ledger row
+> was recorded outside the automated verdict path. Promoting `matmul` to a
+> real pipeline target is open work — the policy is closed; that target's
+> wiring is not.
+
 **This is the GPU lane in miniature.** The environment has no GPU, so the
 GPU fork is shown on the CPU as what it actually is — the same trust
 machinery with a different timer. A Triton or CUDA kernel versus a reference

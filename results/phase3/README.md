@@ -66,3 +66,13 @@ fuzz, and sanitizers. Every rejection is a real mechanism that simply
 didn't clear the 2% CI-lower-bound bar — and it is in the ledger too,
 because a rejection is a complete, valid outcome. Nothing shipped that
 the pipeline couldn't prove.
+
+> **Note (2026-07-13).** "Every win survived … a 10k-input differential
+> fuzz, and sanitizers" is true of the **evidence**, not of the machine
+> record at the time: through Phase 5 the fuzz ran **out-of-band**
+> (`scripts/diff-fuzz-<target>.py`, per-attempt) and the Phase 3 rows
+> therefore carry `fuzz_iters=0`. The fuzz gate is now integrated into the
+> accept path, where a passed fuzz gate is a **precondition** for a machine
+> `accepted` verdict; rows written after this date record the iteration
+> count actually executed. See the per-case-study notes in
+> `01-tokei-algorithmic-rust.md` and `04-cjson-c-target.md`.

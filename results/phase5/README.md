@@ -137,3 +137,31 @@ it generalize?" objection with the two hardest cases the spec named:
 
 Zero shipped false accepts, still. The product is trust, and trust
 transferred.
+
+---
+
+## Erratum (2026-07-13) — how far the kernel lane is actually wired
+
+The write-up above describes the FP-tolerance gate as though `matmul` runs
+through the standard pipeline. It does not, and the distinction matters:
+
+- **The policy is in the pipeline.** `EquivalencePolicy` is honored by
+  `diff-test`'s gate sequence (an fp-tolerance target needs a committed
+  `[corpus].golden_reference`; the gate fails closed without one), and
+  `crates/verdict` treats fp-tolerance equivalence as an automatic
+  `needs-human-review` signal. That machinery is real and unit-tested.
+- **`matmul` is not a pipeline target.** It ships `targets/matmul/kernel.c`
+  and `targets/matmul/equivalence.toml` but **no `target.toml`** — the file
+  `diff-test`/`verdict` load a target from. So the lane cannot currently be
+  run via `just gates` or `just verdict` at all.
+- **Therefore the demonstration is script-driven.**
+  `scripts/kernel-lane-demo.sh` invokes the `fp-compare` binary and
+  `bench-runner compare` directly, and the `phase5-matmul-opt` ledger row
+  was recorded **outside** the automated verdict path.
+
+Nothing in the measured result changes — the 3.23× [3.16, 3.26] speedup, the
+244,901/262,144 differing values, the rejected +0.5 perturbation, and the
+`needs-human-review` verdict all stand as printed. What was overstated is the
+*integration*: the equivalence policy is closed; wiring this target into the
+pipeline is open work. The original text stands unedited above; this note is
+the correction.

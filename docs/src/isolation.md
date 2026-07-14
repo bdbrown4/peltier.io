@@ -34,6 +34,35 @@ The SDK's tool allow/deny list is defense-in-depth, not the boundary —
   path into the repo is the harnessd Unix socket; the trust layer is owned
   by another uid. This is the production shape (`docs/infra.md`).
 
+## Network isolation on the verdict path
+
+Target code should not be able to phone home during a measurement. What
+is actually enforced, stated honestly:
+
+- **The agent path is wrapped.** When `harnessd` launches the verdict
+  pipeline, it execs through `scripts/no-net.sh`, which runs it inside an
+  unprivileged **network namespace** (`unshare --net --map-current-user`).
+  `HOTPATH_VERDICT_WRAPPER` overrides the wrapper.
+- **It fails closed.** Where namespaces are unavailable the wrapper **exits
+  97 without running the pipeline** — it does not degrade silently. The one
+  bypass, `HOTPATH_ALLOW_UNISOLATED=1`, runs the pipeline **with full
+  network access**; it warns loudly on stderr *and* the resulting ledger row
+  records the isolation note `no-net.sh (HOTPATH_ALLOW_UNISOLATED=1 —
+  network NOT isolated)`. A run cannot claim an isolation it did not have.
+- **In CI**, the bench workload runs under `docker run --network=none`.
+
+Two limits, stated plainly rather than buried:
+
+- **Only the harnessd (agent) path is wrapped.** A human who invokes
+  `just verdict` directly runs it **unwrapped on the host**; those rows are
+  stamped `isolation: "unwrapped-host"` in the ledger. The wrapper is a
+  property of the agent pipeline, not of the `verdict` binary.
+- **Full-container isolation is still an open gap.** The namespace isolates
+  the *network* — not the filesystem, not the syscall surface. The
+  fully containerized, seccomp-restricted bench container of SPEC §10 is
+  **not built**. The agent-side OS boundary above is a separate mechanism
+  and *is* shipped.
+
 ## The two times the pipeline was wrong
 
 Anti-reward-hacking is not "it never fails" — it is "when it fails, the

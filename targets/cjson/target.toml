@@ -37,6 +37,12 @@ workload = "5.6 MB synthetic JSON (20k records: nested objects/arrays, escaped/u
 tests = "cmake -S targets/cjson/workspace -B targets/cjson/testbuild -DENABLE_CJSON_TEST=On -DCMAKE_BUILD_TYPE=Debug >/dev/null 2>&1 && cmake --build targets/cjson/testbuild -j >/dev/null 2>&1 && ctest --test-dir targets/cjson/testbuild --output-on-failure"
 # Golden: full re-serialization + checksum of the corpus, byte-hashed.
 golden = "{binary} corpora/cjson/input/big.json 1"
+# Differential fuzz, pipeline-integrated: diff-test substitutes {iters},
+# {baseline} (the pristine binary the accept path rebuilds) and {candidate},
+# then parses the script's final FUZZ-RESULT line. The harness owns where the
+# pristine build lands, so the script takes the baseline from argv and never
+# hardcodes a path; paths may be repo-root-relative or absolute.
+fuzz = "python3 scripts/diff-fuzz-cjson.py targets/cjson/fuzz-work {iters} {baseline} {candidate}"
 
 [corpus]
 manifest = "corpora/cjson/MANIFEST.sha256"

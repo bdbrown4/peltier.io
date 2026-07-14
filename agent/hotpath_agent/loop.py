@@ -1,7 +1,7 @@
-"""Phase 2 agent loop (SPEC §3.5): Claude Agent SDK driving the six
+"""Phase 2 agent loop (SPEC §3.5): Claude Agent SDK driving the seven
 harness tools over a standalone stdio MCP server. The agent gets NO
 built-in tools — no shell, no file writes; every capability is one of
-the six IPC operations, and the trust layer's allowlist/gates remain
+the seven IPC operations, and the trust layer's allowlist/gates remain
 the hard boundary (SPEC §10).
 
 Run one attempt:

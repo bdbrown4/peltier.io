@@ -8,14 +8,16 @@ the ledger stops you from re-grinding a class that already has a verdict.
 |---|---|---|---|
 | 1 | Build config | LTO, codegen-units, target-cpu | tokei ✅ +10.4% |
 | 2 | Allocator | Global allocator swap (mimalloc) | comrak ✅ +4.6% (human-ruled) |
-| 3 | Allocation churn | Remove per-item malloc/free | tokei ✅, cJSON ✅ (+ one overturned) |
+| 3 | Allocation churn | Remove per-item malloc/free | tokei ✅; cJSON rejected-bench (+ one overturned) |
 | 4 | Data layout | Make the cache hierarchy fit the access pattern | comrak (attempted) |
 | 5 | Algorithmic | Eliminate redundant work | tokei ×3 ✅, cJSON ✅ |
 | 6 | SIMD | Autovectorization enablement | comrak, tokei (attempted) |
 | 7 | Concurrency | Parallelism — always `needs-human-review` | — |
 
 Six classes were exercised across the case studies, with verified wins on
-classes 1, 2, 3, and 5 across **both a Rust and a C target**.
+classes 1, 2, 3, and 5 — spanning **both a Rust and a C target** (the C
+win is the class-5 cJSON rewrite; cJSON's class-3 attempt was an honest
+`rejected-bench`, its CI lower bound short of the 2% bar).
 
 ## Why the ordering is load-bearing
 

@@ -21,7 +21,7 @@ hostile review.
 ## Verified results
 
 Every number carries its 95% CI and its workload, and every one survived the
-gates above. Across **five phases and 33 ledger rows, zero shipped false
+gates above. Across **five phases and 34 ledger rows, zero shipped false
 accepts** — including two pipeline over-accepts the audit caught before
 anything shipped, each becoming a permanent new gate.
 
@@ -58,13 +58,42 @@ docs/              The mdBook site (deployed to GitHub Pages)
 just build / test / lint       # trust-layer workspace
 just aa                        # A/A self-test — must yield a null verdict
 just gates <target>            # corpus pin + upstream tests + golden replay
-just verdict <t> <bin> ...     # gates + bench vs pristine baseline + ledger row
+                               #   (fuzz needs a baseline — it runs in `just verdict`)
+just verdict <t> <bin> ...     # gates + fuzz + sanitizers + bench vs pristine baseline
 just report <run-id>           # ROI report from a ledger row
 just isolation-check           # 19 OS-boundary checks (both modes)
 ```
 
+The pipeline is **Linux/POSIX-only** at runtime (Unix sockets, `setsid`,
+sh-based gates). Windows builds the workspace and runs the portable unit
+tests, but cannot run the pipeline.
+
 Full command reference and reproduction steps:
 [Reproduce it yourself](https://bdbrown4.github.io/peltier.io/reproduce.html).
+
+## Use it on your own code
+
+The trust layer is not specific to these targets — it will judge any two shell
+commands. `.claude/skills/peltier/` packages it as a Claude Code skill:
+
+```sh
+# from any repo, with a peltier checkout reachable
+export PELTIER_HOME=/path/to/peltier.io
+mkdir -p .claude/skills
+cp -r /path/to/peltier.io/.claude/skills/peltier .claude/skills/
+```
+
+Then ask Claude to verify a speedup. The skill enforces the order that makes a
+performance claim mean something: **equivalence before timing** (a faster
+program that computes something different is a bug, not an optimization) →
+**A/A calibration** (a host that "finds" a speedup between a binary and itself
+cannot measure yours) → **interleaved A/B with a bootstrap CI** → a verdict
+decided by the CI *lower bound*, never the median.
+
+It drives the real `bench-runner` binary and **refuses rather than degrade**:
+on an unsupported host, or with no trust layer reachable, it stops and says so
+instead of falling back to a hand-rolled timing loop. A second copy of the
+statistics is a second thing that can lie.
 
 ## How it stays honest
 

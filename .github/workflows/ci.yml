@@ -91,3 +91,60 @@ jobs:
           $PERF record -e cpu-clock -o /tmp/p.data -- sh -c 'i=0; while [ $i -lt 2000000 ]; do i=$((i+1)); done' && $PERF report -i /tmp/p.data --stdio | head -5 || echo "cpu-clock sampling unavailable"
           echo "--- hardware cycle counter:"
           $PERF stat -e cycles true 2>&1 | tail -3 || true
+
+  # The peltier skill's contract: preflight must resolve the trust layer when
+  # one is reachable, and REFUSE when it is not. The refusal is the
+  # safety-critical path — a skill that silently degrades to a hand-rolled
+  # timing loop is worse than no skill — so it is asserted here, not assumed.
+  # Statistical outcomes are NOT asserted: a shared runner is too noisy for
+  # that, which is the whole reason the skill calibrates before it claims.
+  skill-preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Preflight resolves inside a peltier checkout
+        run: |
+          sh .claude/skills/peltier/scripts/preflight.sh | tee /tmp/pf.txt
+          grep -q '^STATUS=ok$' /tmp/pf.txt
+          grep -q "^PELTIER_HOME=$PWD$" /tmp/pf.txt
+          BR=$(sed -n 's/^BENCH_RUNNER=//p' /tmp/pf.txt); test -x "$BR"
+
+      - name: Preflight REFUSES with no trust layer reachable
+        run: |
+          # The skill must be copied OUT of the checkout: preflight also walks
+          # up from its own location, so running it in-place would find this
+          # very repo and (correctly) resolve — testing nothing.
+          cp -r .claude/skills/peltier /tmp/skillcopy
+          cd /tmp && mkdir -p not-a-repo && cd not-a-repo
+          set +e
+          env -u PELTIER_HOME sh /tmp/skillcopy/scripts/preflight.sh > out.txt 2>&1
+          rc=$?
+          set -e
+          cat out.txt
+          test "$rc" -ne 0 || { echo "FAIL: preflight did not refuse"; exit 1; }
+          grep -q '^STATUS=refuse$' out.txt
+
+      - name: Preflight works when consumed from another repo (PELTIER_HOME)
+        run: |
+          cd /tmp && mkdir -p other-project && cd other-project
+          PELTIER_HOME="$GITHUB_WORKSPACE" \
+            sh "$GITHUB_WORKSPACE/.claude/skills/peltier/scripts/preflight.sh" | tee pf.txt
+          grep -q '^STATUS=ok$' pf.txt
+
+      - name: The harness the skill drives actually runs (plumbing, not verdict)
+        run: |
+          BR=$(sed -n 's/^BENCH_RUNNER=//p' /tmp/pf.txt)
+          cp .claude/skills/peltier/assets/accept.template.toml /tmp/accept.toml
+          "$BR" --config /tmp/accept.toml compare \
+            --baseline 'sleep 0.02' --candidate 'sleep 0.02' | tee /tmp/cmp.txt
+          grep -q 'speedup (baseline/candidate): median .*95% CI \[' /tmp/cmp.txt
+          grep -q '^verdict: ' /tmp/cmp.txt
+
+      - name: Noise floor of this runner (informational — A/A must find nothing)
+        continue-on-error: true
+        run: |
+          BR=$(sed -n 's/^BENCH_RUNNER=//p' /tmp/pf.txt)
+          "$BR" --config /tmp/accept.toml aa --cmd 'sleep 0.02'

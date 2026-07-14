@@ -230,3 +230,14 @@ remains the deployment shape.
   pipeline into machine-enforced sanitizer gating.
 - **OS-level tool-boundary isolation:** met — was the tracked hardening
   gap; shipped and verified this phase.
+
+---
+
+> **Note (2026-07-13).** The differential-fuzz and ASan/LSan runs
+> described above ran **out-of-band** — per-attempt scripts during the
+> 100% human audit, exactly as this case study records ("fuzz and
+> sanitizers are per-attempt manual in this phase") — so the Phase 2
+> ledger rows carry `fuzz_iters=0` in their machine record. The fuzz
+> gate is now pipeline-integrated (`diff-test` runs the target's
+> declared fuzz command); rows written after this date record the
+> iteration count actually executed.

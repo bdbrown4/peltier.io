@@ -23,10 +23,15 @@ compare baseline candidate:
     cargo run -p bench-runner -- --config config/accept.toml compare \
         --baseline "{{baseline}}" --candidate "{{candidate}}"
 
-# Verify a target corpus against its pinned manifest
-# (wired through diff-test CLI once it exists; manual check for now)
+# Verify a target corpus against its pinned manifest (never rewrites it)
 pin-check target:
-    cd corpora/{{target}} && sh gen-corpus.sh
+    cd corpora/{{target}} && sh gen-corpus.sh --check
+
+# Deliberately re-pin a target corpus manifest — a trust-layer change;
+# review and commit the new MANIFEST.sha256 with justification
+pin-corpus target:
+    @echo "WARNING: rewriting corpora/{{target}}/MANIFEST.sha256 — deliberate human action (corpora/README.md)"
+    cd corpora/{{target}} && sh gen-corpus.sh --pin
 
 # Automated calibration: N A/A sessions (<5% false-positive required) +
 # N injected-slowdown sessions (>=95% detection required), JSON evidence
@@ -34,8 +39,10 @@ calibrate cmd out sessions="20":
     cargo run -p bench-runner -- --config config/accept.toml calibrate \
         --cmd "{{cmd}}" --sessions {{sessions}} --out "{{out}}"
 
-# Equivalence gates for a target: corpus pin (refuses on mismatch) ->
-# upstream tests -> golden replay. Fuzz/sanitizers stay per-attempt.
+# Equivalence gates for a target: corpus + test-suite pins (refuse on
+# mismatch) -> upstream tests -> golden replay. Differential fuzz needs a
+# pristine baseline to differ against, so it reports Skipped here and runs
+# for real on the accept path; sanitizers likewise run in verdict.
 gates target:
     cargo run -p diff-test -- {{target}}
 

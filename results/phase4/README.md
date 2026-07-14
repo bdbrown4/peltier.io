@@ -36,9 +36,11 @@ numbers.
 ## The result (`phase4-cjson-service`, ledger)
 
 The accepted batch win `phase3-cjson-002` (+8.85% throughput) was
-measured as a **service under a 150 rps coordinated-omission-correct
+measured as a **service under a 150 rps-target coordinated-omission-correct
 replay**, baseline (pristine cJSON v1.7.19) vs candidate (the banked
-win), 20 interleaved rounds, server pinned, 40,000 requests, **0 drops**:
+win), 20 interleaved rounds, server pinned, **0 drops** — the ledger row
+records `sessions=20`, `rate_rps=150`, `drop_rate=0.0`; the total request
+count was **not machine-recorded** (see errata below):
 
 | metric | baseline | candidate | speedup | 95% CI |
 |---|---|---|---|---|
@@ -63,7 +65,10 @@ project in one line.
 ## The ROI, generated mechanically
 
 `just report phase4-cjson-service --service-json results/phase4/cjson-service.json`
-→ [`cjson-service-roi.md`](cjson-service-roi.md). On a 500-core fleet at
+→ [`cjson-service-roi.md`](cjson-service-roi.md). *(Note, 2026-07-13: the
+raw `cjson-service.json` was not preserved — see errata below — so this
+command is not reproducible as written; the generated report and the
+ledger row are the surviving evidence.)* On a 500-core fleet at
 $0.04/core-hour, the +6.2% p50 win returns **27.5 cores / $9,621 per
 year at the CI lower bound** (median 29.4 cores / $10,290) — and the
 report quotes the lower bound, because the point estimate is not a
@@ -79,3 +84,20 @@ that produced it, so the number survives hostile review.
   ledger row and the calibrated service JSON with no hand-editing;
   throughput→cores→dollars and latency percentiles, CIs and methodology
   inline.
+
+## Errata (2026-07-13)
+
+- **"40,000 requests" retracted.** This report originally stated the
+  replay comprised 40,000 requests. The `phase4-cjson-service` ledger row
+  records only `sessions=20`, `rate_rps=150`, and `drop_rate=0.0` — the
+  per-run request count was never machine-recorded, so the 40,000 figure
+  (an arithmetic reconstruction, not evidence) is withdrawn. The prose
+  above now states the ledger-backed facts only. The claimed result is
+  unaffected: p50 latency +6.2%, 95% CI [+5.8%, +7.2%], under the 150
+  rps-target CO-correct replay, 20 interleaved rounds, 0 drops.
+- **`results/phase4/cjson-service.json` was not preserved.** The
+  `.gitignore` rule `results/**/*.json` swept the raw service-latency
+  JSON that the report command consumes, so it no longer exists in the
+  repository. A `!results/phase4/*.json` carve-out has been added so
+  future service-mode evidence JSONs are committed alongside the
+  calibration JSONs.

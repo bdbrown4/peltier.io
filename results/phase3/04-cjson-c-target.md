@@ -84,3 +84,12 @@ about the trust story is Rust-specific. The cheapest safe lever (skip a
 per-number allocation) wasn't enough; the algorithmic lever (stop doing a
 redundant heavyweight parse) was — and the pipeline proved it the same
 way it proves everything else.
+
+---
+
+> **Note (2026-07-13).** The 10,000-input differential fuzz cited above
+> ran **out-of-band** (`scripts/diff-fuzz-cjson.py`, per-attempt), not
+> inside the verdict pipeline — so the `phase3-cjson-002` ledger row
+> records `fuzz_iters=0` in its machine record. The fuzz gate is now
+> pipeline-integrated; rows written after this date record the
+> iteration count actually executed.

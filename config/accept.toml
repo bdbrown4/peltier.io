@@ -23,3 +23,6 @@ bootstrap_seed = 1887343589
 # Calibration evidence for this machine shows pinning tightens the A/A
 # CI ~5x (results/calibration/). Empty string disables.
 pin_prefix = "taskset -c 2"
+
+# Differential-fuzz iterations requested per gate run (SPEC §3.2).
+# fuzz_iters = 10000

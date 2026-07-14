@@ -4,8 +4,16 @@
 # with escapes and unicode, ints, floats (the strtod/sprintf hot path),
 # booleans, nulls. No randomness — byte-identical on every machine, so
 # the MANIFEST.sha256 pin is reproducible. Run from repo root:
-#   sh corpora/cjson/gen-corpus.sh
+#   sh corpora/cjson/gen-corpus.sh [--check|--pin]
+# Default/--check: regenerate and verify against MANIFEST.sha256 (never
+# rewrites it). --pin: deliberately rewrite the manifest.
 set -eu
+mode="check"
+case "${1:-}" in
+    "" | --check) ;;
+    --pin) mode="pin" ;;
+    *) echo "usage: gen-corpus.sh [--check|--pin]" >&2; exit 2 ;;
+esac
 DIR="$(cd "$(dirname "$0")" && pwd)"
 OUT="$DIR/input/big.json"
 mkdir -p "$DIR/input"
@@ -57,6 +65,14 @@ with open(sys.argv[1], "w") as f:
 PY
 
 echo "wrote $OUT ($(wc -c < "$OUT") bytes)"
-# Pin the corpus and regenerate the manifest.
-( cd "$DIR/input" && find . -type f -print0 | sort -z | xargs -0 sha256sum ) > "$DIR/MANIFEST.sha256"
-echo "manifest: $DIR/MANIFEST.sha256"
+if [ "$mode" = "pin" ]; then
+    ( cd "$DIR/input" && find . -type f -print0 | sort -z | xargs -0 sha256sum ) > "$DIR/MANIFEST.sha256"
+    echo "re-pinned $DIR/MANIFEST.sha256 — a deliberate human action (corpora/README.md);"
+    echo "commit the new manifest with justification."
+else
+    if [ ! -f "$DIR/MANIFEST.sha256" ]; then
+        echo "no MANIFEST.sha256 — pin the corpus with: sh corpora/cjson/gen-corpus.sh --pin" >&2
+        exit 1
+    fi
+    ( cd "$DIR/input" && sha256sum -c ../MANIFEST.sha256 )
+fi
