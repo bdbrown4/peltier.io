@@ -1,0 +1,41 @@
+# peltier accept thresholds — consumer template.
+#
+# Copy this next to the code you are measuring and pass it with
+# `bench-runner --config <this-file>`. The defaults are peltier's own
+# published bar; loosening them to make a result pass is not measurement,
+# it is negotiation.
+
+# The bootstrap CI *lower bound* of the speedup ratio must clear 1 + threshold.
+# The median is not the claim. The lower bound is the claim.
+threshold = 0.02
+
+# Measured runs per side, interleaved ABAB (SPEC minimum: 30).
+runs_per_side = 30
+
+# Warm-up runs per side, discarded — they pay for cold caches and JIT.
+warmup_runs = 3
+
+# Bootstrap resamples for the ratio CI.
+bootstrap_iters = 10000
+
+# Confidence level for the ratio CI.
+confidence = 0.95
+
+# Fixed PRNG seed so a calibration run is reproducible by anyone.
+bootstrap_seed = 1887343589
+
+# CPU pinning. WARNING: this key is INERT for `compare`, `aa`, and `calibrate`
+# — it is read only by the in-repo `verdict` pipeline. Setting it here and then
+# reporting "pinned to core N" would be a claim about a run that never happened.
+#
+# To actually pin a compare/aa/calibrate run, wrap BOTH sides identically in
+# the command itself:  --baseline 'taskset -c 2 <cmd>' --candidate 'taskset -c 2 <cmd>'
+#
+# Pinning tightens the A/A confidence interval ~5x on peltier's calibration
+# hardware. An unpinned host is not disqualified; a NOISY one is, and the A/A
+# self-test decides that empirically. Leave this empty.
+pin_prefix = ""
+
+# Differential-fuzz iterations requested per gate run. Only used by the
+# in-repo `verdict` pipeline, which requires a target to declare [gates].fuzz.
+# fuzz_iters = 10000

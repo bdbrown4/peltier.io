@@ -71,6 +71,30 @@ tests, but cannot run the pipeline.
 Full command reference and reproduction steps:
 [Reproduce it yourself](https://bdbrown4.github.io/peltier.io/reproduce.html).
 
+## Use it on your own code
+
+The trust layer is not specific to these targets — it will judge any two shell
+commands. `.claude/skills/peltier/` packages it as a Claude Code skill:
+
+```sh
+# from any repo, with a peltier checkout reachable
+export PELTIER_HOME=/path/to/peltier.io
+mkdir -p .claude/skills
+cp -r /path/to/peltier.io/.claude/skills/peltier .claude/skills/
+```
+
+Then ask Claude to verify a speedup. The skill enforces the order that makes a
+performance claim mean something: **equivalence before timing** (a faster
+program that computes something different is a bug, not an optimization) →
+**A/A calibration** (a host that "finds" a speedup between a binary and itself
+cannot measure yours) → **interleaved A/B with a bootstrap CI** → a verdict
+decided by the CI *lower bound*, never the median.
+
+It drives the real `bench-runner` binary and **refuses rather than degrade**:
+on an unsupported host, or with no trust layer reachable, it stops and says so
+instead of falling back to a hand-rolled timing loop. A second copy of the
+statistics is a second thing that can lie.
+
 ## How it stays honest
 
 - The agent speaks to the trust layer through **seven read-only-plus-one-
