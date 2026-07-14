@@ -1,6 +1,6 @@
 ---
 name: peltier
-description: Prove a performance change is real — or refuse to claim it. Use when optimizing code for speed, verifying a claimed speedup ("is this actually faster?", "did my optimization work?"), checking for a performance regression ("did this PR make things slower?"), or comparing the performance of two implementations. Runs peltier's trust layer: equivalence gates, A/A environment calibration, interleaved A/B with bootstrap confidence intervals. Never reports a naked percentage and never claims a win that is not statistically significant. Do NOT use for correctness-only work.
+description: "Prove a performance change is real — or refuse to claim it. Use when optimizing code for speed, verifying a claimed speedup ('is this actually faster?', 'did my optimization work?'), checking for a performance regression ('did this PR make things slower?'), or comparing the performance of two implementations. Runs peltier's trust layer — equivalence gates, A/A environment calibration, interleaved A/B with bootstrap confidence intervals. Never reports a naked percentage and never claims a win that is not statistically significant. Do NOT use for correctness-only work."
 ---
 
 # peltier — prove it, or claim nothing
