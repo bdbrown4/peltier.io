@@ -6,6 +6,8 @@ faster. Find out. Works on any pair of shell commands, in any language.
 ## 0. Preflight
 
     sh <skill-dir>/scripts/preflight.sh
+    # or, if this installation carries no scripts/ (script-blocking harness):
+    sh "$PELTIER_HOME/.claude/skills/peltier/scripts/preflight.sh"
 
 Read the `key=value` output; you need `BENCH_RUNNER` and `PIN_SUPPORTED`. A
 refusal ends the **claim**, not the work — report the reason verbatim and do
