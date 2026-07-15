@@ -43,4 +43,5 @@ can quote to a hostile reviewer. That is the entire product, and this site
 is how it works.
 
 Start with [the thesis](./thesis.md), or jump to a
-[case study](./case-studies/overview.md).
+[case study](./case-studies/overview.md). To run this discipline on your own
+code from your own agent, see [the peltier skill](./skill.md).

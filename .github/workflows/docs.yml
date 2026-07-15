@@ -2,12 +2,23 @@ name: docs
 
 # Builds the mdBook site in docs/ and deploys it to GitHub Pages.
 # One-time setup: repo Settings → Pages → Source = "GitHub Actions".
+#
+# Pull requests build the book but never deploy — so a broken book (or a
+# chapter that {{#include}}s a file that moved) is a red PR check, not a
+# post-merge surprise. results/** is a trigger because case-study chapters
+# include evidence files from there.
 
 on:
   push:
     branches: [main]
     paths:
       - "docs/**"
+      - "results/**"
+      - ".github/workflows/docs.yml"
+  pull_request:
+    paths:
+      - "docs/**"
+      - "results/**"
       - ".github/workflows/docs.yml"
   workflow_dispatch:
 
@@ -18,8 +29,8 @@ permissions:
 
 # Allow one concurrent deployment; don't cancel an in-progress prod deploy.
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: pages-${{ github.event_name == 'pull_request' && github.ref || 'prod' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
@@ -29,6 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Configure Pages
+        if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v5
       - name: Install mdBook
         run: |
@@ -39,11 +51,13 @@ jobs:
       - name: Build
         run: mdbook build docs
       - name: Upload artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs/book
 
   deploy:
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     environment:

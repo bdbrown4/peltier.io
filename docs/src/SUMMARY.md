@@ -23,6 +23,7 @@
 
 # Reference
 
+- [Consume it: the peltier skill](./skill.md)
 - [Reproduce it yourself](./reproduce.md)
 - [The trust boundary (infra)](./infra.md)
 - [Roadmap & scope](./roadmap.md)

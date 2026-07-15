@@ -19,6 +19,9 @@ config/            accept.toml (thresholds), pricing.toml (ROI inputs)
 targets/           Vendored OSS targets — the only agent-writable path
 corpora/           Hash-pinned golden-replay inputs (read-only to agent)
 results/           Calibration evidence, case studies, generated reports
+.claude/skills/    The trust layer as a consumable Agent Skill — mirrored
+                   byte-identically at .agents/skills/ (CI-enforced); see
+                   "Consume it: the peltier skill"
 ```
 
 ## The seven-tool boundary
