@@ -105,22 +105,57 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
 
-      - name: SKILL.md frontmatter is loadable
+      - name: SKILL.md conforms to the Agent Skills spec (both copies)
         run: |
           python3 - <<'PY'
-          import sys, yaml, pathlib
-          p = pathlib.Path(".claude/skills/peltier/SKILL.md")
-          text = p.read_text(encoding="utf-8")
-          if not text.startswith("---\n"):
-              sys.exit("SKILL.md must open with a --- frontmatter block")
-          fm = yaml.safe_load(text.split("---", 2)[1])   # raises on malformed YAML
-          for key in ("name", "description"):
-              if not isinstance(fm.get(key), str) or not fm[key].strip():
-                  sys.exit(f"frontmatter '{key}' must be a non-empty string")
-          if fm["name"] != p.parent.name:
-              sys.exit(f"frontmatter name '{fm['name']}' != directory '{p.parent.name}'")
-          print(f"frontmatter OK: name={fm['name']}, description={len(fm['description'])} chars")
+          import re, sys, yaml, pathlib
+          for skill in (".claude/skills/peltier", ".agents/skills/peltier"):
+              p = pathlib.Path(skill) / "SKILL.md"
+              text = p.read_text(encoding="utf-8")
+              if not text.startswith("---\n"):
+                  sys.exit(f"{p}: must open with a --- frontmatter block")
+              fm = yaml.safe_load(text.split("---", 2)[1])   # raises on malformed YAML
+              body = text.split("---", 2)[2]
+              for key in ("name", "description"):
+                  if not isinstance(fm.get(key), str) or not fm[key].strip():
+                      sys.exit(f"{p}: frontmatter '{key}' must be a non-empty string")
+              # agentskills.io spec: 1-64 chars, [a-z0-9-], no edge/double hyphens,
+              # name == parent dir; description <= 1024 chars; body <= 500 lines.
+              n = fm["name"]
+              if not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", n) or len(n) > 64:
+                  sys.exit(f"{p}: name '{n}' violates the Agent Skills name rules")
+              if n != p.parent.name:
+                  sys.exit(f"{p}: name '{n}' != directory '{p.parent.name}'")
+              if len(fm["description"]) > 1024:
+                  sys.exit(f"{p}: description exceeds 1024 chars")
+              if len(body.splitlines()) > 500:
+                  sys.exit(f"{p}: body exceeds 500 lines")
+              if "metadata" in fm and not (
+                  isinstance(fm["metadata"], dict)
+                  and all(isinstance(k, str) and isinstance(v, str) for k, v in fm["metadata"].items())
+              ):
+                  sys.exit(f"{p}: metadata must be a string-to-string map")
+              print(f"{p}: spec OK (name={n}, description={len(fm['description'])} chars)")
           PY
+
+      - name: .agents mirror is byte-identical to .claude canonical
+        run: |
+          diff -r .claude/skills/peltier .agents/skills/peltier
+          echo "mirror identical"
+
+      - name: Installer stamps both layouts + the ZeroClaw variant correctly
+        run: |
+          if sh scripts/install-skill.sh /tmp/no-such-dir 2>/dev/null; then
+            echo "FAIL: installer accepted a nonexistent target"; exit 1
+          fi
+          mkdir -p /tmp/consumer && sh scripts/install-skill.sh /tmp/consumer
+          diff -r .claude/skills/peltier /tmp/consumer/.claude/skills/peltier
+          diff -r .claude/skills/peltier /tmp/consumer/.agents/skills/peltier
+          sh scripts/install-skill.sh --zeroclaw-variant /tmp/zc-variant
+          test ! -e /tmp/zc-variant/scripts   # script-less: ZeroClaw blocks script files
+          test -f /tmp/zc-variant/SKILL.md
+          diff -r .claude/skills/peltier/references /tmp/zc-variant/references
+          echo "installer OK: both layouts identical to canonical; zeroclaw variant has no scripts/"
 
       - name: Preflight resolves inside a peltier checkout
         run: |

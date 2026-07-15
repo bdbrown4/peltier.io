@@ -71,24 +71,40 @@ tests, but cannot run the pipeline.
 Full command reference and reproduction steps:
 [Reproduce it yourself](https://bdbrown4.github.io/peltier.io/reproduce.html).
 
-## Use it on your own code
+## Use it on your own code — from any agent harness
 
 The trust layer is not specific to these targets — it will judge any two shell
-commands. `.claude/skills/peltier/` packages it as a Claude Code skill:
+commands. It ships as an **[Agent Skill](https://agentskills.io)** (the open
+SKILL.md standard), which Claude Code, OpenAI Codex, GitHub Copilot, VS Code,
+Cursor, Gemini CLI, opencode, Goose, Amp, Zed, and ZeroClaw all load natively.
+One installer stamps it into your repo at both discovery paths:
 
 ```sh
-# from any repo, with a peltier checkout reachable
-export PELTIER_HOME=/path/to/peltier.io
-mkdir -p .claude/skills
-cp -r /path/to/peltier.io/.claude/skills/peltier .claude/skills/
+# from your repo, with a peltier checkout at /path/to/peltier.io
+sh /path/to/peltier.io/scripts/install-skill.sh .
+export PELTIER_HOME=/path/to/peltier.io   # the skill drives bench-runner from here
 ```
 
-Then ask Claude to verify a speedup. The skill enforces the order that makes a
-performance claim mean something: **equivalence before timing** (a faster
-program that computes something different is a bug, not an optimization) →
-**A/A calibration** (a host that "finds" a speedup between a binary and itself
-cannot measure yours) → **interleaved A/B with a bootstrap CI** → a verdict
-decided by the CI *lower bound*, never the median.
+That writes `.claude/skills/peltier/` (Claude Code; also read by Copilot,
+VS Code, opencode, Amp) and `.agents/skills/peltier/` (the cross-tool path:
+Codex, Zed, Cursor, Gemini CLI, Goose, and others). This repo carries both,
+CI-enforced byte-identical, so the two copies cannot drift.
+
+**ZeroClaw** blocks script files inside skills by default, so it gets a
+script-less variant (preflight runs from your peltier checkout instead —
+same one copy of the script):
+
+```sh
+sh /path/to/peltier.io/scripts/install-skill.sh --zeroclaw-variant /tmp/peltier-skill
+zeroclaw skills install /tmp/peltier-skill
+```
+
+Then ask your agent to verify a speedup. The skill enforces the order that
+makes a performance claim mean something: **equivalence before timing** (a
+faster program that computes something different is a bug, not an
+optimization) → **A/A calibration** (a host that "finds" a speedup between a
+binary and itself cannot measure yours) → **interleaved A/B with a bootstrap
+CI** → a verdict decided by the CI *lower bound*, never the median.
 
 It drives the real `bench-runner` binary and **refuses rather than degrade**:
 on an unsupported host, or with no trust layer reachable, it stops and says so
