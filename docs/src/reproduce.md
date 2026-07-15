@@ -60,3 +60,9 @@ python3 scripts/diff-fuzz-<target>.py <dir> 10000 <baseline-bin> <candidate-bin>
 The ledger itself is the record: `results/ledger.sqlite`, append-only,
 every attempt (win or loss) with its hypothesis, gates, bench evidence, and
 verdict.
+
+## Use it on your own code
+
+The whole discipline is installable into any repo as an Agent Skill, driven
+from any SKILL.md-reading harness — see
+[Consume it: the peltier skill](./skill.md).
