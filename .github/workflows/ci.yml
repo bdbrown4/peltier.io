@@ -245,6 +245,10 @@ jobs:
           $joined = $out -join "`n"
           if ($joined -notlike "*STATUS=refuse*") { throw "no STATUS=refuse in output" }
           if ($joined -notlike "*unsupported host 'Windows'*") { throw "missing refusal reason" }
+          Write-Output "native refusal verified (5.1)"
+          # the runner appends `exit $LASTEXITCODE`; the refusal's exit 1 is
+          # the EXPECTED outcome we just asserted, so clear it explicitly
+          exit 0
       - name: ps1 refuses natively (pwsh)
         shell: pwsh
         run: |
@@ -252,6 +256,8 @@ jobs:
           $out | Write-Output
           if ($LASTEXITCODE -eq 0) { throw "preflight did not refuse under pwsh" }
           if (($out -join "`n") -notlike "*STATUS=refuse*") { throw "no STATUS=refuse in output" }
+          Write-Output "native refusal verified (pwsh)"
+          exit 0   # clear the asserted refusal's exit 1 (runner appends exit $LASTEXITCODE)
       - name: sh entry point also refuses here (Git Bash)
         shell: bash
         run: |
