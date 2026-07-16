@@ -30,6 +30,17 @@ plugin, or copied into another project):
 
     sh <skill-dir>/scripts/preflight.sh
 
+    # no POSIX shell on this host (Windows-native harness)? same contract:
+    powershell -NoProfile -ExecutionPolicy Bypass -File <skill-dir>/scripts/preflight.ps1
+
+The two entry points implement one contract and are byte-diffed against each
+other in CI — same checks, same output, same refusals. Dispatch on launcher
+availability, not OS: try `sh` first; if the **launcher itself** is missing
+(`sh: not found` — a launch failure, not a refusal), run the PowerShell entry
+point instead. A `STATUS=refuse` from either is **final**: never run the
+second entry point hoping for a different answer — they are kept
+byte-identical in CI precisely so there is no different answer.
+
 Some harnesses block script files inside skills, so your installation may
 carry no `scripts/` directory. The script still exists exactly once — in the
 peltier checkout this skill drives (which you need anyway; it is where

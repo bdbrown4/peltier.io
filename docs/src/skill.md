@@ -83,7 +83,13 @@ document. In `verify` mode, the gate order is the content:
 
 Measurement requires a Linux/POSIX host — the same requirement as the rest of
 the pipeline. On Windows (or with no checkout reachable) the skill refuses and
-says why. That is asserted, not assumed: on every pull request, CI runs the
+says why. The refusal itself is cross-OS: preflight ships as both `preflight.sh`
+(POSIX) and `preflight.ps1` (Windows PowerShell 5.1 / pwsh), so a Windows-native
+harness with no POSIX shell still gets a structured `STATUS=refuse` instead of a
+launch error it might misread as license to hand-roll a timing loop. Two
+implementations of one contract is a drift risk, so CI byte-diffs their output
+on every path (resolve, refuse, `PELTIER_HOME`) on the same host, and a Windows
+runner asserts the native refusal on every pull request. That is asserted, not assumed: on every pull request, CI runs the
 preflight's refusal path (skill copied outside any checkout) and its resolve
 paths (in-checkout and via `PELTIER_HOME` from a foreign repo), alongside a
 live plumbing run of the harness it drives.

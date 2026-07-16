@@ -6,8 +6,14 @@ faster. Find out. Works on any pair of shell commands, in any language.
 ## 0. Preflight
 
     sh <skill-dir>/scripts/preflight.sh
-    # or, if this installation carries no scripts/ (script-blocking harness):
+    # `sh` launcher missing ("sh: not found" — a launch failure, NOT a refusal)?
+    # same contract, byte-diffed against the sh version in CI:
+    powershell -NoProfile -ExecutionPolicy Bypass -File <skill-dir>/scripts/preflight.ps1
+    # installation carries no scripts/ (script-blocking harness)? run from the checkout:
     sh "$PELTIER_HOME/.claude/skills/peltier/scripts/preflight.sh"
+
+A `STATUS=refuse` from either entry point is final — do not run the other one
+looking for a different answer.
 
 Read the `key=value` output; you need `BENCH_RUNNER` and `PIN_SUPPORTED`. A
 refusal ends the **claim**, not the work — report the reason verbatim and do
