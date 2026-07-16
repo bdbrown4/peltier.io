@@ -186,6 +186,31 @@ jobs:
             sh "$GITHUB_WORKSPACE/.claude/skills/peltier/scripts/preflight.sh" | tee pf.txt
           grep -q '^STATUS=ok$' pf.txt
 
+      - name: sh and ps1 preflights are byte-equivalent (two entry points, one contract)
+        run: |
+          # preflight.ps1 exists for hosts with no POSIX shell. Two
+          # implementations of the same contract can drift, so both run here
+          # on the same host and their stdout is byte-diffed on every path.
+          # 1. in-checkout resolve
+          sh .claude/skills/peltier/scripts/preflight.sh > /tmp/eq-sh.txt
+          pwsh -NoProfile -File .claude/skills/peltier/scripts/preflight.ps1 > /tmp/eq-ps.txt
+          diff /tmp/eq-sh.txt /tmp/eq-ps.txt
+          # 2. refusal with no checkout reachable (copied out of the repo)
+          cp -r .claude/skills/peltier /tmp/eqskill
+          mkdir -p /tmp/eq-not-a-repo && cd /tmp/eq-not-a-repo
+          set +e
+          env -u PELTIER_HOME sh /tmp/eqskill/scripts/preflight.sh > sh.txt 2>&1; shrc=$?
+          env -u PELTIER_HOME pwsh -NoProfile -File /tmp/eqskill/scripts/preflight.ps1 > ps.txt 2>&1; psrc=$?
+          set -e
+          test "$shrc" -ne 0 && test "$psrc" -ne 0
+          diff sh.txt ps.txt
+          # 3. resolve via PELTIER_HOME from a foreign repo
+          mkdir -p /tmp/eq-foreign && cd /tmp/eq-foreign
+          PELTIER_HOME="$GITHUB_WORKSPACE" sh /tmp/eqskill/scripts/preflight.sh > sh2.txt
+          PELTIER_HOME="$GITHUB_WORKSPACE" pwsh -NoProfile -File /tmp/eqskill/scripts/preflight.ps1 > ps2.txt
+          diff sh2.txt ps2.txt
+          echo "equivalence holds on all three paths"
+
       - name: The harness the skill drives actually runs (plumbing, not verdict)
         run: |
           BR=$(sed -n 's/^BENCH_RUNNER=//p' /tmp/pf.txt)
@@ -200,3 +225,40 @@ jobs:
         run: |
           BR=$(sed -n 's/^BENCH_RUNNER=//p' /tmp/pf.txt)
           "$BR" --config /tmp/accept.toml aa --cmd 'sleep 0.02'
+
+  # The refusal doctrine must survive hosts with no POSIX shell: on a real
+  # Windows runner, BOTH preflight entry points must refuse with a structured
+  # STATUS=refuse — never a launch failure an agent could misread as license
+  # to hand-roll a timing loop. Windows PowerShell 5.1 is tested separately
+  # from pwsh because 5.1 misdecodes BOM-less UTF-8 (the ps1 source is pure
+  # ASCII for exactly that reason).
+  skill-preflight-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: ps1 refuses natively (Windows PowerShell 5.1)
+        shell: powershell
+        run: |
+          $out = & powershell -NoProfile -ExecutionPolicy Bypass -File .claude\skills\peltier\scripts\preflight.ps1
+          $out | Write-Output
+          if ($LASTEXITCODE -eq 0) { throw "preflight did not refuse on Windows" }
+          $joined = $out -join "`n"
+          if ($joined -notlike "*STATUS=refuse*") { throw "no STATUS=refuse in output" }
+          if ($joined -notlike "*unsupported host 'Windows'*") { throw "missing refusal reason" }
+      - name: ps1 refuses natively (pwsh)
+        shell: pwsh
+        run: |
+          $out = & pwsh -NoProfile -File .claude\skills\peltier\scripts\preflight.ps1
+          $out | Write-Output
+          if ($LASTEXITCODE -eq 0) { throw "preflight did not refuse under pwsh" }
+          if (($out -join "`n") -notlike "*STATUS=refuse*") { throw "no STATUS=refuse in output" }
+      - name: sh entry point also refuses here (Git Bash)
+        shell: bash
+        run: |
+          set +e
+          sh .claude/skills/peltier/scripts/preflight.sh > out.txt 2>&1
+          rc=$?
+          set -e
+          cat out.txt
+          test "$rc" -ne 0
+          grep -q '^STATUS=refuse$' out.txt
