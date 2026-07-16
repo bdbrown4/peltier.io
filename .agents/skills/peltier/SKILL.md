@@ -39,14 +39,18 @@ availability, not OS: try `sh` first; if the **launcher itself** is missing
 (`sh: not found` — a launch failure, not a refusal), run the PowerShell entry
 point instead. A `STATUS=refuse` from either is **final**: never run the
 second entry point hoping for a different answer — they are kept
-byte-identical in CI precisely so there is no different answer.
+byte-identical in CI precisely so there is no different answer. And if
+neither launcher exists on this host, that is itself a preflight refusal:
+report it; do not improvise a substitute.
 
 Some harnesses block script files inside skills, so your installation may
-carry no `scripts/` directory. The script still exists exactly once — in the
-peltier checkout this skill drives (which you need anyway; it is where
-`bench-runner` lives). Run it from there:
+carry no `scripts/` directory. Both entry points still exist exactly once —
+in the peltier checkout this skill drives (which you need anyway; it is where
+`bench-runner` lives). Run one from there, same dispatch rule:
 
     sh "$PELTIER_HOME/.claude/skills/peltier/scripts/preflight.sh"
+    # or, sh launcher missing on this host:
+    powershell -NoProfile -ExecutionPolicy Bypass -File "$env:PELTIER_HOME\.claude\skills\peltier\scripts\preflight.ps1"
 
 Never transcribe or re-implement the preflight logic inline; if you cannot
 locate a checkout to run it from, that IS a preflight refusal — report it.

@@ -9,11 +9,14 @@ faster. Find out. Works on any pair of shell commands, in any language.
     # `sh` launcher missing ("sh: not found" — a launch failure, NOT a refusal)?
     # same contract, byte-diffed against the sh version in CI:
     powershell -NoProfile -ExecutionPolicy Bypass -File <skill-dir>/scripts/preflight.ps1
-    # installation carries no scripts/ (script-blocking harness)? run from the checkout:
+    # installation carries no scripts/ (script-blocking harness)? run from the
+    # checkout — either entry point, same dispatch rule:
     sh "$PELTIER_HOME/.claude/skills/peltier/scripts/preflight.sh"
+    powershell -NoProfile -ExecutionPolicy Bypass -File "$env:PELTIER_HOME\.claude\skills\peltier\scripts\preflight.ps1"
 
 A `STATUS=refuse` from either entry point is final — do not run the other one
-looking for a different answer.
+looking for a different answer. If no entry point can launch at all, that too
+is a refusal: report it rather than improvising a substitute.
 
 Read the `key=value` output; you need `BENCH_RUNNER` and `PIN_SUPPORTED`. A
 refusal ends the **claim**, not the work — report the reason verbatim and do
