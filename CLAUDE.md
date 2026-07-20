@@ -6,6 +6,8 @@
 
 An agent that profiles real binaries and services, isolates hot paths, proposes optimizations, and accepts a change **only** when (a) behavioral-equivalence gates pass and (b) the benchmark improvement is statistically significant on trusted infrastructure. Output: verified performance deltas translated into ROI reports nobody can dispute.
 
+Mental model: **the optimizer is a Bayesian detective; the trust layer is a frequentist court.** The detective (agent + playbook prior + policy ranking + ledger evidence + explain feedback) chooses what to try; the court (gates + calibrated bench + CI-lower-bound rule) decides what is true, with measured error rates and no priors on the accept path. Evidence flows back; authority never does. Priors steer where we look — they never touch what we conclude.
+
 Full engineering spec: `SPEC.md`. Read it before starting any phase.
 
 ## Non-negotiables (re-read every session)

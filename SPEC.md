@@ -9,6 +9,8 @@ Why this wins:
 - **The metric defends itself.** Same inputs, same outputs, fewer cycles, with confidence intervals. No correlation-causation problem is possible by construction.
 - **The ledger compounds.** Every accepted/rejected attempt with full evidence is future RL training data and, eventually, the substrate for learned optimization policies (see §13, research fork).
 
+> **Added 2026-07-20 — the statistical identity, named.** The optimizer is a **Bayesian detective**; the trust layer is a **frequentist court**. The detective (agent loop, playbook prior, §13 policy ranking, ledger evidence, §3.7 explain feedback) decides *what to try next* by belief-updating over accumulated evidence. The court (§3.1–§3.3: gates, calibrated bench, CI-lower-bound accept rule) decides *what is true* via procedures with empirically measured error rates — no prior appears anywhere on the accept path. Evidence flows from court to detective (ledger rows, explanations); authority never flows the other way. Invariant: **priors steer where we look; they never touch what we conclude.** A wrong prior costs compute; a prior in the verdict would cost trust.
+
 ## 2. System overview
 
 ```
