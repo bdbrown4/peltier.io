@@ -472,6 +472,10 @@ fn main() -> Result<()> {
             "workload": spec.bench.workload,
             "target_commit": spec.source.commit,
             "isolation": cli.isolation_note.as_deref().unwrap_or("unwrapped-host"),
+            // The accept bar in force for THIS run, recorded so the row is
+            // self-contained: `explain` must never guess a historical
+            // threshold from today's config (SPEC §3.7).
+            "accept_threshold": cfg.threshold,
             "gates_detail": "diff-fuzz gated in-pipeline against the pristine baseline (an accept requires it to have passed); ASan+UBSan enforced on the accept path, TSan when configured",
         });
         if !samples.baseline_max_rss_kib.is_empty() && !samples.candidate_max_rss_kib.is_empty() {

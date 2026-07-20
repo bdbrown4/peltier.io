@@ -90,6 +90,20 @@ Consumes ledger rows, emits per-engagement ROI report:
 - Optional: joules saved (RAPL) for the sustainability line. *(Amended 2026-07-13: never implemented — RAPL energy is not captured anywhere in the harness, so no report emits a joules figure. See the §3.1 amendment.)*
 - Every figure carries CI + workload description + environment fingerprint. Caveats are printed on the report, not in an appendix.
 
+### 3.7 `explain/` (post-verdict diagnostics)
+
+> **Added 2026-07-20.** Verdicts say *what*; this component says *why*. It exists to make the next hypothesis better, and it is built so it can never contaminate the thing it explains.
+
+Requirements:
+- **Advisory, strictly off the accept path.** Runs only after a verdict is recorded; nothing it emits feeds gates, the bench, the verdict, or the ledger.
+- **Ledger-only inputs, deterministic output.** Consumes exactly one row via `ledger::attempt_row` — no config files, no clock, no re-benching. Identical row ⇒ byte-identical text; the header states this so a regenerated explanation is checkable.
+- **Record vs. inference is typographically explicit.** Restatements of the machine record (verdict, medians, CI, workload, gate fields) are printed plain; anything beyond restatement is prefixed `inference:` so no explanation can be quoted as if the machine measured it.
+- **The narrative must agree with the machine verdict.** An `accepted` row is described by its CI *lower bound* — the defensible claim — never re-litigated against today's config. A `rejected-bench` row is classified against 1.0: measured regression (CI < 1.0), null result (CI straddles 1.0), or real-but-below-bar. A `needs-human-review` row names the recorded cap (risk signals, missing differential-fuzz pass, fp-tolerance tier) and states that the numbers were not the deciding factor. A `rejected-gate` row names the failing gate.
+- **Historical rows are flagged, not laundered.** An accepted row with `sanitizers_clean=false` or `fuzz_iters=0` gets an explicit caution naming the doctrine it predates (see the §3.2 amendments and `results/rulings/`).
+- **Rows are self-contained going forward:** `verdict` now records `accept_threshold` (the bar in force for that run) in the bench env fingerprint. For older rows, explain prints that the bar was not machine-recorded — it never substitutes today's `config/accept.toml` for a historical one.
+- CLI: `just explain <run-id>` → `cargo run -p explain -- --run-id <id> [--db results/ledger.sqlite]`.
+- **Deliberately not agent-facing yet.** The harnessd surface stays at seven ops; explanations are a human/CLI tool. Any future exposure to the agent loop must remain read-only, advisory, and outside the accept path — the loop's compounding benefit (better next hypotheses) must never become a feedback channel into measurement.
+
 ## 4. Optimization playbook v0 (strict order)
 
 1. **Build configuration**: opt level, `-march`/`target-cpu`, LTO (thin → fat), PGO, BOLT where applicable.

@@ -11,6 +11,9 @@ crates/            Trust layer — agent has NO write access (SPEC §10)
   diff-test/       Equivalence gates, corpus hash-pinning, per-target spec
   ledger/          Append-only SQLite attempt ledger (enforced by triggers)
   report/          ROI: speedup CI → cores → dollars, methodology inline
+  explain/         Advisory post-verdict diagnosis of a ledger row (why it
+                   won or lost) — never on the accept path
+  policy/          Learned class-selection prior from the ledger (advisory)
   verdict/         The pipeline in one command: gates → bench → ledger row
   harnessd/        The one door the agent talks through (7 JSON ops)
 agent/             Untrusted proposer (Claude Agent SDK, Python)

@@ -25,6 +25,7 @@ Full engineering spec: `SPEC.md`. Read it before starting any phase.
 - `crates/diff-test` — behavioral equivalence: corpus/test-suite pin checks + upstream test suite + golden I/O replay + differential fuzz (a baseline-vs-candidate gate; sanitizers run on the accept path in `crates/verdict`, and `diff-test` reports them as skipped-with-reason)
 - `crates/ledger` — append-only SQLite record of every attempt: hypothesis, patch, gate results, bench deltas, verdict, cost
 - `crates/report` — ROI generator: cores saved × $/core-hr, latency percentile deltas, CIs, workload caveats printed on every number
+- `crates/explain` — advisory post-verdict diagnosis (SPEC §3.7): one ledger row → why it won or lost. Ledger-only inputs, deterministic (identical row = identical bytes), `inference:`-labeled lines, verdict-narrative agreement enforced, historical accepts flagged rather than laundered. Strictly off the accept path; not exposed to the agent (harnessd stays seven ops)
 - `agent/` — Claude Agent SDK (Python) loop, prompts, tool definitions
 - `targets/` — vendored OSS targets for case studies (permissive licenses only)
 - `playbook/` — optimization classes, ordered, with preconditions and known risks
@@ -58,6 +59,8 @@ just pin-corpus <target>    # deliberate corpus re-pin (writes MANIFEST.sha256)
 just calibrate <cmd> <out>  # automated A/A + regression-injection calibration
 just verdict <t> <bin> ...  # gates + bench vs pristine-rebuilt baseline + ledger row
 just report <run-id>        # ROI report from a ledger row (CIs + methodology inline)
+just explain <run-id>       # advisory post-verdict diagnosis of a row (SPEC §3.7):
+                            #   why it won/lost, ledger-only inputs, never changes a verdict
 just agent-attempt <t> <id> # one unattended agent attempt behind the OS boundary
 just isolation-check        # verify the SPEC §10 OS boundary (19 checks, both modes)
 just service <b> <c> <doc>  # service-mode latency A/B, CO-correct, p50/p99 CIs
