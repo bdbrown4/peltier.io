@@ -46,3 +46,62 @@ cannot touch the thresholds. It can only propose a patch and ask the
 harness to judge it. The [architecture](./architecture.md) is designed so
 that even a compromised or adversarial proposer cannot manufacture a false
 win.
+
+## The detective and the court
+
+> The optimizer is a **Bayesian detective**. The trust layer is a
+> **frequentist court**.
+
+That sentence is the whole design. The two halves run on opposite
+statistical philosophies, deliberately:
+
+```
+     BAYESIAN DETECTIVE                        FREQUENTIST COURT
+     the optimizer: agent loop,                the trust layer: gates,
+     playbook prior, policy ranking            calibrated bench, verdict
+
+   ┌───────────────────────────┐            ┌────────────────────────────┐
+   │ generate hypotheses       │            │ prove equivalence first    │
+   │ prioritize the docket     │  proposes  │ calibrate the instrument   │
+   │ estimate likely payoff    │ ─────────▶ │ measure, interleaved A/B   │
+   └───────────────────────────┘            │ reject noise (CI lower     │
+               ▲                            │ bound vs. threshold)       │
+               │                            └─────────────┬──────────────┘
+               │                                          ▼
+               │        evidence flows back            verdict
+               └───── ledger row + explain ◀──────────────┘
+```
+
+The **detective** reasons like a Bayesian: it holds a prior over where wins
+live (the [playbook's](./playbook.md) cheapest-first ordering), updates it
+from accumulated evidence (the append-only ledger — failures included,
+because failures are the most informative updates), ranks its next bets
+(`crates/policy`, by the Wilson *lower* bound of each class's proven win
+rate — even the learning layer bets pessimistically), and reads the
+[post-verdict diagnosis](./explain.md) so the next hypothesis is sharper
+than the last. Its "estimate likely payoff" is a belief, and stays one:
+dollar figures are minted only by the court's
+[mechanical report](./roi.md), only from accepted rows.
+
+The **court** reasons like a frequentist, because its audience is a hostile
+reviewer who shares none of your priors. Its verdicts are decision
+procedures with *measured* long-run error rates: the A/A calibration bounds
+the false-positive rate and the injected-regression test bounds the power —
+per machine, empirically, before any real measurement is believed. The
+accept rule is a conservative bound, not a posterior; there is no prior
+anywhere on the accept path, so there is nothing to argue about except the
+evidence.
+
+The return edge is what makes the detective Bayesian at all — and note its
+direction. **Evidence flows back; authority never does.** The invariant
+underneath the whole system:
+
+> **Priors may steer where you look. They may never touch what you
+> conclude.**
+
+A wrong prior in the detective costs compute — a few wasted attempts, each
+honestly ledgered. A prior in the court could cost a false claim, the one
+unrecoverable failure for a project whose product is trust. The gates are
+what make speculative, prior-driven exploration *safe*: the detective can
+believe anything it likes, because nothing it believes survives into a
+number.

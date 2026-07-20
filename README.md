@@ -15,6 +15,14 @@ deltas with the methodology attached** — a stopwatch on pinned hardware, a
 proof of equivalence, and an ROI figure whose confidence interval survives
 hostile review.
 
+The design in one breath: **the optimizer is a Bayesian detective; the
+trust layer is a frequentist court.** The detective holds priors, updates
+them from the ledger, and picks the next bet; the court runs calibrated
+procedures with measured error rates and no priors at all. Evidence flows
+back from court to detective — authority never does. Priors steer where we
+look; they never touch what we conclude.
+[The full argument](https://bdbrown4.github.io/peltier.io/thesis.html#the-detective-and-the-court).
+
 📖 **Full documentation: the [peltier.io book](https://bdbrown4.github.io/peltier.io/)**
 · Design spec: [SPEC.md](SPEC.md) · Charter: [CLAUDE.md](CLAUDE.md)
 
