@@ -308,6 +308,75 @@ impl Ledger {
         }
     }
 
+    /// The full machine record of one attempt — every column, with the
+    /// gates/bench JSON columns parsed. Read-only; this is the entire input
+    /// surface of `crates/explain` (SPEC §3.7), which must derive from the
+    /// ledger row and nothing else.
+    pub fn attempt_row(&self, run_id: &str) -> Result<Option<serde_json::Value>, LedgerError> {
+        let row = self.conn.query_row(
+            "SELECT timestamp, target, target_commit, phase, hotspot, playbook_class, \
+             hypothesis, patch, gates, bench, verdict, tokens_spent, wall_time_s \
+             FROM attempts WHERE run_id = ?1",
+            [run_id],
+            |r| {
+                Ok((
+                    r.get::<_, String>(0)?,
+                    r.get::<_, String>(1)?,
+                    r.get::<_, String>(2)?,
+                    r.get::<_, i64>(3)?,
+                    r.get::<_, String>(4)?,
+                    r.get::<_, i64>(5)?,
+                    r.get::<_, String>(6)?,
+                    r.get::<_, String>(7)?,
+                    r.get::<_, String>(8)?,
+                    r.get::<_, Option<String>>(9)?,
+                    r.get::<_, String>(10)?,
+                    r.get::<_, i64>(11)?,
+                    r.get::<_, f64>(12)?,
+                ))
+            },
+        );
+        match row {
+            Ok((
+                ts,
+                target,
+                commit,
+                phase,
+                hotspot,
+                class,
+                hyp,
+                patch,
+                gates,
+                bench,
+                verdict,
+                tokens,
+                wall,
+            )) => {
+                let gates: serde_json::Value = serde_json::from_str(&gates)?;
+                let bench: Option<serde_json::Value> =
+                    bench.map(|b| serde_json::from_str(&b)).transpose()?;
+                Ok(Some(serde_json::json!({
+                    "run_id": run_id,
+                    "timestamp": ts,
+                    "target": target,
+                    "target_commit": commit,
+                    "phase": phase,
+                    "hotspot": hotspot,
+                    "playbook_class": class,
+                    "hypothesis": hyp,
+                    "patch": patch,
+                    "gates": gates,
+                    "bench": bench,
+                    "verdict": verdict,
+                    "tokens_spent": tokens,
+                    "wall_time_s": wall,
+                })))
+            }
+            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e.into()),
+        }
+    }
+
     pub fn count(&self) -> Result<u64, LedgerError> {
         Ok(self
             .conn

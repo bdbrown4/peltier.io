@@ -25,5 +25,6 @@
 
 - [Consume it: the peltier skill](./skill.md)
 - [Reproduce it yourself](./reproduce.md)
+- [Explain: why a row won or lost](./explain.md)
 - [The trust boundary (infra)](./infra.md)
 - [Roadmap & scope](./roadmap.md)

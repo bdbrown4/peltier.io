@@ -92,6 +92,11 @@ service-calibrate server doc out *flags:
 report run_id *flags:
     cargo run -p report -- --run-id "{{run_id}}" {{flags}}
 
+# Advisory post-verdict diagnosis of a ledger row (SPEC §3.7): why it won
+# or lost, derived solely from the machine record. Never changes a verdict.
+explain run_id:
+    cargo run -p explain -- --run-id "{{run_id}}"
+
 # Learned playbook-class ranking from the ledger (SPEC §13 research fork)
 policy *flags:
     cargo run -p policy -- {{flags}}

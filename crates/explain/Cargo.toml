@@ -1,0 +1,13 @@
+[package]
+name = "explain"
+description = "Advisory post-verdict diagnosis of a ledger row: why it won or lost, derived solely from the machine record, never on the accept path"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+ledger = { path = "../ledger" }
+serde_json.workspace = true

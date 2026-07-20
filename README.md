@@ -61,6 +61,7 @@ just gates <target>            # corpus pin + upstream tests + golden replay
                                #   (fuzz needs a baseline — it runs in `just verdict`)
 just verdict <t> <bin> ...     # gates + fuzz + sanitizers + bench vs pristine baseline
 just report <run-id>           # ROI report from a ledger row
+just explain <run-id>          # why a row won/lost — advisory, from the record only
 just isolation-check           # 19 OS-boundary checks (both modes)
 ```
 
