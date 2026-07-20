@@ -84,6 +84,18 @@ dollars, and/or latency percentiles — every figure with its CI, workload, and
 methodology printed inline. It flags any row that was not accepted, so a
 rejected attempt cannot be laundered into a dollar figure.
 
+## Explain — read this before your next hypothesis
+
+    just explain <run-id>
+
+Advisory diagnosis of the row you just wrote (SPEC §3.7): *why* it won or
+lost, derived solely from the ledger — deterministic, never on the accept
+path, with everything beyond the machine record prefixed `inference:`. Run it
+on every rejection before forming the next hypothesis: "real improvement,
+below the ship bar", "indistinguishable from no change", and "a measured
+regression" are three different next moves, and the verdict string alone does
+not tell you which one you got. Quote the record, not the inferences.
+
 ## Unattended
 
     just agent-attempt <target> <run-id>
