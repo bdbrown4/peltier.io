@@ -140,4 +140,4 @@ it before it shipped.
 
 ## License
 
-GPL-3.0-or-later — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).

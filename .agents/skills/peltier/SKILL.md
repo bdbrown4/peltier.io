@@ -1,7 +1,7 @@
 ---
 name: peltier
 description: "Prove a performance change is real — or refuse to claim it. Use when optimizing code for speed, verifying a claimed speedup ('is this actually faster?', 'did my optimization work?'), checking for a performance regression ('did this PR make things slower?'), or comparing the performance of two implementations. Runs peltier's trust layer — equivalence gates, A/A environment calibration, interleaved A/B with bootstrap confidence intervals. Never reports a naked percentage and never claims a win that is not statistically significant. Do NOT use for correctness-only work."
-license: "GPL-3.0-or-later"
+license: "MIT"
 compatibility: "Needs a peltier checkout (https://github.com/bdbrown4/peltier.io; set PELTIER_HOME) with cargo to build bench-runner. Measurement requires a Linux/POSIX host; on unsupported hosts the skill refuses to produce numbers rather than degrade."
 version: "1.1.0"
 author: "peltier.io (Ben Brown)"
