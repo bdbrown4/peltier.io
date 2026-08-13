@@ -1,0 +1,6 @@
+# Upstream data payloads: ~1.8 GB unpacked. Refetch with src/fetch_data.sh,
+# which verifies data/SHA256SUMS (which IS committed).
+data/raw/
+data/cache/
+__pycache__/
+*.pyc

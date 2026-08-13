@@ -1,0 +1,645 @@
+h^1,1 = 4   delta = 8   weight w = 6   universe = unique
+  invariant: 2h-invariant-octic
+  1183 manifolds over 86 Hodge classes; 103 have I = 0
+  634 factorisations (one per distinct non-zero value) cover 24413 same-Hodge pairs
+
+  same-Hodge pairs                     24413
+    silent  (both I = 0)                      289   1.18%
+    excluded (exactly one I = 0)             4306   17.64%
+    screened (both I != 0)                  19818   81.18%
+      same invariant  (|det P| = 1)           257
+      excluded by signature                 19537
+      FALSIFIER CANDIDATES                     24
+
+  audit: 13525 value-pairs re-tested without factorisation, 0 disagreements
+
+  13 candidate value-pairs:
+    h12=52   I=-131072 vs -23328  ratio=729/4096  |det P|=3/4  (3 manifold pairs)  sig -2^5
+    h12=56   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^2
+    h12=58   I=-5832 vs -8  ratio=1/729  |det P|=1/3  (2 manifold pairs)  sig -2^3
+    h12=60   I=-4096 vs -64  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -1
+    h12=64   I=-46656 vs -4096  ratio=64/729  |det P|=2/3  (1 manifold pairs)  sig -1
+    h12=68   I=-200448 vs -3132  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^2 * 3^3 * 29^1
+    h12=68   I=-52488 vs -4608  ratio=64/729  |det P|=2/3  (2 manifold pairs)  sig -2^3 * 3^2
+    h12=70   I=9 vs 6561  ratio=729  |det P|=3  (1 manifold pairs)  sig +3^2
+    h12=70   I=-23328 vs -32  ratio=1/729  |det P|=1/3  (1 manifold pairs)  sig -2^5
+    h12=72   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (4 manifold pairs)  sig -2^2
+    h12=76   I=1024 vs 11664  ratio=729/64  |det P|=3/2  (1 manifold pairs)  sig +2^4
+    h12=106  I=4 vs 256  ratio=64  |det P|=2  (1 manifold pairs)  sig +2^2
+    h12=214  I=-512 vs -8  ratio=1/64  |det P|=1/2  (4 manifold pairs)  sig -2^3
+------------------------------------------------------------------------
+h^1,1 = 4   delta = 8   weight w = 6   universe = distinct
+  invariant: 2h-invariant-octic
+  1948 manifolds over 86 Hodge classes; 288 have I = 0
+  634 factorisations (one per distinct non-zero value) cover 70401 same-Hodge pairs
+
+  same-Hodge pairs                     70401
+    silent  (both I = 0)                     3776   5.36%
+    excluded (exactly one I = 0)            19018   27.01%
+    screened (both I != 0)                  47607   67.62%
+      same invariant  (|det P| = 1)          1772
+      excluded by signature                 45763
+      FALSIFIER CANDIDATES                     72
+
+  audit: 13525 value-pairs re-tested without factorisation, 0 disagreements
+
+  13 candidate value-pairs:
+    h12=52   I=-131072 vs -23328  ratio=729/4096  |det P|=3/4  (9 manifold pairs)  sig -2^5
+    h12=56   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (6 manifold pairs)  sig -2^2
+    h12=58   I=-5832 vs -8  ratio=1/729  |det P|=1/3  (8 manifold pairs)  sig -2^3
+    h12=60   I=-4096 vs -64  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -1
+    h12=64   I=-46656 vs -4096  ratio=64/729  |det P|=2/3  (10 manifold pairs)  sig -1
+    h12=68   I=-200448 vs -3132  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^2 * 3^3 * 29^1
+    h12=68   I=-52488 vs -4608  ratio=64/729  |det P|=2/3  (2 manifold pairs)  sig -2^3 * 3^2
+    h12=70   I=-23328 vs -32  ratio=1/729  |det P|=1/3  (4 manifold pairs)  sig -2^5
+    h12=70   I=9 vs 6561  ratio=729  |det P|=3  (2 manifold pairs)  sig +3^2
+    h12=72   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (12 manifold pairs)  sig -2^2
+    h12=76   I=1024 vs 11664  ratio=729/64  |det P|=3/2  (1 manifold pairs)  sig +2^4
+    h12=106  I=4 vs 256  ratio=64  |det P|=2  (1 manifold pairs)  sig +2^2
+    h12=214  I=-512 vs -8  ratio=1/64  |det P|=1/2  (15 manifold pairs)  sig -2^3
+------------------------------------------------------------------------
+h^1,1 = 4   delta = 8   weight w = 6   universe = all
+  invariant: 2h-invariant-octic
+  5324 manifolds over 86 Hodge classes; 767 have I = 0
+  634 factorisations (one per distinct non-zero value) cover 558551 same-Hodge pairs
+
+  same-Hodge pairs                     558551
+    silent  (both I = 0)                    29869   5.35%
+    excluded (exactly one I = 0)           169103   30.28%
+    screened (both I != 0)                 359579   64.38%
+      same invariant  (|det P| = 1)         25779
+      excluded by signature                333401
+      FALSIFIER CANDIDATES                    399
+
+  audit: 13525 value-pairs re-tested without factorisation, 0 disagreements
+
+  13 candidate value-pairs:
+    h12=52   I=-131072 vs -23328  ratio=729/4096  |det P|=3/4  (12 manifold pairs)  sig -2^5
+    h12=56   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (12 manifold pairs)  sig -2^2
+    h12=58   I=-5832 vs -8  ratio=1/729  |det P|=1/3  (130 manifold pairs)  sig -2^3
+    h12=60   I=-4096 vs -64  ratio=1/64  |det P|=1/2  (6 manifold pairs)  sig -1
+    h12=64   I=-46656 vs -4096  ratio=64/729  |det P|=2/3  (20 manifold pairs)  sig -1
+    h12=68   I=-200448 vs -3132  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^2 * 3^3 * 29^1
+    h12=68   I=-52488 vs -4608  ratio=64/729  |det P|=2/3  (8 manifold pairs)  sig -2^3 * 3^2
+    h12=70   I=-23328 vs -32  ratio=1/729  |det P|=1/3  (20 manifold pairs)  sig -2^5
+    h12=70   I=9 vs 6561  ratio=729  |det P|=3  (42 manifold pairs)  sig +3^2
+    h12=72   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (40 manifold pairs)  sig -2^2
+    h12=76   I=1024 vs 11664  ratio=729/64  |det P|=3/2  (2 manifold pairs)  sig +2^4
+    h12=106  I=4 vs 256  ratio=64  |det P|=2  (45 manifold pairs)  sig +2^2
+    h12=214  I=-512 vs -8  ratio=1/64  |det P|=1/2  (60 manifold pairs)  sig -2^3
+------------------------------------------------------------------------
+h^1,1 = 5   delta = 10   weight w = 6   universe = unique
+  invariant: 2h-invariant-decic
+  8023 manifolds over 113 Hodge classes; 638 have I = 0
+  5168 factorisations (one per distinct non-zero value) cover 1019394 same-Hodge pairs
+
+  same-Hodge pairs                     1019394
+    silent  (both I = 0)                     7123   0.70%
+    excluded (exactly one I = 0)           150433   14.76%
+    screened (both I != 0)                 861838   84.54%
+      same invariant  (|det P| = 1)          1199
+      excluded by signature                860201
+      FALSIFIER CANDIDATES                    438
+
+  audit: 671887 value-pairs re-tested without factorisation, 0 disagreements
+  cross-check (CEpsDeg8Invariant, weight 6): 0 survive, 167 killed, 0 undecidable
+
+  167 candidate value-pairs:
+    h12=35   I=-24576 vs -384  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^1 * 3^1
+    h12=41   I=-13824 vs -216  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3 * 3^3
+    h12=47   I=512 vs 32768  ratio=64  |det P|=2  (1 manifold pairs)  sig +2^3
+    h12=47   I=-373248 vs -5832  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3
+    h12=49   I=-52488 vs -4608  ratio=64/729  |det P|=2/3  (1 manifold pairs)  sig -2^3 * 3^2
+    h12=51   I=-262144 vs -4096  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -1
+    h12=51   I=512 vs 32768  ratio=64  |det P|=2  (2 manifold pairs)  sig +2^3
+    h12=51   I=8192 vs 524288  ratio=64  |det P|=2  (1 manifold pairs)  sig +2^1
+    h12=51   I=2048 vs 131072  ratio=64  |det P|=2  (1 manifold pairs)  sig +2^5
+    h12=53   I=-373248 vs -5832  ratio=1/64  |det P|=1/2  (10 manifold pairs)  sig -2^3
+    h12=53   I=888 vs 647352  ratio=729  |det P|=3  (1 manifold pairs)  sig +2^3 * 3^1 * 37^1
+    h12=53   I=-1179648 vs -209952  ratio=729/4096  |det P|=3/4  (1 manifold pairs)  sig -2^5 * 3^2
+    h12=53   I=-3359232 vs -52488  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^3 * 3^2
+    h12=53   I=-1048576 vs -186624  ratio=729/4096  |det P|=3/4  (1 manifold pairs)  sig -2^2
+    h12=53   I=-1048576 vs -16384  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^2
+    h12=53   I=-186624 vs -16384  ratio=64/729  |det P|=2/3  (2 manifold pairs)  sig -2^2
+    h12=53   I=-1492992 vs -23328  ratio=1/64  |det P|=1/2  (3 manifold pairs)  sig -2^5
+    h12=53   I=-1492992 vs -2048  ratio=1/729  |det P|=1/3  (1 manifold pairs)  sig -2^5
+    h12=53   I=-23328 vs -2048  ratio=64/729  |det P|=2/3  (3 manifold pairs)  sig -2^5
+    h12=53   I=-93312 vs -128  ratio=1/729  |det P|=1/3  (4 manifold pairs)  sig -2^1
+    h12=53   I=81 vs 59049  ratio=729  |det P|=3  (1 manifold pairs)  sig +3^4
+    h12=55   I=-746496 vs -65536  ratio=64/729  |det P|=2/3  (6 manifold pairs)  sig -2^4
+    h12=55   I=-262144 vs -4096  ratio=1/64  |det P|=1/2  (3 manifold pairs)  sig -1
+    h12=55   I=-327680 vs -5120  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^4 * 5^1
+    h12=55   I=9216 vs 589824  ratio=64  |det P|=2  (1 manifold pairs)  sig +2^4 * 3^2
+    h12=55   I=32768 vs 373248  ratio=729/64  |det P|=3/2  (2 manifold pairs)  sig +2^3
+    h12=55   I=3072 vs 196608  ratio=64  |det P|=2  (3 manifold pairs)  sig +2^4 * 3^1
+    h12=55   I=-131072 vs -23328  ratio=729/4096  |det P|=3/4  (2 manifold pairs)  sig -2^5
+    h12=55   I=-131072 vs -2048  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^5
+    h12=55   I=-23328 vs -2048  ratio=64/729  |det P|=2/3  (2 manifold pairs)  sig -2^5
+    h12=55   I=93312 vs 524288  ratio=4096/729  |det P|=4/3  (1 manifold pairs)  sig +2^1
+    h12=55   I=-229376 vs -3584  ratio=1/64  |det P|=1/2  (3 manifold pairs)  sig -2^3 * 7^1
+    h12=55   I=-294912 vs -52488  ratio=729/4096  |det P|=3/4  (1 manifold pairs)  sig -2^3 * 3^2
+    h12=55   I=-98304 vs -1536  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3 * 3^1
+    h12=55   I=-393216 vs -6144  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^5 * 3^1
+    h12=56   I=-373248 vs -5832  ratio=1/64  |det P|=1/2  (12 manifold pairs)  sig -2^3
+    h12=57   I=-18432 vs -288  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^5 * 3^2
+    h12=57   I=49152 vs 559872  ratio=729/64  |det P|=3/2  (2 manifold pairs)  sig +2^2 * 3^1
+    h12=57   I=-1492992 vs -23328  ratio=1/64  |det P|=1/2  (3 manifold pairs)  sig -2^5
+    h12=57   I=-373248 vs -512  ratio=1/729  |det P|=1/3  (3 manifold pairs)  sig -2^3
+    h12=57   I=-909792 vs -79872  ratio=64/729  |det P|=2/3  (2 manifold pairs)  sig -2^5 * 3^1 * 13^1
+    h12=57   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^2
+    h12=57   I=-1804032 vs -28188  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^2 * 3^5 * 29^1
+    h12=57   I=-124416 vs -1944  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^3 * 3^5
+    h12=59   I=-159744 vs -28431  ratio=729/4096  |det P|=3/4  (1 manifold pairs)  sig -3^1 * 13^1
+    h12=59   I=24576 vs 279936  ratio=729/64  |det P|=3/2  (6 manifold pairs)  sig +2^1 * 3^1
+    h12=59   I=64152 vs 360448  ratio=4096/729  |det P|=4/3  (4 manifold pairs)  sig +2^3 * 11^1
+    h12=59   I=40824 vs 229376  ratio=4096/729  |det P|=4/3  (2 manifold pairs)  sig +2^3 * 7^1
+    h12=59   I=-1492992 vs -131072  ratio=64/729  |det P|=2/3  (10 manifold pairs)  sig -2^5
+    h12=59   I=2560 vs 163840  ratio=64  |det P|=2  (1 manifold pairs)  sig +2^3 * 5^1
+    h12=59   I=-3359232 vs -52488  ratio=1/64  |det P|=1/2  (3 manifold pairs)  sig -2^3 * 3^2
+    h12=59   I=-442368 vs -6912  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^2 * 3^3
+    h12=59   I=-373248 vs -32768  ratio=64/729  |det P|=2/3  (7 manifold pairs)  sig -2^3
+    h12=59   I=-373248 vs -5832  ratio=1/64  |det P|=1/2  (35 manifold pairs)  sig -2^3
+    h12=59   I=-373248 vs -512  ratio=1/729  |det P|=1/3  (7 manifold pairs)  sig -2^3
+    h12=59   I=-32768 vs -5832  ratio=729/4096  |det P|=3/4  (5 manifold pairs)  sig -2^3
+    h12=59   I=-32768 vs -512  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3
+    h12=59   I=-5832 vs -512  ratio=64/729  |det P|=2/3  (5 manifold pairs)  sig -2^3
+    h12=59   I=18432 vs 209952  ratio=729/64  |det P|=3/2  (1 manifold pairs)  sig +2^5 * 3^2
+    h12=59   I=-2654208 vs -472392  ratio=729/4096  |det P|=3/4  (10 manifold pairs)  sig -2^3 * 3^4
+    h12=59   I=-1048576 vs -186624  ratio=729/4096  |det P|=3/4  (1 manifold pairs)  sig -2^2
+    h12=59   I=-1119744 vs -98304  ratio=64/729  |det P|=2/3  (2 manifold pairs)  sig -2^3 * 3^1
+    h12=59   I=16384 vs 186624  ratio=729/64  |det P|=3/2  (1 manifold pairs)  sig +2^2
+    h12=59   I=-393216 vs -6144  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^5 * 3^1
+    h12=59   I=4096 vs 46656  ratio=729/64  |det P|=3/2  (1 manifold pairs)  sig +1
+    h12=59   I=-255879 vs -22464  ratio=64/729  |det P|=2/3  (2 manifold pairs)  sig -3^3 * 13^1
+    h12=59   I=-262144 vs -46656  ratio=729/4096  |det P|=3/4  (2 manifold pairs)  sig -1
+    h12=59   I=-262144 vs -4096  ratio=1/64  |det P|=1/2  (6 manifold pairs)  sig -1
+    h12=59   I=-46656 vs -4096  ratio=64/729  |det P|=2/3  (3 manifold pairs)  sig -1
+    h12=59   I=-458752 vs -7168  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^4 * 7^1
+    h12=59   I=-360448 vs -64152  ratio=729/4096  |det P|=3/4  (1 manifold pairs)  sig -2^3 * 11^1
+    h12=59   I=-612360 vs -53760  ratio=64/729  |det P|=2/3  (2 manifold pairs)  sig -2^3 * 3^1 * 5^1 * 7^1
+    h12=59   I=76545 vs 430080  ratio=4096/729  |det P|=4/3  (1 manifold pairs)  sig +3^1 * 5^1 * 7^1
+    h12=59   I=-93312 vs -8192  ratio=64/729  |det P|=2/3  (2 manifold pairs)  sig -2^1
+    h12=59   I=8192 vs 93312  ratio=729/64  |det P|=3/2  (4 manifold pairs)  sig +2^1
+    h12=59   I=-589824 vs -104976  ratio=729/4096  |det P|=3/4  (1 manifold pairs)  sig -2^4 * 3^2
+    h12=59   I=896 vs 57344  ratio=64  |det P|=2  (1 manifold pairs)  sig +2^1 * 7^1
+    h12=59   I=59049 vs 331776  ratio=4096/729  |det P|=4/3  (3 manifold pairs)  sig +3^4
+    h12=60   I=-1492992 vs -23328  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^5
+    h12=61   I=-1048576 vs -16384  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^2
+    h12=61   I=-1048576 vs -256  ratio=1/4096  |det P|=1/4  (1 manifold pairs)  sig -2^2
+    h12=61   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^2
+    h12=61   I=14336 vs 163296  ratio=729/64  |det P|=3/2  (2 manifold pairs)  sig +2^5 * 7^1
+    h12=61   I=-746496 vs -65536  ratio=64/729  |det P|=2/3  (2 manifold pairs)  sig -2^4
+    h12=61   I=-325632 vs -5088  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^5 * 3^1 * 53^1
+    h12=61   I=-233280 vs -20480  ratio=64/729  |det P|=2/3  (1 manifold pairs)  sig -5^1
+    h12=62   I=-3359232 vs -52488  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^3 * 3^2
+    h12=63   I=-262144 vs -4096  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -1
+    h12=63   I=16 vs 1024  ratio=64  |det P|=2  (1 manifold pairs)  sig +2^4
+    h12=63   I=16 vs 65536  ratio=4096  |det P|=4  (2 manifold pairs)  sig +2^4
+    h12=63   I=1024 vs 65536  ratio=64  |det P|=2  (2 manifold pairs)  sig +2^4
+    h12=63   I=-1492992 vs -131072  ratio=64/729  |det P|=2/3  (3 manifold pairs)  sig -2^5
+    h12=63   I=-1492992 vs -23328  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^5
+    h12=63   I=-131072 vs -23328  ratio=729/4096  |det P|=3/4  (3 manifold pairs)  sig -2^5
+    h12=63   I=24064 vs 274104  ratio=729/64  |det P|=3/2  (1 manifold pairs)  sig +2^3 * 47^1
+    h12=63   I=110592 vs 1259712  ratio=729/64  |det P|=3/2  (1 manifold pairs)  sig +3^3
+    h12=63   I=-172032 vs -2688  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^1 * 3^1 * 7^1
+    h12=63   I=-114688 vs -28  ratio=1/4096  |det P|=1/4  (1 manifold pairs)  sig -2^2 * 7^1
+    h12=63   I=-626688 vs -9792  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -3^2 * 17^1
+    h12=63   I=-524288 vs -93312  ratio=729/4096  |det P|=3/4  (1 manifold pairs)  sig -2^1
+    h12=65   I=-373248 vs -512  ratio=1/729  |det P|=1/3  (8 manifold pairs)  sig -2^3
+    h12=65   I=216 vs 157464  ratio=729  |det P|=3  (2 manifold pairs)  sig +2^3 * 3^3
+    h12=65   I=-3359232 vs -52488  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3 * 3^2
+    h12=65   I=-737280 vs -11520  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^2 * 3^2 * 5^1
+    h12=65   I=-49152 vs -768  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^2 * 3^1
+    h12=65   I=-1048576 vs -186624  ratio=729/4096  |det P|=3/4  (2 manifold pairs)  sig -2^2
+    h12=65   I=-1048576 vs -16384  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^2
+    h12=65   I=-186624 vs -16384  ratio=64/729  |det P|=2/3  (1 manifold pairs)  sig -2^2
+    h12=65   I=11776 vs 134136  ratio=729/64  |det P|=3/2  (2 manifold pairs)  sig +2^3 * 23^1
+    h12=65   I=-699840 vs -960  ratio=1/729  |det P|=1/3  (1 manifold pairs)  sig -3^1 * 5^1
+    h12=65   I=224 vs 163296  ratio=729  |det P|=3  (2 manifold pairs)  sig +2^5 * 7^1
+    h12=65   I=-29160 vs -2560  ratio=64/729  |det P|=2/3  (2 manifold pairs)  sig -2^3 * 5^1
+    h12=65   I=144 vs 104976  ratio=729  |det P|=3  (1 manifold pairs)  sig +2^4 * 3^2
+    h12=65   I=-64000 vs -1000  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3 * 5^3
+    h12=67   I=46656 vs 262144  ratio=4096/729  |det P|=4/3  (2 manifold pairs)  sig +1
+    h12=67   I=-746496 vs -65536  ratio=64/729  |det P|=2/3  (1 manifold pairs)  sig -2^4
+    h12=67   I=-1310720 vs -20480  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -5^1
+    h12=67   I=-479232 vs -7488  ratio=1/64  |det P|=1/2  (3 manifold pairs)  sig -3^2 * 13^1
+    h12=69   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^2
+    h12=69   I=-64000 vs -1000  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3 * 5^3
+    h12=69   I=-753664 vs -11776  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3 * 23^1
+    h12=69   I=-23328 vs -2048  ratio=64/729  |det P|=2/3  (6 manifold pairs)  sig -2^5
+    h12=69   I=-93312 vs -128  ratio=1/729  |det P|=1/3  (2 manifold pairs)  sig -2^1
+    h12=69   I=-419904 vs -576  ratio=1/729  |det P|=1/3  (1 manifold pairs)  sig -3^2
+    h12=69   I=324 vs 1327104  ratio=4096  |det P|=4  (2 manifold pairs)  sig +2^2 * 3^4
+    h12=71   I=-1048576 vs -16384  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^2
+    h12=71   I=-753664 vs -11776  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3 * 23^1
+    h12=73   I=-2560 vs -40  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3 * 5^1
+    h12=73   I=-131072 vs -2048  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^5
+    h12=73   I=-1605632 vs -25088  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3 * 7^2
+    h12=73   I=-294912 vs -4608  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3 * 3^2
+    h12=73   I=-64000 vs -1000  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^3 * 5^3
+    h12=73   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^2
+    h12=73   I=-995328 vs -15552  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -3^5
+    h12=75   I=-2916000 vs -4000  ratio=1/729  |det P|=1/3  (2 manifold pairs)  sig -2^5 * 5^3
+    h12=77   I=-746496 vs -1024  ratio=1/729  |det P|=1/3  (2 manifold pairs)  sig -2^4
+    h12=77   I=-64000 vs -1000  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3 * 5^3
+    h12=77   I=-2097152 vs -32768  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3
+    h12=77   I=-2097152 vs -512  ratio=1/4096  |det P|=1/4  (1 manifold pairs)  sig -2^3
+    h12=77   I=-32768 vs -512  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3
+    h12=77   I=-131072 vs -2048  ratio=1/64  |det P|=1/2  (3 manifold pairs)  sig -2^5
+    h12=77   I=4 vs 256  ratio=64  |det P|=2  (1 manifold pairs)  sig +2^2
+    h12=77   I=-1179648 vs -18432  ratio=1/64  |det P|=1/2  (4 manifold pairs)  sig -2^5 * 3^2
+    h12=77   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^2
+    h12=77   I=-4608 vs -72  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^3 * 3^2
+    h12=77   I=147456 vs 1679616  ratio=729/64  |det P|=3/2  (2 manifold pairs)  sig +2^2 * 3^2
+    h12=79   I=-2916000 vs -4000  ratio=1/729  |det P|=1/3  (1 manifold pairs)  sig -2^5 * 5^3
+    h12=81   I=320 vs 20480  ratio=64  |det P|=2  (1 manifold pairs)  sig +5^1
+    h12=81   I=-32768 vs -512  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^3
+    h12=85   I=-2097152 vs -32768  ratio=1/64  |det P|=1/2  (18 manifold pairs)  sig -2^3
+    h12=85   I=-2097152 vs -512  ratio=1/4096  |det P|=1/4  (6 manifold pairs)  sig -2^3
+    h12=85   I=-32768 vs -512  ratio=1/64  |det P|=1/2  (12 manifold pairs)  sig -2^3
+    h12=85   I=-196608 vs -3072  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^4 * 3^1
+    h12=85   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (3 manifold pairs)  sig -2^2
+    h12=89   I=-131072 vs -2048  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^5
+    h12=89   I=-2097152 vs -32768  ratio=1/64  |det P|=1/2  (4 manifold pairs)  sig -2^3
+    h12=89   I=-1417176 vs -124416  ratio=64/729  |det P|=2/3  (1 manifold pairs)  sig -2^3 * 3^5
+    h12=89   I=-294912 vs -4608  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^3 * 3^2
+    h12=93   I=-2097152 vs -32768  ratio=1/64  |det P|=1/2  (5 manifold pairs)  sig -2^3
+    h12=93   I=-4500000 vs -18432  ratio=64/15625  |det P|=2/5  (1 manifold pairs)  sig -2^5 * 3^2
+    h12=97   I=9216 vs 6718464  ratio=729  |det P|=3  (2 manifold pairs)  sig +2^4 * 3^2
+    h12=101  I=-2097152 vs -32768  ratio=1/64  |det P|=1/2  (12 manifold pairs)  sig -2^3
+    h12=105  I=256 vs 16384  ratio=64  |det P|=2  (1 manifold pairs)  sig +2^2
+    h12=105  I=-294912 vs -4608  ratio=1/64  |det P|=1/2  (4 manifold pairs)  sig -2^3 * 3^2
+    h12=185  I=-32768 vs -512  ratio=1/64  |det P|=1/2  (4 manifold pairs)  sig -2^3
+    h12=185  I=-32768 vs -8  ratio=1/4096  |det P|=1/4  (4 manifold pairs)  sig -2^3
+    h12=185  I=-512 vs -8  ratio=1/64  |det P|=1/2  (4 manifold pairs)  sig -2^3
+------------------------------------------------------------------------
+h^1,1 = 5   delta = 10   weight w = 6   universe = distinct
+  invariant: 2h-invariant-decic
+  13330 manifolds over 113 Hodge classes; 1638 have I = 0
+  5168 factorisations (one per distinct non-zero value) cover 2782233 same-Hodge pairs
+
+  same-Hodge pairs                     2782233
+    silent  (both I = 0)                    82779   2.98%
+    excluded (exactly one I = 0)           655250   23.55%
+    screened (both I != 0)                2044204   73.47%
+      same invariant  (|det P| = 1)         18172
+      excluded by signature               2023908
+      FALSIFIER CANDIDATES                   2124
+
+  audit: 671887 value-pairs re-tested without factorisation, 0 disagreements
+  cross-check (CEpsDeg8Invariant, weight 6): 0 survive, 167 killed, 0 undecidable
+
+  167 candidate value-pairs:
+    h12=35   I=-24576 vs -384  ratio=1/64  |det P|=1/2  (6 manifold pairs)  sig -2^1 * 3^1
+    h12=41   I=-13824 vs -216  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3 * 3^3
+    h12=47   I=-373248 vs -5832  ratio=1/64  |det P|=1/2  (21 manifold pairs)  sig -2^3
+    h12=47   I=512 vs 32768  ratio=64  |det P|=2  (4 manifold pairs)  sig +2^3
+    h12=49   I=-52488 vs -4608  ratio=64/729  |det P|=2/3  (1 manifold pairs)  sig -2^3 * 3^2
+    h12=51   I=-262144 vs -4096  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -1
+    h12=51   I=512 vs 32768  ratio=64  |det P|=2  (2 manifold pairs)  sig +2^3
+    h12=51   I=8192 vs 524288  ratio=64  |det P|=2  (1 manifold pairs)  sig +2^1
+    h12=51   I=2048 vs 131072  ratio=64  |det P|=2  (1 manifold pairs)  sig +2^5
+    h12=53   I=-3359232 vs -52488  ratio=1/64  |det P|=1/2  (57 manifold pairs)  sig -2^3 * 3^2
+    h12=53   I=-1492992 vs -23328  ratio=1/64  |det P|=1/2  (184 manifold pairs)  sig -2^5
+    h12=53   I=-1492992 vs -2048  ratio=1/729  |det P|=1/3  (8 manifold pairs)  sig -2^5
+    h12=53   I=-23328 vs -2048  ratio=64/729  |det P|=2/3  (23 manifold pairs)  sig -2^5
+    h12=53   I=-373248 vs -5832  ratio=1/64  |det P|=1/2  (24 manifold pairs)  sig -2^3
+    h12=53   I=-93312 vs -128  ratio=1/729  |det P|=1/3  (28 manifold pairs)  sig -2^1
+    h12=53   I=-1048576 vs -186624  ratio=729/4096  |det P|=3/4  (2 manifold pairs)  sig -2^2
+    h12=53   I=-1048576 vs -16384  ratio=1/64  |det P|=1/2  (11 manifold pairs)  sig -2^2
+    h12=53   I=-186624 vs -16384  ratio=64/729  |det P|=2/3  (22 manifold pairs)  sig -2^2
+    h12=53   I=81 vs 59049  ratio=729  |det P|=3  (20 manifold pairs)  sig +3^4
+    h12=53   I=-1179648 vs -209952  ratio=729/4096  |det P|=3/4  (3 manifold pairs)  sig -2^5 * 3^2
+    h12=53   I=888 vs 647352  ratio=729  |det P|=3  (4 manifold pairs)  sig +2^3 * 3^1 * 37^1
+    h12=55   I=-131072 vs -23328  ratio=729/4096  |det P|=3/4  (3 manifold pairs)  sig -2^5
+    h12=55   I=-131072 vs -2048  ratio=1/64  |det P|=1/2  (4 manifold pairs)  sig -2^5
+    h12=55   I=-23328 vs -2048  ratio=64/729  |det P|=2/3  (12 manifold pairs)  sig -2^5
+    h12=55   I=-229376 vs -3584  ratio=1/64  |det P|=1/2  (3 manifold pairs)  sig -2^3 * 7^1
+    h12=55   I=93312 vs 524288  ratio=4096/729  |det P|=4/3  (2 manifold pairs)  sig +2^1
+    h12=55   I=-294912 vs -52488  ratio=729/4096  |det P|=3/4  (2 manifold pairs)  sig -2^3 * 3^2
+    h12=55   I=-746496 vs -65536  ratio=64/729  |det P|=2/3  (12 manifold pairs)  sig -2^4
+    h12=55   I=9216 vs 589824  ratio=64  |det P|=2  (4 manifold pairs)  sig +2^4 * 3^2
+    h12=55   I=-262144 vs -4096  ratio=1/64  |det P|=1/2  (8 manifold pairs)  sig -1
+    h12=55   I=3072 vs 196608  ratio=64  |det P|=2  (6 manifold pairs)  sig +2^4 * 3^1
+    h12=55   I=32768 vs 373248  ratio=729/64  |det P|=3/2  (4 manifold pairs)  sig +2^3
+    h12=55   I=-98304 vs -1536  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3 * 3^1
+    h12=55   I=-393216 vs -6144  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^5 * 3^1
+    h12=55   I=-327680 vs -5120  ratio=1/64  |det P|=1/2  (3 manifold pairs)  sig -2^4 * 5^1
+    h12=56   I=-373248 vs -5832  ratio=1/64  |det P|=1/2  (20 manifold pairs)  sig -2^3
+    h12=57   I=-1492992 vs -23328  ratio=1/64  |det P|=1/2  (9 manifold pairs)  sig -2^5
+    h12=57   I=49152 vs 559872  ratio=729/64  |det P|=3/2  (3 manifold pairs)  sig +2^2 * 3^1
+    h12=57   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^2
+    h12=57   I=-1804032 vs -28188  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^2 * 3^5 * 29^1
+    h12=57   I=-909792 vs -79872  ratio=64/729  |det P|=2/3  (12 manifold pairs)  sig -2^5 * 3^1 * 13^1
+    h12=57   I=-373248 vs -512  ratio=1/729  |det P|=1/3  (18 manifold pairs)  sig -2^3
+    h12=57   I=-124416 vs -1944  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^3 * 3^5
+    h12=57   I=-18432 vs -288  ratio=1/64  |det P|=1/2  (6 manifold pairs)  sig -2^5 * 3^2
+    h12=59   I=-2654208 vs -472392  ratio=729/4096  |det P|=3/4  (90 manifold pairs)  sig -2^3 * 3^4
+    h12=59   I=59049 vs 331776  ratio=4096/729  |det P|=4/3  (28 manifold pairs)  sig +3^4
+    h12=59   I=-3359232 vs -52488  ratio=1/64  |det P|=1/2  (88 manifold pairs)  sig -2^3 * 3^2
+    h12=59   I=-159744 vs -28431  ratio=729/4096  |det P|=3/4  (4 manifold pairs)  sig -3^1 * 13^1
+    h12=59   I=-393216 vs -6144  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^5 * 3^1
+    h12=59   I=-373248 vs -32768  ratio=64/729  |det P|=2/3  (20 manifold pairs)  sig -2^3
+    h12=59   I=-373248 vs -5832  ratio=1/64  |det P|=1/2  (140 manifold pairs)  sig -2^3
+    h12=59   I=-373248 vs -512  ratio=1/729  |det P|=1/3  (20 manifold pairs)  sig -2^3
+    h12=59   I=-32768 vs -5832  ratio=729/4096  |det P|=3/4  (7 manifold pairs)  sig -2^3
+    h12=59   I=-32768 vs -512  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3
+    h12=59   I=-5832 vs -512  ratio=64/729  |det P|=2/3  (7 manifold pairs)  sig -2^3
+    h12=59   I=-1492992 vs -131072  ratio=64/729  |det P|=2/3  (42 manifold pairs)  sig -2^5
+    h12=59   I=-1048576 vs -186624  ratio=729/4096  |det P|=3/4  (3 manifold pairs)  sig -2^2
+    h12=59   I=-262144 vs -46656  ratio=729/4096  |det P|=3/4  (2 manifold pairs)  sig -1
+    h12=59   I=-262144 vs -4096  ratio=1/64  |det P|=1/2  (6 manifold pairs)  sig -1
+    h12=59   I=-46656 vs -4096  ratio=64/729  |det P|=2/3  (3 manifold pairs)  sig -1
+    h12=59   I=-1119744 vs -98304  ratio=64/729  |det P|=2/3  (2 manifold pairs)  sig -2^3 * 3^1
+    h12=59   I=16384 vs 186624  ratio=729/64  |det P|=3/2  (1 manifold pairs)  sig +2^2
+    h12=59   I=18432 vs 209952  ratio=729/64  |det P|=3/2  (3 manifold pairs)  sig +2^5 * 3^2
+    h12=59   I=4096 vs 46656  ratio=729/64  |det P|=3/2  (1 manifold pairs)  sig +1
+    h12=59   I=-255879 vs -22464  ratio=64/729  |det P|=2/3  (2 manifold pairs)  sig -3^3 * 13^1
+    h12=59   I=2560 vs 163840  ratio=64  |det P|=2  (2 manifold pairs)  sig +2^3 * 5^1
+    h12=59   I=-442368 vs -6912  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^2 * 3^3
+    h12=59   I=-458752 vs -7168  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^4 * 7^1
+    h12=59   I=-360448 vs -64152  ratio=729/4096  |det P|=3/4  (1 manifold pairs)  sig -2^3 * 11^1
+    h12=59   I=40824 vs 229376  ratio=4096/729  |det P|=4/3  (4 manifold pairs)  sig +2^3 * 7^1
+    h12=59   I=64152 vs 360448  ratio=4096/729  |det P|=4/3  (8 manifold pairs)  sig +2^3 * 11^1
+    h12=59   I=-612360 vs -53760  ratio=64/729  |det P|=2/3  (2 manifold pairs)  sig -2^3 * 3^1 * 5^1 * 7^1
+    h12=59   I=76545 vs 430080  ratio=4096/729  |det P|=4/3  (1 manifold pairs)  sig +3^1 * 5^1 * 7^1
+    h12=59   I=-93312 vs -8192  ratio=64/729  |det P|=2/3  (2 manifold pairs)  sig -2^1
+    h12=59   I=8192 vs 93312  ratio=729/64  |det P|=3/2  (4 manifold pairs)  sig +2^1
+    h12=59   I=24576 vs 279936  ratio=729/64  |det P|=3/2  (9 manifold pairs)  sig +2^1 * 3^1
+    h12=59   I=-589824 vs -104976  ratio=729/4096  |det P|=3/4  (1 manifold pairs)  sig -2^4 * 3^2
+    h12=59   I=896 vs 57344  ratio=64  |det P|=2  (1 manifold pairs)  sig +2^1 * 7^1
+    h12=60   I=-1492992 vs -23328  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^5
+    h12=61   I=-1048576 vs -16384  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^2
+    h12=61   I=-1048576 vs -256  ratio=1/4096  |det P|=1/4  (3 manifold pairs)  sig -2^2
+    h12=61   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (3 manifold pairs)  sig -2^2
+    h12=61   I=-746496 vs -65536  ratio=64/729  |det P|=2/3  (3 manifold pairs)  sig -2^4
+    h12=61   I=14336 vs 163296  ratio=729/64  |det P|=3/2  (6 manifold pairs)  sig +2^5 * 7^1
+    h12=61   I=-325632 vs -5088  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^5 * 3^1 * 53^1
+    h12=61   I=-233280 vs -20480  ratio=64/729  |det P|=2/3  (1 manifold pairs)  sig -5^1
+    h12=62   I=-3359232 vs -52488  ratio=1/64  |det P|=1/2  (12 manifold pairs)  sig -2^3 * 3^2
+    h12=63   I=-262144 vs -4096  ratio=1/64  |det P|=1/2  (20 manifold pairs)  sig -1
+    h12=63   I=110592 vs 1259712  ratio=729/64  |det P|=3/2  (1 manifold pairs)  sig +3^3
+    h12=63   I=-172032 vs -2688  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^1 * 3^1 * 7^1
+    h12=63   I=16 vs 1024  ratio=64  |det P|=2  (3 manifold pairs)  sig +2^4
+    h12=63   I=16 vs 65536  ratio=4096  |det P|=4  (3 manifold pairs)  sig +2^4
+    h12=63   I=1024 vs 65536  ratio=64  |det P|=2  (9 manifold pairs)  sig +2^4
+    h12=63   I=-1492992 vs -131072  ratio=64/729  |det P|=2/3  (12 manifold pairs)  sig -2^5
+    h12=63   I=-1492992 vs -23328  ratio=1/64  |det P|=1/2  (9 manifold pairs)  sig -2^5
+    h12=63   I=-131072 vs -23328  ratio=729/4096  |det P|=3/4  (12 manifold pairs)  sig -2^5
+    h12=63   I=-524288 vs -93312  ratio=729/4096  |det P|=3/4  (2 manifold pairs)  sig -2^1
+    h12=63   I=24064 vs 274104  ratio=729/64  |det P|=3/2  (2 manifold pairs)  sig +2^3 * 47^1
+    h12=63   I=-114688 vs -28  ratio=1/4096  |det P|=1/4  (1 manifold pairs)  sig -2^2 * 7^1
+    h12=63   I=-626688 vs -9792  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -3^2 * 17^1
+    h12=65   I=-3359232 vs -52488  ratio=1/64  |det P|=1/2  (12 manifold pairs)  sig -2^3 * 3^2
+    h12=65   I=216 vs 157464  ratio=729  |det P|=3  (28 manifold pairs)  sig +2^3 * 3^3
+    h12=65   I=-64000 vs -1000  ratio=1/64  |det P|=1/2  (24 manifold pairs)  sig -2^3 * 5^3
+    h12=65   I=-373248 vs -512  ratio=1/729  |det P|=1/3  (22 manifold pairs)  sig -2^3
+    h12=65   I=-49152 vs -768  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^2 * 3^1
+    h12=65   I=144 vs 104976  ratio=729  |det P|=3  (3 manifold pairs)  sig +2^4 * 3^2
+    h12=65   I=-737280 vs -11520  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^2 * 3^2 * 5^1
+    h12=65   I=-1048576 vs -186624  ratio=729/4096  |det P|=3/4  (2 manifold pairs)  sig -2^2
+    h12=65   I=-1048576 vs -16384  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^2
+    h12=65   I=-186624 vs -16384  ratio=64/729  |det P|=2/3  (1 manifold pairs)  sig -2^2
+    h12=65   I=11776 vs 134136  ratio=729/64  |det P|=3/2  (2 manifold pairs)  sig +2^3 * 23^1
+    h12=65   I=-699840 vs -960  ratio=1/729  |det P|=1/3  (1 manifold pairs)  sig -3^1 * 5^1
+    h12=65   I=224 vs 163296  ratio=729  |det P|=3  (2 manifold pairs)  sig +2^5 * 7^1
+    h12=65   I=-29160 vs -2560  ratio=64/729  |det P|=2/3  (2 manifold pairs)  sig -2^3 * 5^1
+    h12=67   I=46656 vs 262144  ratio=4096/729  |det P|=4/3  (4 manifold pairs)  sig +1
+    h12=67   I=-746496 vs -65536  ratio=64/729  |det P|=2/3  (2 manifold pairs)  sig -2^4
+    h12=67   I=-1310720 vs -20480  ratio=1/64  |det P|=1/2  (3 manifold pairs)  sig -5^1
+    h12=67   I=-479232 vs -7488  ratio=1/64  |det P|=1/2  (3 manifold pairs)  sig -3^2 * 13^1
+    h12=69   I=-93312 vs -128  ratio=1/729  |det P|=1/3  (4 manifold pairs)  sig -2^1
+    h12=69   I=-753664 vs -11776  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3 * 23^1
+    h12=69   I=-64000 vs -1000  ratio=1/64  |det P|=1/2  (6 manifold pairs)  sig -2^3 * 5^3
+    h12=69   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (4 manifold pairs)  sig -2^2
+    h12=69   I=324 vs 1327104  ratio=4096  |det P|=4  (4 manifold pairs)  sig +2^2 * 3^4
+    h12=69   I=-23328 vs -2048  ratio=64/729  |det P|=2/3  (12 manifold pairs)  sig -2^5
+    h12=69   I=-419904 vs -576  ratio=1/729  |det P|=1/3  (1 manifold pairs)  sig -3^2
+    h12=71   I=-1048576 vs -16384  ratio=1/64  |det P|=1/2  (3 manifold pairs)  sig -2^2
+    h12=71   I=-753664 vs -11776  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3 * 23^1
+    h12=73   I=-131072 vs -2048  ratio=1/64  |det P|=1/2  (4 manifold pairs)  sig -2^5
+    h12=73   I=-294912 vs -4608  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^3 * 3^2
+    h12=73   I=-2560 vs -40  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^3 * 5^1
+    h12=73   I=-1605632 vs -25088  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3 * 7^2
+    h12=73   I=-64000 vs -1000  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^3 * 5^3
+    h12=73   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^2
+    h12=73   I=-995328 vs -15552  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -3^5
+    h12=75   I=-2916000 vs -4000  ratio=1/729  |det P|=1/3  (8 manifold pairs)  sig -2^5 * 5^3
+    h12=77   I=147456 vs 1679616  ratio=729/64  |det P|=3/2  (6 manifold pairs)  sig +2^2 * 3^2
+    h12=77   I=-64000 vs -1000  ratio=1/64  |det P|=1/2  (72 manifold pairs)  sig -2^3 * 5^3
+    h12=77   I=-2097152 vs -32768  ratio=1/64  |det P|=1/2  (6 manifold pairs)  sig -2^3
+    h12=77   I=-2097152 vs -512  ratio=1/4096  |det P|=1/4  (6 manifold pairs)  sig -2^3
+    h12=77   I=-32768 vs -512  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3
+    h12=77   I=-4608 vs -72  ratio=1/64  |det P|=1/2  (3 manifold pairs)  sig -2^3 * 3^2
+    h12=77   I=-746496 vs -1024  ratio=1/729  |det P|=1/3  (6 manifold pairs)  sig -2^4
+    h12=77   I=-131072 vs -2048  ratio=1/64  |det P|=1/2  (6 manifold pairs)  sig -2^5
+    h12=77   I=4 vs 256  ratio=64  |det P|=2  (1 manifold pairs)  sig +2^2
+    h12=77   I=-1179648 vs -18432  ratio=1/64  |det P|=1/2  (4 manifold pairs)  sig -2^5 * 3^2
+    h12=77   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^2
+    h12=79   I=-2916000 vs -4000  ratio=1/729  |det P|=1/3  (4 manifold pairs)  sig -2^5 * 5^3
+    h12=81   I=-32768 vs -512  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^3
+    h12=81   I=320 vs 20480  ratio=64  |det P|=2  (2 manifold pairs)  sig +5^1
+    h12=85   I=-2097152 vs -32768  ratio=1/64  |det P|=1/2  (168 manifold pairs)  sig -2^3
+    h12=85   I=-2097152 vs -512  ratio=1/4096  |det P|=1/4  (48 manifold pairs)  sig -2^3
+    h12=85   I=-32768 vs -512  ratio=1/64  |det P|=1/2  (14 manifold pairs)  sig -2^3
+    h12=85   I=-196608 vs -3072  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^4 * 3^1
+    h12=85   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (3 manifold pairs)  sig -2^2
+    h12=89   I=-1417176 vs -124416  ratio=64/729  |det P|=2/3  (3 manifold pairs)  sig -2^3 * 3^5
+    h12=89   I=-2097152 vs -32768  ratio=1/64  |det P|=1/2  (24 manifold pairs)  sig -2^3
+    h12=89   I=-294912 vs -4608  ratio=1/64  |det P|=1/2  (6 manifold pairs)  sig -2^3 * 3^2
+    h12=89   I=-131072 vs -2048  ratio=1/64  |det P|=1/2  (6 manifold pairs)  sig -2^5
+    h12=93   I=-4500000 vs -18432  ratio=64/15625  |det P|=2/5  (3 manifold pairs)  sig -2^5 * 3^2
+    h12=93   I=-2097152 vs -32768  ratio=1/64  |det P|=1/2  (48 manifold pairs)  sig -2^3
+    h12=97   I=9216 vs 6718464  ratio=729  |det P|=3  (24 manifold pairs)  sig +2^4 * 3^2
+    h12=101  I=-2097152 vs -32768  ratio=1/64  |det P|=1/2  (84 manifold pairs)  sig -2^3
+    h12=105  I=-294912 vs -4608  ratio=1/64  |det P|=1/2  (8 manifold pairs)  sig -2^3 * 3^2
+    h12=105  I=256 vs 16384  ratio=64  |det P|=2  (1 manifold pairs)  sig +2^2
+    h12=185  I=-32768 vs -512  ratio=1/64  |det P|=1/2  (20 manifold pairs)  sig -2^3
+    h12=185  I=-32768 vs -8  ratio=1/4096  |det P|=1/4  (105 manifold pairs)  sig -2^3
+    h12=185  I=-512 vs -8  ratio=1/64  |det P|=1/2  (84 manifold pairs)  sig -2^3
+------------------------------------------------------------------------
+h^1,1 = 5   delta = 10   weight w = 6   universe = all
+  invariant: 2h-invariant-decic
+  56714 manifolds over 113 Hodge classes; 7460 have I = 0
+  5168 factorisations (one per distinct non-zero value) cover 51651614 same-Hodge pairs
+
+  same-Hodge pairs                     51651614
+    silent  (both I = 0)                  1575197   3.05%
+    excluded (exactly one I = 0)         13468807   26.08%
+    screened (both I != 0)               36607610   70.87%
+      same invariant  (|det P| = 1)        820049
+      excluded by signature              35740144
+      FALSIFIER CANDIDATES                  47417
+
+  audit: 671887 value-pairs re-tested without factorisation, 0 disagreements
+  cross-check (CEpsDeg8Invariant, weight 6): 0 survive, 167 killed, 0 undecidable
+
+  167 candidate value-pairs:
+    h12=35   I=-24576 vs -384  ratio=1/64  |det P|=1/2  (444 manifold pairs)  sig -2^1 * 3^1
+    h12=41   I=-13824 vs -216  ratio=1/64  |det P|=1/2  (48 manifold pairs)  sig -2^3 * 3^3
+    h12=47   I=-373248 vs -5832  ratio=1/64  |det P|=1/2  (21 manifold pairs)  sig -2^3
+    h12=47   I=512 vs 32768  ratio=64  |det P|=2  (16 manifold pairs)  sig +2^3
+    h12=49   I=-52488 vs -4608  ratio=64/729  |det P|=2/3  (72 manifold pairs)  sig -2^3 * 3^2
+    h12=51   I=-262144 vs -4096  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -1
+    h12=51   I=512 vs 32768  ratio=64  |det P|=2  (30 manifold pairs)  sig +2^3
+    h12=51   I=8192 vs 524288  ratio=64  |det P|=2  (36 manifold pairs)  sig +2^1
+    h12=51   I=2048 vs 131072  ratio=64  |det P|=2  (4 manifold pairs)  sig +2^5
+    h12=53   I=-3359232 vs -52488  ratio=1/64  |det P|=1/2  (57 manifold pairs)  sig -2^3 * 3^2
+    h12=53   I=-1492992 vs -23328  ratio=1/64  |det P|=1/2  (184 manifold pairs)  sig -2^5
+    h12=53   I=-1492992 vs -2048  ratio=1/729  |det P|=1/3  (48 manifold pairs)  sig -2^5
+    h12=53   I=-23328 vs -2048  ratio=64/729  |det P|=2/3  (138 manifold pairs)  sig -2^5
+    h12=53   I=-373248 vs -5832  ratio=1/64  |det P|=1/2  (36 manifold pairs)  sig -2^3
+    h12=53   I=-93312 vs -128  ratio=1/729  |det P|=1/3  (140 manifold pairs)  sig -2^1
+    h12=53   I=-1048576 vs -186624  ratio=729/4096  |det P|=3/4  (2 manifold pairs)  sig -2^2
+    h12=53   I=-1048576 vs -16384  ratio=1/64  |det P|=1/2  (12 manifold pairs)  sig -2^2
+    h12=53   I=-186624 vs -16384  ratio=64/729  |det P|=2/3  (24 manifold pairs)  sig -2^2
+    h12=53   I=81 vs 59049  ratio=729  |det P|=3  (280 manifold pairs)  sig +3^4
+    h12=53   I=-1179648 vs -209952  ratio=729/4096  |det P|=3/4  (6 manifold pairs)  sig -2^5 * 3^2
+    h12=53   I=888 vs 647352  ratio=729  |det P|=3  (4 manifold pairs)  sig +2^3 * 3^1 * 37^1
+    h12=55   I=-131072 vs -23328  ratio=729/4096  |det P|=3/4  (4 manifold pairs)  sig -2^5
+    h12=55   I=-131072 vs -2048  ratio=1/64  |det P|=1/2  (24 manifold pairs)  sig -2^5
+    h12=55   I=-23328 vs -2048  ratio=64/729  |det P|=2/3  (96 manifold pairs)  sig -2^5
+    h12=55   I=-229376 vs -3584  ratio=1/64  |det P|=1/2  (46 manifold pairs)  sig -2^3 * 7^1
+    h12=55   I=93312 vs 524288  ratio=4096/729  |det P|=4/3  (8 manifold pairs)  sig +2^1
+    h12=55   I=-294912 vs -52488  ratio=729/4096  |det P|=3/4  (18 manifold pairs)  sig -2^3 * 3^2
+    h12=55   I=-746496 vs -65536  ratio=64/729  |det P|=2/3  (28 manifold pairs)  sig -2^4
+    h12=55   I=9216 vs 589824  ratio=64  |det P|=2  (76 manifold pairs)  sig +2^4 * 3^2
+    h12=55   I=-262144 vs -4096  ratio=1/64  |det P|=1/2  (56 manifold pairs)  sig -1
+    h12=55   I=3072 vs 196608  ratio=64  |det P|=2  (36 manifold pairs)  sig +2^4 * 3^1
+    h12=55   I=32768 vs 373248  ratio=729/64  |det P|=3/2  (6 manifold pairs)  sig +2^3
+    h12=55   I=-98304 vs -1536  ratio=1/64  |det P|=1/2  (4 manifold pairs)  sig -2^3 * 3^1
+    h12=55   I=-393216 vs -6144  ratio=1/64  |det P|=1/2  (6 manifold pairs)  sig -2^5 * 3^1
+    h12=55   I=-327680 vs -5120  ratio=1/64  |det P|=1/2  (18 manifold pairs)  sig -2^4 * 5^1
+    h12=56   I=-373248 vs -5832  ratio=1/64  |det P|=1/2  (48 manifold pairs)  sig -2^3
+    h12=57   I=-1492992 vs -23328  ratio=1/64  |det P|=1/2  (24 manifold pairs)  sig -2^5
+    h12=57   I=49152 vs 559872  ratio=729/64  |det P|=3/2  (6 manifold pairs)  sig +2^2 * 3^1
+    h12=57   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (54 manifold pairs)  sig -2^2
+    h12=57   I=-1804032 vs -28188  ratio=1/64  |det P|=1/2  (6 manifold pairs)  sig -2^2 * 3^5 * 29^1
+    h12=57   I=-909792 vs -79872  ratio=64/729  |det P|=2/3  (12 manifold pairs)  sig -2^5 * 3^1 * 13^1
+    h12=57   I=-373248 vs -512  ratio=1/729  |det P|=1/3  (864 manifold pairs)  sig -2^3
+    h12=57   I=-124416 vs -1944  ratio=1/64  |det P|=1/2  (135 manifold pairs)  sig -2^3 * 3^5
+    h12=57   I=-18432 vs -288  ratio=1/64  |det P|=1/2  (108 manifold pairs)  sig -2^5 * 3^2
+    h12=59   I=-2654208 vs -472392  ratio=729/4096  |det P|=3/4  (252 manifold pairs)  sig -2^3 * 3^4
+    h12=59   I=59049 vs 331776  ratio=4096/729  |det P|=4/3  (1782 manifold pairs)  sig +3^4
+    h12=59   I=-3359232 vs -52488  ratio=1/64  |det P|=1/2  (154 manifold pairs)  sig -2^3 * 3^2
+    h12=59   I=-159744 vs -28431  ratio=729/4096  |det P|=3/4  (162 manifold pairs)  sig -3^1 * 13^1
+    h12=59   I=-393216 vs -6144  ratio=1/64  |det P|=1/2  (20 manifold pairs)  sig -2^5 * 3^1
+    h12=59   I=-373248 vs -32768  ratio=64/729  |det P|=2/3  (104 manifold pairs)  sig -2^3
+    h12=59   I=-373248 vs -5832  ratio=1/64  |det P|=1/2  (338 manifold pairs)  sig -2^3
+    h12=59   I=-373248 vs -512  ratio=1/729  |det P|=1/3  (494 manifold pairs)  sig -2^3
+    h12=59   I=-32768 vs -5832  ratio=729/4096  |det P|=3/4  (52 manifold pairs)  sig -2^3
+    h12=59   I=-32768 vs -512  ratio=1/64  |det P|=1/2  (76 manifold pairs)  sig -2^3
+    h12=59   I=-5832 vs -512  ratio=64/729  |det P|=2/3  (247 manifold pairs)  sig -2^3
+    h12=59   I=-1492992 vs -131072  ratio=64/729  |det P|=2/3  (390 manifold pairs)  sig -2^5
+    h12=59   I=-1048576 vs -186624  ratio=729/4096  |det P|=3/4  (3 manifold pairs)  sig -2^2
+    h12=59   I=-262144 vs -46656  ratio=729/4096  |det P|=3/4  (4 manifold pairs)  sig -1
+    h12=59   I=-262144 vs -4096  ratio=1/64  |det P|=1/2  (72 manifold pairs)  sig -1
+    h12=59   I=-46656 vs -4096  ratio=64/729  |det P|=2/3  (18 manifold pairs)  sig -1
+    h12=59   I=-1119744 vs -98304  ratio=64/729  |det P|=2/3  (12 manifold pairs)  sig -2^3 * 3^1
+    h12=59   I=16384 vs 186624  ratio=729/64  |det P|=3/2  (12 manifold pairs)  sig +2^2
+    h12=59   I=18432 vs 209952  ratio=729/64  |det P|=3/2  (30 manifold pairs)  sig +2^5 * 3^2
+    h12=59   I=4096 vs 46656  ratio=729/64  |det P|=3/2  (12 manifold pairs)  sig +1
+    h12=59   I=-255879 vs -22464  ratio=64/729  |det P|=2/3  (72 manifold pairs)  sig -3^3 * 13^1
+    h12=59   I=2560 vs 163840  ratio=64  |det P|=2  (2 manifold pairs)  sig +2^3 * 5^1
+    h12=59   I=-442368 vs -6912  ratio=1/64  |det P|=1/2  (6 manifold pairs)  sig -2^2 * 3^3
+    h12=59   I=-458752 vs -7168  ratio=1/64  |det P|=1/2  (12 manifold pairs)  sig -2^4 * 7^1
+    h12=59   I=-360448 vs -64152  ratio=729/4096  |det P|=3/4  (3 manifold pairs)  sig -2^3 * 11^1
+    h12=59   I=40824 vs 229376  ratio=4096/729  |det P|=4/3  (4 manifold pairs)  sig +2^3 * 7^1
+    h12=59   I=64152 vs 360448  ratio=4096/729  |det P|=4/3  (20 manifold pairs)  sig +2^3 * 11^1
+    h12=59   I=-612360 vs -53760  ratio=64/729  |det P|=2/3  (2 manifold pairs)  sig -2^3 * 3^1 * 5^1 * 7^1
+    h12=59   I=76545 vs 430080  ratio=4096/729  |det P|=4/3  (3 manifold pairs)  sig +3^1 * 5^1 * 7^1
+    h12=59   I=-93312 vs -8192  ratio=64/729  |det P|=2/3  (16 manifold pairs)  sig -2^1
+    h12=59   I=8192 vs 93312  ratio=729/64  |det P|=3/2  (20 manifold pairs)  sig +2^1
+    h12=59   I=24576 vs 279936  ratio=729/64  |det P|=3/2  (9 manifold pairs)  sig +2^1 * 3^1
+    h12=59   I=-589824 vs -104976  ratio=729/4096  |det P|=3/4  (2 manifold pairs)  sig -2^4 * 3^2
+    h12=59   I=896 vs 57344  ratio=64  |det P|=2  (8 manifold pairs)  sig +2^1 * 7^1
+    h12=60   I=-1492992 vs -23328  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^5
+    h12=61   I=-1048576 vs -16384  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^2
+    h12=61   I=-1048576 vs -256  ratio=1/4096  |det P|=1/4  (30 manifold pairs)  sig -2^2
+    h12=61   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (30 manifold pairs)  sig -2^2
+    h12=61   I=-746496 vs -65536  ratio=64/729  |det P|=2/3  (8 manifold pairs)  sig -2^4
+    h12=61   I=14336 vs 163296  ratio=729/64  |det P|=3/2  (15 manifold pairs)  sig +2^5 * 7^1
+    h12=61   I=-325632 vs -5088  ratio=1/64  |det P|=1/2  (12 manifold pairs)  sig -2^5 * 3^1 * 53^1
+    h12=61   I=-233280 vs -20480  ratio=64/729  |det P|=2/3  (2 manifold pairs)  sig -5^1
+    h12=62   I=-3359232 vs -52488  ratio=1/64  |det P|=1/2  (12 manifold pairs)  sig -2^3 * 3^2
+    h12=63   I=-262144 vs -4096  ratio=1/64  |det P|=1/2  (40 manifold pairs)  sig -1
+    h12=63   I=110592 vs 1259712  ratio=729/64  |det P|=3/2  (2 manifold pairs)  sig +3^3
+    h12=63   I=-172032 vs -2688  ratio=1/64  |det P|=1/2  (12 manifold pairs)  sig -2^1 * 3^1 * 7^1
+    h12=63   I=16 vs 1024  ratio=64  |det P|=2  (12 manifold pairs)  sig +2^4
+    h12=63   I=16 vs 65536  ratio=4096  |det P|=4  (13 manifold pairs)  sig +2^4
+    h12=63   I=1024 vs 65536  ratio=64  |det P|=2  (156 manifold pairs)  sig +2^4
+    h12=63   I=-1492992 vs -131072  ratio=64/729  |det P|=2/3  (30 manifold pairs)  sig -2^5
+    h12=63   I=-1492992 vs -23328  ratio=1/64  |det P|=1/2  (9 manifold pairs)  sig -2^5
+    h12=63   I=-131072 vs -23328  ratio=729/4096  |det P|=3/4  (30 manifold pairs)  sig -2^5
+    h12=63   I=-524288 vs -93312  ratio=729/4096  |det P|=3/4  (10 manifold pairs)  sig -2^1
+    h12=63   I=24064 vs 274104  ratio=729/64  |det P|=3/2  (8 manifold pairs)  sig +2^3 * 47^1
+    h12=63   I=-114688 vs -28  ratio=1/4096  |det P|=1/4  (9 manifold pairs)  sig -2^2 * 7^1
+    h12=63   I=-626688 vs -9792  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -3^2 * 17^1
+    h12=65   I=-3359232 vs -52488  ratio=1/64  |det P|=1/2  (30 manifold pairs)  sig -2^3 * 3^2
+    h12=65   I=216 vs 157464  ratio=729  |det P|=3  (28 manifold pairs)  sig +2^3 * 3^3
+    h12=65   I=-64000 vs -1000  ratio=1/64  |det P|=1/2  (111 manifold pairs)  sig -2^3 * 5^3
+    h12=65   I=-373248 vs -512  ratio=1/729  |det P|=1/3  (146 manifold pairs)  sig -2^3
+    h12=65   I=-49152 vs -768  ratio=1/64  |det P|=1/2  (30 manifold pairs)  sig -2^2 * 3^1
+    h12=65   I=144 vs 104976  ratio=729  |det P|=3  (198 manifold pairs)  sig +2^4 * 3^2
+    h12=65   I=-737280 vs -11520  ratio=1/64  |det P|=1/2  (80 manifold pairs)  sig -2^2 * 3^2 * 5^1
+    h12=65   I=-1048576 vs -186624  ratio=729/4096  |det P|=3/4  (6 manifold pairs)  sig -2^2
+    h12=65   I=-1048576 vs -16384  ratio=1/64  |det P|=1/2  (2 manifold pairs)  sig -2^2
+    h12=65   I=-186624 vs -16384  ratio=64/729  |det P|=2/3  (3 manifold pairs)  sig -2^2
+    h12=65   I=11776 vs 134136  ratio=729/64  |det P|=3/2  (12 manifold pairs)  sig +2^3 * 23^1
+    h12=65   I=-699840 vs -960  ratio=1/729  |det P|=1/3  (24 manifold pairs)  sig -3^1 * 5^1
+    h12=65   I=224 vs 163296  ratio=729  |det P|=3  (104 manifold pairs)  sig +2^5 * 7^1
+    h12=65   I=-29160 vs -2560  ratio=64/729  |det P|=2/3  (2 manifold pairs)  sig -2^3 * 5^1
+    h12=67   I=46656 vs 262144  ratio=4096/729  |det P|=4/3  (16 manifold pairs)  sig +1
+    h12=67   I=-746496 vs -65536  ratio=64/729  |det P|=2/3  (6 manifold pairs)  sig -2^4
+    h12=67   I=-1310720 vs -20480  ratio=1/64  |det P|=1/2  (24 manifold pairs)  sig -5^1
+    h12=67   I=-479232 vs -7488  ratio=1/64  |det P|=1/2  (128 manifold pairs)  sig -3^2 * 13^1
+    h12=69   I=-93312 vs -128  ratio=1/729  |det P|=1/3  (30 manifold pairs)  sig -2^1
+    h12=69   I=-753664 vs -11776  ratio=1/64  |det P|=1/2  (6 manifold pairs)  sig -2^3 * 23^1
+    h12=69   I=-64000 vs -1000  ratio=1/64  |det P|=1/2  (6 manifold pairs)  sig -2^3 * 5^3
+    h12=69   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (96 manifold pairs)  sig -2^2
+    h12=69   I=324 vs 1327104  ratio=4096  |det P|=4  (280 manifold pairs)  sig +2^2 * 3^4
+    h12=69   I=-23328 vs -2048  ratio=64/729  |det P|=2/3  (258 manifold pairs)  sig -2^5
+    h12=69   I=-419904 vs -576  ratio=1/729  |det P|=1/3  (18 manifold pairs)  sig -3^2
+    h12=71   I=-1048576 vs -16384  ratio=1/64  |det P|=1/2  (25 manifold pairs)  sig -2^2
+    h12=71   I=-753664 vs -11776  ratio=1/64  |det P|=1/2  (1 manifold pairs)  sig -2^3 * 23^1
+    h12=73   I=-131072 vs -2048  ratio=1/64  |det P|=1/2  (420 manifold pairs)  sig -2^5
+    h12=73   I=-294912 vs -4608  ratio=1/64  |det P|=1/2  (222 manifold pairs)  sig -2^3 * 3^2
+    h12=73   I=-2560 vs -40  ratio=1/64  |det P|=1/2  (39 manifold pairs)  sig -2^3 * 5^1
+    h12=73   I=-1605632 vs -25088  ratio=1/64  |det P|=1/2  (26 manifold pairs)  sig -2^3 * 7^2
+    h12=73   I=-64000 vs -1000  ratio=1/64  |det P|=1/2  (7 manifold pairs)  sig -2^3 * 5^3
+    h12=73   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (96 manifold pairs)  sig -2^2
+    h12=73   I=-995328 vs -15552  ratio=1/64  |det P|=1/2  (47 manifold pairs)  sig -3^5
+    h12=75   I=-2916000 vs -4000  ratio=1/729  |det P|=1/3  (84 manifold pairs)  sig -2^5 * 5^3
+    h12=77   I=147456 vs 1679616  ratio=729/64  |det P|=3/2  (319 manifold pairs)  sig +2^2 * 3^2
+    h12=77   I=-64000 vs -1000  ratio=1/64  |det P|=1/2  (168 manifold pairs)  sig -2^3 * 5^3
+    h12=77   I=-2097152 vs -32768  ratio=1/64  |det P|=1/2  (128 manifold pairs)  sig -2^3
+    h12=77   I=-2097152 vs -512  ratio=1/4096  |det P|=1/4  (416 manifold pairs)  sig -2^3
+    h12=77   I=-32768 vs -512  ratio=1/64  |det P|=1/2  (208 manifold pairs)  sig -2^3
+    h12=77   I=-4608 vs -72  ratio=1/64  |det P|=1/2  (744 manifold pairs)  sig -2^3 * 3^2
+    h12=77   I=-746496 vs -1024  ratio=1/729  |det P|=1/3  (525 manifold pairs)  sig -2^4
+    h12=77   I=-131072 vs -2048  ratio=1/64  |det P|=1/2  (86 manifold pairs)  sig -2^5
+    h12=77   I=4 vs 256  ratio=64  |det P|=2  (460 manifold pairs)  sig +2^2
+    h12=77   I=-1179648 vs -18432  ratio=1/64  |det P|=1/2  (6 manifold pairs)  sig -2^5 * 3^2
+    h12=77   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (30 manifold pairs)  sig -2^2
+    h12=79   I=-2916000 vs -4000  ratio=1/729  |det P|=1/3  (63 manifold pairs)  sig -2^5 * 5^3
+    h12=81   I=-32768 vs -512  ratio=1/64  |det P|=1/2  (156 manifold pairs)  sig -2^3
+    h12=81   I=320 vs 20480  ratio=64  |det P|=2  (868 manifold pairs)  sig +5^1
+    h12=85   I=-2097152 vs -32768  ratio=1/64  |det P|=1/2  (10150 manifold pairs)  sig -2^3
+    h12=85   I=-2097152 vs -512  ratio=1/4096  |det P|=1/4  (2320 manifold pairs)  sig -2^3
+    h12=85   I=-32768 vs -512  ratio=1/64  |det P|=1/2  (7000 manifold pairs)  sig -2^3
+    h12=85   I=-196608 vs -3072  ratio=1/64  |det P|=1/2  (102 manifold pairs)  sig -2^4 * 3^1
+    h12=85   I=-16384 vs -256  ratio=1/64  |det P|=1/2  (1003 manifold pairs)  sig -2^2
+    h12=89   I=-1417176 vs -124416  ratio=64/729  |det P|=2/3  (297 manifold pairs)  sig -2^3 * 3^5
+    h12=89   I=-2097152 vs -32768  ratio=1/64  |det P|=1/2  (988 manifold pairs)  sig -2^3
+    h12=89   I=-294912 vs -4608  ratio=1/64  |det P|=1/2  (80 manifold pairs)  sig -2^3 * 3^2
+    h12=89   I=-131072 vs -2048  ratio=1/64  |det P|=1/2  (1380 manifold pairs)  sig -2^5
+    h12=93   I=-4500000 vs -18432  ratio=64/15625  |det P|=2/5  (45 manifold pairs)  sig -2^5 * 3^2
+    h12=93   I=-2097152 vs -32768  ratio=1/64  |det P|=1/2  (854 manifold pairs)  sig -2^3
+    h12=97   I=9216 vs 6718464  ratio=729  |det P|=3  (1749 manifold pairs)  sig +2^4 * 3^2
+    h12=101  I=-2097152 vs -32768  ratio=1/64  |det P|=1/2  (3010 manifold pairs)  sig -2^3
+    h12=105  I=-294912 vs -4608  ratio=1/64  |det P|=1/2  (126 manifold pairs)  sig -2^3 * 3^2
+    h12=105  I=256 vs 16384  ratio=64  |det P|=2  (126 manifold pairs)  sig +2^2
+    h12=185  I=-32768 vs -512  ratio=1/64  |det P|=1/2  (1449 manifold pairs)  sig -2^3
+    h12=185  I=-32768 vs -8  ratio=1/4096  |det P|=1/4  (1323 manifold pairs)  sig -2^3
+    h12=185  I=-512 vs -8  ratio=1/64  |det P|=1/2  (483 manifold pairs)  sig -2^3
+------------------------------------------------------------------------

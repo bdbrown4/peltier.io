@@ -1,0 +1,442 @@
+{
+  "h11": 4,
+  "delta": 8,
+  "weight": 6,
+  "invariant_key": "2h-invariant-octic",
+  "universe": "all",
+  "n_manifolds": 5324,
+  "dropped_not_simply_connected": [],
+  "n_hodge_classes": 86,
+  "n_zero_invariant": 767,
+  "n_distinct_nonzero_values": 634,
+  "n_factorisations": 634,
+  "pairs": {
+    "same_hodge_total": 558551,
+    "silent_both_zero": 29869,
+    "excluded_exactly_one_zero": 169103,
+    "screened_both_nonzero": 359579,
+    "of_which_same_invariant": 25779,
+    "of_which_excluded_by_signature": 333401,
+    "of_which_falsifier_candidates": 399
+  },
+  "audit": {
+    "value_pairs_checked": 13525,
+    "disagreements_with_exact_test": 0
+  },
+  "falsifier_candidates": [
+    {
+      "h12": 52,
+      "signature": "-2^5",
+      "I_a": -131072,
+      "I_b": -23328,
+      "ratio_I_b_over_I_a": "729/4096",
+      "abs_det_P": "3/4",
+      "n_manifold_pairs": 12,
+      "example_a": [
+        [
+          127,
+          30,
+          0
+        ],
+        [
+          128,
+          30,
+          1
+        ]
+      ],
+      "example_b": [
+        [
+          137,
+          36,
+          0
+        ],
+        [
+          179,
+          41,
+          0
+        ]
+      ]
+    },
+    {
+      "h12": 56,
+      "signature": "-2^2",
+      "I_a": -16384,
+      "I_b": -256,
+      "ratio_I_b_over_I_a": "1/64",
+      "abs_det_P": "1/2",
+      "n_manifold_pairs": 12,
+      "example_a": [
+        [
+          328,
+          75,
+          1
+        ],
+        [
+          330,
+          75,
+          3
+        ]
+      ],
+      "example_b": [
+        [
+          323,
+          73,
+          1
+        ],
+        [
+          365,
+          81,
+          2
+        ]
+      ]
+    },
+    {
+      "h12": 58,
+      "signature": "-2^3",
+      "I_a": -5832,
+      "I_b": -8,
+      "ratio_I_b_over_I_a": "1/729",
+      "abs_det_P": "1/3",
+      "n_manifold_pairs": 130,
+      "example_a": [
+        [
+          431,
+          105,
+          0
+        ],
+        [
+          432,
+          105,
+          1
+        ]
+      ],
+      "example_b": [
+        [
+          445,
+          112,
+          0
+        ],
+        [
+          446,
+          112,
+          1
+        ]
+      ]
+    },
+    {
+      "h12": 60,
+      "signature": "-1",
+      "I_a": -4096,
+      "I_b": -64,
+      "ratio_I_b_over_I_a": "1/64",
+      "abs_det_P": "1/2",
+      "n_manifold_pairs": 6,
+      "example_a": [
+        [
+          540,
+          137,
+          0
+        ],
+        [
+          541,
+          137,
+          1
+        ]
+      ],
+      "example_b": [
+        [
+          526,
+          131,
+          0
+        ],
+        [
+          527,
+          131,
+          1
+        ]
+      ]
+    },
+    {
+      "h12": 64,
+      "signature": "-1",
+      "I_a": -46656,
+      "I_b": -4096,
+      "ratio_I_b_over_I_a": "64/729",
+      "abs_det_P": "2/3",
+      "n_manifold_pairs": 20,
+      "example_a": [
+        [
+          884,
+          245,
+          1
+        ],
+        [
+          886,
+          245,
+          3
+        ]
+      ],
+      "example_b": [
+        [
+          744,
+          200,
+          0
+        ],
+        [
+          832,
+          234,
+          0
+        ]
+      ]
+    },
+    {
+      "h12": 68,
+      "signature": "-2^2 * 3^3 * 29^1",
+      "I_a": -200448,
+      "I_b": -3132,
+      "ratio_I_b_over_I_a": "1/64",
+      "abs_det_P": "1/2",
+      "n_manifold_pairs": 2,
+      "example_a": [
+        [
+          1200,
+          360,
+          0
+        ]
+      ],
+      "example_b": [
+        [
+          1228,
+          375,
+          0
+        ],
+        [
+          1230,
+          375,
+          2
+        ]
+      ]
+    },
+    {
+      "h12": 68,
+      "signature": "-2^3 * 3^2",
+      "I_a": -52488,
+      "I_b": -4608,
+      "ratio_I_b_over_I_a": "64/729",
+      "abs_det_P": "2/3",
+      "n_manifold_pairs": 8,
+      "example_a": [
+        [
+          1214,
+          368,
+          0
+        ],
+        [
+          1233,
+          376,
+          1
+        ]
+      ],
+      "example_b": [
+        [
+          1293,
+          392,
+          0
+        ],
+        [
+          1294,
+          392,
+          1
+        ]
+      ]
+    },
+    {
+      "h12": 70,
+      "signature": "-2^5",
+      "I_a": -23328,
+      "I_b": -32,
+      "ratio_I_b_over_I_a": "1/729",
+      "abs_det_P": "1/3",
+      "n_manifold_pairs": 20,
+      "example_a": [
+        [
+          1413,
+          417,
+          0
+        ]
+      ],
+      "example_b": [
+        [
+          1380,
+          411,
+          0
+        ],
+        [
+          1381,
+          411,
+          1
+        ]
+      ]
+    },
+    {
+      "h12": 70,
+      "signature": "+3^2",
+      "I_a": 9,
+      "I_b": 6561,
+      "ratio_I_b_over_I_a": "729",
+      "abs_det_P": "3",
+      "n_manifold_pairs": 42,
+      "example_a": [
+        [
+          1393,
+          412,
+          0
+        ],
+        [
+          1394,
+          412,
+          1
+        ]
+      ],
+      "example_b": [
+        [
+          1432,
+          425,
+          2
+        ],
+        [
+          1433,
+          425,
+          3
+        ]
+      ]
+    },
+    {
+      "h12": 72,
+      "signature": "-2^2",
+      "I_a": -16384,
+      "I_b": -256,
+      "ratio_I_b_over_I_a": "1/64",
+      "abs_det_P": "1/2",
+      "n_manifold_pairs": 40,
+      "example_a": [
+        [
+          1559,
+          458,
+          0
+        ],
+        [
+          1560,
+          458,
+          1
+        ]
+      ],
+      "example_b": [
+        [
+          1557,
+          457,
+          2
+        ],
+        [
+          1558,
+          457,
+          3
+        ]
+      ]
+    },
+    {
+      "h12": 76,
+      "signature": "+2^4",
+      "I_a": 1024,
+      "I_b": 11664,
+      "ratio_I_b_over_I_a": "729/64",
+      "abs_det_P": "3/2",
+      "n_manifold_pairs": 2,
+      "example_a": [
+        [
+          1893,
+          548,
+          0
+        ]
+      ],
+      "example_b": [
+        [
+          1862,
+          534,
+          0
+        ],
+        [
+          1863,
+          534,
+          1
+        ]
+      ]
+    },
+    {
+      "h12": 106,
+      "signature": "+2^2",
+      "I_a": 4,
+      "I_b": 256,
+      "ratio_I_b_over_I_a": "64",
+      "abs_det_P": "2",
+      "n_manifold_pairs": 45,
+      "example_a": [
+        [
+          4579,
+          1026,
+          0
+        ],
+        [
+          4580,
+          1026,
+          1
+        ]
+      ],
+      "example_b": [
+        [
+          4549,
+          1021,
+          0
+        ],
+        [
+          4550,
+          1021,
+          1
+        ]
+      ]
+    },
+    {
+      "h12": 214,
+      "signature": "-2^3",
+      "I_a": -512,
+      "I_b": -8,
+      "ratio_I_b_over_I_a": "1/64",
+      "abs_det_P": "1/2",
+      "n_manifold_pairs": 60,
+      "example_a": [
+        [
+          5297,
+          1177,
+          0
+        ],
+        [
+          5298,
+          1177,
+          1
+        ]
+      ],
+      "example_b": [
+        [
+          5290,
+          1175,
+          1
+        ],
+        [
+          5292,
+          1175,
+          3
+        ]
+      ]
+    }
+  ]
+}

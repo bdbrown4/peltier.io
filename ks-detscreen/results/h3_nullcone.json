@@ -1,0 +1,710 @@
+{
+  "h11": 3,
+  "n_manifolds_simply_connected": 517,
+  "n_classes_GL3Z": 183,
+  "n_classes_GL3Q": 150,
+  "n_merge_events": 33,
+  "n_merged_Q_classes": 22,
+  "rational_maps": {
+    "n_matrices": 291,
+    "n_with_non_integer_entries": 167,
+    "recomputed_determinants": {
+      "-1": 140,
+      "1": 151
+    },
+    "recorded_vs_recomputed_mismatches": 0
+  },
+  "nullcone": {
+    "merged_classes_on_nullcone": 5,
+    "merged_classes_off_nullcone": 17,
+    "merged_classes_with_unequal_invariants": 0
+  },
+  "merged_classes": [
+    {
+      "n_integral_classes_merged": 3,
+      "n_manifolds": 15,
+      "I4": [
+        0
+      ],
+      "I6": [
+        0
+      ],
+      "on_nullcone": true,
+      "example_mpts": [
+        [
+          46,
+          23,
+          0
+        ],
+        [
+          47,
+          24,
+          0
+        ],
+        [
+          48,
+          24,
+          1
+        ],
+        [
+          49,
+          24,
+          2
+        ]
+      ]
+    },
+    {
+      "n_integral_classes_merged": 2,
+      "n_manifolds": 4,
+      "I4": [
+        -18
+      ],
+      "I6": [
+        783
+      ],
+      "on_nullcone": false,
+      "example_mpts": [
+        [
+          52,
+          26,
+          0
+        ],
+        [
+          67,
+          34,
+          0
+        ],
+        [
+          68,
+          34,
+          1
+        ],
+        [
+          75,
+          37,
+          0
+        ]
+      ]
+    },
+    {
+      "n_integral_classes_merged": 3,
+      "n_manifolds": 4,
+      "I4": [
+        -81
+      ],
+      "I6": [
+        5832
+      ],
+      "on_nullcone": false,
+      "example_mpts": [
+        [
+          84,
+          44,
+          0
+        ],
+        [
+          86,
+          45,
+          1
+        ],
+        [
+          87,
+          45,
+          2
+        ],
+        [
+          88,
+          45,
+          3
+        ]
+      ]
+    },
+    {
+      "n_integral_classes_merged": 2,
+      "n_manifolds": 4,
+      "I4": [
+        0
+      ],
+      "I6": [
+        -576
+      ],
+      "on_nullcone": false,
+      "example_mpts": [
+        [
+          99,
+          53,
+          0
+        ],
+        [
+          100,
+          53,
+          1
+        ],
+        [
+          101,
+          53,
+          2
+        ],
+        [
+          102,
+          53,
+          3
+        ]
+      ]
+    },
+    {
+      "n_integral_classes_merged": 2,
+      "n_manifolds": 4,
+      "I4": [
+        0
+      ],
+      "I6": [
+        0
+      ],
+      "on_nullcone": true,
+      "example_mpts": [
+        [
+          105,
+          56,
+          0
+        ],
+        [
+          120,
+          68,
+          0
+        ],
+        [
+          129,
+          74,
+          0
+        ],
+        [
+          130,
+          74,
+          1
+        ]
+      ]
+    },
+    {
+      "n_integral_classes_merged": 2,
+      "n_manifolds": 4,
+      "I4": [
+        -36
+      ],
+      "I6": [
+        1863
+      ],
+      "on_nullcone": false,
+      "example_mpts": [
+        [
+          106,
+          57,
+          0
+        ],
+        [
+          119,
+          67,
+          0
+        ],
+        [
+          127,
+          73,
+          0
+        ],
+        [
+          128,
+          73,
+          1
+        ]
+      ]
+    },
+    {
+      "n_integral_classes_merged": 6,
+      "n_manifolds": 9,
+      "I4": [
+        -81
+      ],
+      "I6": [
+        5832
+      ],
+      "on_nullcone": false,
+      "example_mpts": [
+        [
+          109,
+          60,
+          0
+        ],
+        [
+          110,
+          61,
+          0
+        ],
+        [
+          113,
+          63,
+          1
+        ],
+        [
+          114,
+          64,
+          0
+        ]
+      ]
+    },
+    {
+      "n_integral_classes_merged": 2,
+      "n_manifolds": 2,
+      "I4": [
+        0
+      ],
+      "I6": [
+        1215
+      ],
+      "on_nullcone": false,
+      "example_mpts": [
+        [
+          112,
+          63,
+          0
+        ],
+        [
+          125,
+          72,
+          0
+        ]
+      ]
+    },
+    {
+      "n_integral_classes_merged": 2,
+      "n_manifolds": 2,
+      "I4": [
+        -9
+      ],
+      "I6": [
+        1512
+      ],
+      "on_nullcone": false,
+      "example_mpts": [
+        [
+          135,
+          78,
+          0
+        ],
+        [
+          136,
+          79,
+          0
+        ]
+      ]
+    },
+    {
+      "n_integral_classes_merged": 3,
+      "n_manifolds": 3,
+      "I4": [
+        -81
+      ],
+      "I6": [
+        5832
+      ],
+      "on_nullcone": false,
+      "example_mpts": [
+        [
+          147,
+          87,
+          0
+        ],
+        [
+          148,
+          88,
+          0
+        ],
+        [
+          149,
+          88,
+          1
+        ]
+      ]
+    },
+    {
+      "n_integral_classes_merged": 3,
+      "n_manifolds": 10,
+      "I4": [
+        -81
+      ],
+      "I6": [
+        5832
+      ],
+      "on_nullcone": false,
+      "example_mpts": [
+        [
+          159,
+          94,
+          2
+        ],
+        [
+          160,
+          95,
+          0
+        ],
+        [
+          161,
+          95,
+          1
+        ],
+        [
+          163,
+          97,
+          0
+        ]
+      ]
+    },
+    {
+      "n_integral_classes_merged": 2,
+      "n_manifolds": 4,
+      "I4": [
+        0
+      ],
+      "I6": [
+        -2304
+      ],
+      "on_nullcone": false,
+      "example_mpts": [
+        [
+          192,
+          113,
+          0
+        ],
+        [
+          193,
+          113,
+          1
+        ],
+        [
+          194,
+          114,
+          0
+        ],
+        [
+          195,
+          114,
+          1
+        ]
+      ]
+    },
+    {
+      "n_integral_classes_merged": 2,
+      "n_manifolds": 2,
+      "I4": [
+        -81
+      ],
+      "I6": [
+        5832
+      ],
+      "on_nullcone": false,
+      "example_mpts": [
+        [
+          199,
+          116,
+          0
+        ],
+        [
+          200,
+          117,
+          0
+        ]
+      ]
+    },
+    {
+      "n_integral_classes_merged": 3,
+      "n_manifolds": 22,
+      "I4": [
+        0
+      ],
+      "I6": [
+        0
+      ],
+      "on_nullcone": true,
+      "example_mpts": [
+        [
+          240,
+          138,
+          0
+        ],
+        [
+          243,
+          141,
+          0
+        ],
+        [
+          244,
+          141,
+          1
+        ],
+        [
+          245,
+          141,
+          2
+        ]
+      ]
+    },
+    {
+      "n_integral_classes_merged": 2,
+      "n_manifolds": 8,
+      "I4": [
+        0
+      ],
+      "I6": [
+        -9216
+      ],
+      "on_nullcone": false,
+      "example_mpts": [
+        [
+          332,
+          169,
+          0
+        ],
+        [
+          333,
+          169,
+          1
+        ],
+        [
+          334,
+          170,
+          0
+        ],
+        [
+          335,
+          170,
+          1
+        ]
+      ]
+    },
+    {
+      "n_integral_classes_merged": 2,
+      "n_manifolds": 10,
+      "I4": [
+        0
+      ],
+      "I6": [
+        0
+      ],
+      "on_nullcone": true,
+      "example_mpts": [
+        [
+          361,
+          182,
+          0
+        ],
+        [
+          362,
+          182,
+          1
+        ],
+        [
+          373,
+          188,
+          0
+        ],
+        [
+          374,
+          189,
+          0
+        ]
+      ]
+    },
+    {
+      "n_integral_classes_merged": 3,
+      "n_manifolds": 17,
+      "I4": [
+        0
+      ],
+      "I6": [
+        0
+      ],
+      "on_nullcone": true,
+      "example_mpts": [
+        [
+          363,
+          183,
+          0
+        ],
+        [
+          364,
+          183,
+          1
+        ],
+        [
+          365,
+          183,
+          2
+        ],
+        [
+          386,
+          194,
+          0
+        ]
+      ]
+    },
+    {
+      "n_integral_classes_merged": 3,
+      "n_manifolds": 12,
+      "I4": [
+        -16
+      ],
+      "I6": [
+        512
+      ],
+      "on_nullcone": false,
+      "example_mpts": [
+        [
+          416,
+          201,
+          2
+        ],
+        [
+          419,
+          203,
+          0
+        ],
+        [
+          420,
+          203,
+          1
+        ],
+        [
+          421,
+          204,
+          0
+        ]
+      ]
+    },
+    {
+      "n_integral_classes_merged": 2,
+      "n_manifolds": 10,
+      "I4": [
+        0
+      ],
+      "I6": [
+        -64
+      ],
+      "on_nullcone": false,
+      "example_mpts": [
+        [
+          430,
+          207,
+          0
+        ],
+        [
+          431,
+          207,
+          1
+        ],
+        [
+          432,
+          207,
+          2
+        ],
+        [
+          433,
+          207,
+          3
+        ]
+      ]
+    },
+    {
+      "n_integral_classes_merged": 2,
+      "n_manifolds": 5,
+      "I4": [
+        -16
+      ],
+      "I6": [
+        512
+      ],
+      "on_nullcone": false,
+      "example_mpts": [
+        [
+          490,
+          225,
+          0
+        ],
+        [
+          491,
+          225,
+          1
+        ],
+        [
+          492,
+          226,
+          0
+        ],
+        [
+          493,
+          226,
+          1
+        ]
+      ]
+    },
+    {
+      "n_integral_classes_merged": 2,
+      "n_manifolds": 8,
+      "I4": [
+        0
+      ],
+      "I6": [
+        -576
+      ],
+      "on_nullcone": false,
+      "example_mpts": [
+        [
+          495,
+          227,
+          0
+        ],
+        [
+          496,
+          227,
+          1
+        ],
+        [
+          497,
+          227,
+          2
+        ],
+        [
+          500,
+          229,
+          0
+        ]
+      ]
+    },
+    {
+      "n_integral_classes_merged": 2,
+      "n_manifolds": 3,
+      "I4": [
+        -1
+      ],
+      "I6": [
+        8
+      ],
+      "on_nullcone": false,
+      "example_mpts": [
+        [
+          522,
+          240,
+          0
+        ],
+        [
+          523,
+          241,
+          0
+        ],
+        [
+          525,
+          242,
+          1
+        ]
+      ]
+    }
+  ]
+}
