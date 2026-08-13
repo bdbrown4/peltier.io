@@ -106,6 +106,24 @@ check(
     arith.residue_signature(-512, 6) != arith.residue_signature(512, 6),
     "sign is part of the signature for even w",
 )
+check(
+    arith.residue_signature(-512, 5) == arith.residue_signature(512, 5),
+    "sign is NOT part of the signature for odd w, since -1 = (-1)**w",
+)
+
+# The signature/exact-test equivalence must hold at odd w too, where negative
+# ratios are legitimate w-th powers. This is the case that a sign-unconditional
+# signature would get wrong.
+for w in (3, 5):
+    fams = [[s * m**w for m in (1, 2, 3)] for s in (6, -6, 5, -5)]
+    flat = [v for f in fams for v in f]
+    for a in flat:
+        for b in flat:
+            if a == b:
+                continue
+            sig = arith.residue_signature(a, w) == arith.residue_signature(b, w)
+            exact = arith.ratio_is_wth_power(a, b, w)
+            check(sig == exact, f"w={w} a={a} b={b}: signature={sig} exact={exact}")
 
 print("FAILURES:", fails) if fails else print("all arithmetic self-tests passed")
 raise SystemExit(1 if fails else 0)

@@ -148,13 +148,15 @@ def residue_signature(n: int, w: int) -> tuple:
 
     Returned as (sign, ((p, e mod w), ...)) with zero residues dropped and
     primes sorted, so the value is hashable and canonical.
+
+    The sign matters only for even w. For even w, q**w > 0 forces a and b to
+    share a sign, so the sign is part of the class. For odd w, -1 = (-1)**w is
+    itself a w-th power, so sign carries no information and is normalised away
+    -- folding it in regardless would wrongly separate a from -a.
     """
     if n == 0:
         raise ValueError("the signature of 0 is not defined")
-    sign = 1 if n > 0 else -1
-    if w % 2 == 0 and sign == -1:
-        # a/b = q**w with w even forces a/b > 0, so sign is part of the class.
-        pass
+    sign = (1 if n > 0 else -1) if w % 2 == 0 else 1
     residues = tuple(
         sorted((p, e % w) for p, e in factorise(n).items() if e % w != 0)
     )
